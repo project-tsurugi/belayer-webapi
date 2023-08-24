@@ -1,0 +1,18 @@
+{
+	"db": {
+		"status": "shutdown",
+		"count": 0
+	},
+	"quiesce": {
+		"status": "success",
+		"count": 0
+	},
+	"backupoffline": {
+		"status": "",
+		"count": 2
+	},
+	"restore": {
+		"status": "",
+		"count": 5
+	}
+}

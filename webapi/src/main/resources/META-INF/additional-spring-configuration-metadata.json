@@ -1,0 +1,77 @@
+{"properties": [
+  {
+    "name": "webapi.storage.root",
+    "type": "java.lang.String",
+    "description": "Storage root directory used by Web API Server'"
+  },
+  {
+    "name": "webapi.tsurugi.url",
+    "type": "java.lang.String",
+    "description": "URL to connect Tsurugi DB'"
+  },
+  {
+    "name": "webapi.tsurugi.connect_timeout",
+    "type": "int",
+    "description": "Connect timeout seconds for Tsurugi DB Session'"
+  },
+  {
+    "name": "webapi.tsurugi.session_timeout",
+    "type": "int",
+    "description": "Session timeout minutes for Tsurugi DB Session'"
+  },
+  {
+    "name": "webapi.tsurugi.conf",
+    "type": "java.lang.String",
+    "description": "Tsurugi config file path'"
+  },
+  {
+    "name": "webapi.tsurugi.home",
+    "type": "java.lang.String",
+    "description": "Tsurugi HOME directory'"
+  },
+  {
+    "name": "webapi.auth.url",
+    "type": "java.lang.String",
+    "description": "AUTH endpoint URL'"
+  },
+  {
+    "name": "webapi.auth.at.expiration.min",
+    "type": "int",
+    "description": "Access Token expiration time in minutes.'"
+  },
+  {
+    "name": "webapi.download.zipcompresslevel",
+    "type": "int",
+    "description": "Zip compress level for download files.'"
+  },
+  {
+    "name": "webapi.backup.zipcompresslevel",
+    "type": "int",
+    "description": "Zip compress level for backup files.'"
+  },
+  {
+    "name": "webapi.list.max.files",
+    "type": "int",
+    "description": "max size to list files.'"
+  },
+  {
+    "name": "webapi.cli.cmd.online",
+    "type": "java.lang.String",
+    "description": "CLI command to determine DB is online'"
+  },
+  {
+    "name": "webapi.cli.cmd.quiesce",
+    "type": "java.lang.String",
+    "description": "CLI command to call quiesce database'"
+  },
+  {
+    "name": "webapi.cli.cmd.backupoffline",
+    "type": "java.lang.String",
+    "description": "CLI command to backup using Tsurugi CLI'"
+  },
+  {
+    "name": "webapi.cli.cmd.restore",
+    "type": "java.lang.String",
+    "description": "CLI command to restore backups'"
+  }
+]}

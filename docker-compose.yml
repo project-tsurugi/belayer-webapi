@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GPR_USER: ${GPR_USER}
+        GPR_KEY: ${GPR_KEY}
+    tty: true
+    volumes:
+      - ./test_work/storage:/usr/lib/tsurugi-webapp/storage
+    environment:
+      BELAYER_HOME: "/usr/lib/tsurugi-webapp"
+      BELAYER_STORAGE_ROOT: "/usr/lib/tsurugi-webapp/storage"
+      TSURUGI_CONF: "/usr/lib/tsurugi/conf/tsurugi.ini"
+      TSURUGI_URL: "tcp://localhost:12345/"
+      TSURUGI_JWT_SECRET_KEY: "secret"
+      TSURUGI_AUTH_URL: "http://localhost:8080/harinoki"
+      BELAYER_SERVER_PORT: "8000"
+      BELAYER_MANAGEMENT_PORT: "18000"
+    ports:
+      - 12345:12345
+      - 8000:8000
+      - 18000:18000
+      - 8080:8080
+

@@ -1,0 +1,7 @@
+*
+!docker
+!test_work/script
+!webapi/build.gradle
+!webapi/settings.gradle
+!webapi/src
+!VERSION

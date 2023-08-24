@@ -1,0 +1,142 @@
+name: Belayer-WebAPI-Release
+
+on:
+  push:
+    tags:
+      - '*-alpha'
+  # schedule:
+  #   - cron: '37 3,15 * * *'
+  workflow_dispatch:
+
+jobs:
+  Build_Release_Archive:
+    runs-on: [self-hosted, docker]
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/project-tsurugi/oltp-sandbox:ubuntu-20.04
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GHCR_PAT }}
+      volumes:
+        - ${{ vars.gradle_cache_dir }}:/root/.gradle
+    defaults:
+      run:
+        shell: bash
+    env:
+      GPR_USER: ${{ github.repository_owner }}
+      GPR_KEY: ${{ secrets.GHCR_PAT }}
+
+    steps:
+      - id: Setup_Java
+        name: Setup_Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - id: Setup_Golang
+        name: Setup_Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.17.x'
+
+      - id: Checkout
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.GHA_PAT }}
+
+      - id: Checkout_Actions
+        name: Checkout_Actions
+        uses: actions/checkout@v3
+        with:
+          repository: project-tsurugi/tsurugi-github-actions
+          path: .github/actions
+          ref: master
+          submodules: recursive
+          token: ${{ secrets.GHA_PAT }}
+
+      - id: Create_Archives
+        name: Create_Archives
+        run: |
+          VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          echo ${VERSION} > ./VERSION
+          cd distribution
+          rm -fr dist
+          ./create_archives.sh
+
+      - id: Upload_Artifact
+        name: Upload_Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: belayer-webapi-dists
+          path: distribution/dist/*
+          retention-days: 1
+
+      - id: Notify_Slack
+        name: Notify_Slack
+        uses: ./.github/actions/tsurugi-slack-action
+        if: always() && (contains(github.ref, '/tags/') || contains(github.ref, '/pull/') || contains(github.ref, '/heads/master'))
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          kind: 'job-result'
+          channel: 'belayer-dev'
+          status: ${{ job.status }}
+          step_context: ${{ toJson(steps) }}
+          username: ${{ github.workflow }}
+
+  Generate_GitHub_Release:
+    needs: Build_Release_Archive
+    runs-on: [self-hosted, docker]
+    timeout-minutes: 30
+    container: ubuntu:20.04
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - id: Clean
+        name: Clean
+        run: |
+          rm -fr work
+
+      - id: Download_Artifact
+        name: Download_Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: belayer-web-api-dists
+          path: work
+
+      - id: Delete_Old_Snapshot_Release
+        name: Delete_Old_Snapshot_Release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1.0
+        if: contains(github.ref, '/heads/master')
+        with:
+          delete_release: true
+          tag_name: SNAPSHOT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: Create_Snapshot_Release
+        name: Create_Snapshot_Release
+        uses: softprops/action-gh-release@v1
+        if: contains(github.ref, '/heads/master')
+        with:
+          prerelease: true
+          draft: false
+          name: snapshot_release
+          tag_name: SNAPSHOT
+          files: |
+            work/*
+
+      - id: Create_Release
+        name: Create_Release
+        uses: softprops/action-gh-release@v1
+        if: contains(github.ref, 'refs/tags/')
+        with:
+          prerelease: true
+          draft: false
+          files: |
+            work/*

@@ -1,0 +1,43 @@
+# Gradle
+.gradle/
+/build
+/modules/*/build
+/buildSrc/build
+
+# Eclipse
+/bin
+/.project
+/.classpath
+/.settings
+/modules/*/bin
+/modules/*/.project
+/modules/*/.classpath
+/modules/*/.settings
+
+# IDEA
+/.idea
+/modules/*/out
+
+# VSCode
+/.vscode
+
+# emacs
+*~
+.#*
+\#*#
+
+e2e/fs/load_file/*
+e2e/fs/dl/*
+/distribution/dist
+/distribution/dist_temp
+/storage
+/test_work/tmp
+/test_work/storage/
+/test_work/storage/aaa
+/test_work/storage/user
+/test_work/storage/dmp/
+/test_work/storage/bk/
+/webapi/src/test/files/parquet/out/*
+/webapi/test_tmp/belayer_jobs.json
+test_work/storage/belayer_jobs.json
+distribution/tsurugi-webapp-*

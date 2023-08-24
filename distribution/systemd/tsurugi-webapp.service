@@ -1,0 +1,10 @@
+[Unit]
+Description=Tsurugi WebApp
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/tsurugi-webapp-#VERSION#/bin/start_server.sh
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
