@@ -163,7 +163,7 @@ public class FileSystemService {
     log.debug("check file path. dest:{}", fp);
     if (!new File(fp.toString()).isFile()) {
       String message = "Invalid path. path:" + filePath;
-      throw new NotFoundException(message, message, null);
+      throw new BadRequestException(message, message, null);
     }
   }
 
