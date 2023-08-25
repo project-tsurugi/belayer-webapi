@@ -34,5 +34,4 @@
 /test_work/storage/
 /test_work/storage/tsurugi
 /test_work/storage/belayer_jobs.json
-/webapi/src/test/files/parquet/out/*
 /webapi/test_tmp/belayer_jobs.json
