@@ -64,7 +64,7 @@ jobs:
           echo ${VERSION} > ./VERSION
           cd distribution
           rm -fr dist
-          ./create_archives.sh
+          sh create_archives.sh
 
       - id: Upload_Artifact
         name: Upload_Artifact
