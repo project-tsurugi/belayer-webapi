@@ -48,7 +48,7 @@ jobs:
 
       - id: Publish
         name: Publish
-        if: contains(github.ref, '/heads/master')
+        if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
         run: |
           cd webapi
           ./gradlew -i clean build publish -x test
