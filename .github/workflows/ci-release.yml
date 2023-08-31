@@ -70,7 +70,7 @@ jobs:
         name: Upload_Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: belayer-webapi-dists
+          name: belayer-webapi-api-dists
           path: distribution/dist/*
           retention-days: 1
 
