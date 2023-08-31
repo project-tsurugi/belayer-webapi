@@ -64,7 +64,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
           kind: 'job-result'
-          channel: 'tsurugi-build'
+          channel: 'belayer-dev'
           status: ${{ job.status }}
           step_context: ${{ toJson(steps) }}
           username: ${{ github.workflow }}
