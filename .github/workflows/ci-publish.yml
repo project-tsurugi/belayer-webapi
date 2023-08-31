@@ -1,13 +1,15 @@
-name: Belayer-WebAPI-CI
+name: Belayer-WebAPI-Publish
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  workflow_call:
 
 jobs:
-  Build:
+  Publish:
     runs-on: [self-hosted, docker]
     timeout-minutes: 30
     container:
-      image: ghcr.io/project-tsurugi/oltp-sandbox:ubuntu-20.04
+      image: ghcr.io/project-tsurugi/oltp-sandbox:ubuntu-22.04
       credentials:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GHCR_PAT }}
@@ -17,8 +19,7 @@ jobs:
       run:
         shell: bash
     env:
-      GPR_USER: ${{ github.repository_owner }}
-      GPR_KEY: ${{ secrets.GHCR_PAT }}
+      JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
 
     steps:
       - id: Setup_Java
@@ -45,43 +46,24 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GHA_PAT }}
 
-      - id: Assemble_WebAPI
-        name: Assemble_WebAPI
+      - id: Publish
+        name: Publish
+        if: contains(github.ref, '/heads/master')
         run: |
-          cd webapi
-          ./gradlew -i clean assemble
-
-      - id: Check_WebAPI
-        name: Check_WebAPI
-        run: |
-          cd webapi
-          ./gradlew -i check
-
-      - id: Generate_Annotations
-        name: Generate_Annotations
-        uses: ./.github/actions/tsurugi-annotations-action
-        if: always()
-        with:
-          junit_input: |
-            webapi/build/test-results/**/TEST-*.xml
-          spotbugs_input: webapi/build/reports/spotbugs/main/*.xml
-          checkstyle_input: webapi/build/reports/checkstyle/main.xml
+          ./gradlew -i clean bulid publish -x test
+        env:
+          GPR_USER: ${{ github.repository_owner }}
+          GPR_KEY: ${{ secrets.GITHUB_TOKEN }}
 
       - id: Notify_Slack
         name: Notify_Slack
         uses: ./.github/actions/tsurugi-slack-action
-        if: always() && (contains(github.ref, '/tags/') || contains(github.ref, '/pull/') || contains(github.ref, '/heads/master'))
+        if: always() && (github.event.pull_request.draft == false) && (contains(github.ref, '/tags/') || contains(github.ref, '/pull/') || contains(github.ref, '/heads/master'))
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
           kind: 'job-result'
-          channel: 'belayer-dev'
+          channel: 'tsurugi-build'
           status: ${{ job.status }}
           step_context: ${{ toJson(steps) }}
           username: ${{ github.workflow }}
-
-  Publish:
-    uses: ./.github/workflows/ci-publish.yml
-    if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
-    needs: Build
-    secrets: inherit
