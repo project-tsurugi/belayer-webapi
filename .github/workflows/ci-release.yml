@@ -70,7 +70,7 @@ jobs:
         name: Upload_Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: belayer-webapi-api-dists
+          name: belayer-web-api-dists
           path: distribution/dist/*
           retention-days: 1
 
@@ -106,7 +106,7 @@ jobs:
         name: Download_Artifact
         uses: actions/download-artifact@v3
         with:
-          name: belayer-web-api-dists
+          name: belayer-webapi-dists
           path: work
 
       - id: Delete_Old_Snapshot_Release
@@ -140,6 +140,7 @@ jobs:
           draft: false
           files: |
             work/*
+
   Publish:
     uses: ./.github/workflows/ci-publish.yml
     if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
