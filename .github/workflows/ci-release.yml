@@ -140,3 +140,9 @@ jobs:
           draft: false
           files: |
             work/*
+  Publish:
+    uses: ./.github/workflows/ci-publish.yml
+    if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
+    needs: Generate_GitHub_Release
+    secrets: inherit
+          

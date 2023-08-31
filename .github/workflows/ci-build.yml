@@ -79,9 +79,3 @@ jobs:
           status: ${{ job.status }}
           step_context: ${{ toJson(steps) }}
           username: ${{ github.workflow }}
-
-  Publish:
-    uses: ./.github/workflows/ci-publish.yml
-    if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
-    needs: Build
-    secrets: inherit
