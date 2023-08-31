@@ -51,7 +51,7 @@ jobs:
         if: contains(github.ref, '/heads/master')
         run: |
           cd webapi
-          ./gradlew -i clean bulid publish -x test
+          ./gradlew -i clean build publish -x test
         env:
           GPR_USER: ${{ github.repository_owner }}
           GPR_KEY: ${{ secrets.GITHUB_TOKEN }}
