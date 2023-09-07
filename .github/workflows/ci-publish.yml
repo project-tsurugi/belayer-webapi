@@ -51,6 +51,7 @@ jobs:
         if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
         run: |
           cd webapi
+          ./gradlew -i clean build publish -x test -Dtsubakuro-auth=mock
           ./gradlew -i clean build publish -x test
         env:
           GPR_USER: ${{ github.repository_owner }}

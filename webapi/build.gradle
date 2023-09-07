@@ -10,6 +10,9 @@ plugins {
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
 version = versionString
+if(System.getProperty("tsubakuro-auth") == "mock"){
+	version="${versionString}-mock-auth"
+}
 sourceCompatibility = '11'
 
 configurations {
