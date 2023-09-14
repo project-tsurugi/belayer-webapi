@@ -9,6 +9,7 @@ plugins {
 
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
+version = versionString
 sourceCompatibility = '11'
 
 configurations {
@@ -73,7 +74,7 @@ dependencies {
 	implementation 'com.tsurugidb.tsubakuro:tsubakuro-session:0.0.1-SNAPSHOT'
 	implementation 'com.tsurugidb.tsubakuro:tsubakuro-connector:0.0.1-SNAPSHOT'
 	implementation 'com.tsurugidb.tsubakuro:tsubakuro-auth-http:0.0.1-SNAPSHOT'
-    implementation 'com.tsurugidb.tsubakuro:tsubakuro-auth-mock:0.0.1-SNAPSHOT'
+	implementation 'com.tsurugidb.tsubakuro:tsubakuro-auth-mock:0.0.1-SNAPSHOT'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
