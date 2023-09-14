@@ -79,10 +79,8 @@ See the env var table below.
 |BELAYER_ADMIN_PAGE_PATH|WebAdmin page path.|`/admin`|
 |BELAYER_WEBADMIN_LOCATION|Path to WebAdmin Contents.(optional, not supported as default)|`file://dev/null`|
 
-### How to use mock Authentication
+### How to use mock Authentication for development
 
-* Build Belayer JAR with the option `-Dtsubakuro-auth`.
-    * `./gradlew build -x test -Dtsubakuro-auth=mock`
 * Launch Java process with the profile option.
     * `java -Dspring.profiles.active=authmock -jar path/to/belayer.jar`
 * You can use dummy users defined as uid=password in `webapi/src/main/resources/application-authmock.properties`
