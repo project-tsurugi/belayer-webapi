@@ -24,7 +24,7 @@ FROM ghcr.io/project-tsurugi/tsurugi:latest
 
 ENV BELAYER_HOME=/usr/lib/tsurugi-webapp
 ENV BELAYER_STORAGE_ROOT=${BELAYER_HOME}/storage
-ENV TSURUGI_CONF_DIR=/usr/lib/tsurugi/conf
+ENV TSURUGI_CONF_DIR=/usr/lib/tsurugi/var/etc
 ENV BELAYER_DIST_DIR=/opt/belayer/dist
 ENV HARINOKI_ETC=/usr/lib/tsurugi/var/auth/etc
 

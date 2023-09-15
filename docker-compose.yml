@@ -14,7 +14,7 @@ services:
     environment:
       BELAYER_HOME: "/usr/lib/tsurugi-webapp"
       BELAYER_STORAGE_ROOT: "/usr/lib/tsurugi-webapp/storage"
-      TSURUGI_CONF: "/usr/lib/tsurugi/conf/tsurugi.ini"
+      TSURUGI_CONF: "/usr/lib/tsurugi/var/etc/tsurugi.ini"
       TSURUGI_URL: "tcp://localhost:12345/"
       TSURUGI_JWT_SECRET_KEY: "secret"
       TSURUGI_AUTH_URL: "http://localhost:8080/harinoki"
