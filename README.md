@@ -68,7 +68,7 @@ See the env var table below.
 |TSURUGI_CONNECT_TIMEOUT_SEC|connect timeout seconds for Tsurugi database.|`5`|
 |TSURUGI_SESSION_TIMEOUT_MIN|session timeout minutes for Tsurugi database.|`15`|
 |TSURUGI_HOME|Tsurugi HOME directory.|`/usr/lib/tsurugi`|
-|TSURUGI_CONF|Tsurugi configuration file path.|`${TSURUGI_HOME}/conf/tsurugi.ini`|
+|TSURUGI_CONF|Tsurugi configuration file path.|`${TSURUGI_HOME}/var/etc/tsurugi.ini`|
 |TSURUGI_AUTH_URL|URL for authentication server "harinoki".|`http://localhost:8080/harinoki`|
 |TSURUGI_AUTH_AT_EXPIRATION_MIN|The expiration minutes for Access Token.|`10`|
 |BELAYER_MAX_FILE_LIST_SIZE|Max size to list the files.|`500`|
