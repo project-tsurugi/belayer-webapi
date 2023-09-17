@@ -280,7 +280,7 @@ public class DumpLoadService {
         job.setJobId(param.getJobId());
         job.setFiles(param.getFiles());
         job.setFormat(param.getFormat());
-        job.setTransactionNeeded(param.isSingleTransaction());
+        job.setTransactionNeeded(param.isTransactional());
         job.setMappings(param.getMappings());
         job.setStatus(JobStatus.RUNNING);
 

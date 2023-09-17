@@ -42,6 +42,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
 import com.tsurugidb.belayer.webapi.dto.ColumnMapping;
 import com.tsurugidb.belayer.webapi.dto.DumpJob;
+import com.tsurugidb.belayer.webapi.dto.DumpRequestParam;
 import com.tsurugidb.belayer.webapi.dto.ErrorResult;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
@@ -107,9 +108,13 @@ public class DumpLoadApiHandlerTest {
     when(jobIdService.createNewJobId()).thenReturn(jobId);
     when(dumpLoadService.startDump(any())).thenReturn(Mono.just(exp));
 
-    String url = ApiPath.DUMP_START_API + "/{dirpath}/{table}";
+    String url = ApiPath.DUMP_START_API + "/{table}";
     String dirPath = "path/to/savedir";
-    client.post().uri(url, dirPath, table)
+    var reqBody = new DumpRequestParam();
+    reqBody.setDirPath(dirPath);
+
+    client.post().uri(url, table)
+        .body(BodyInserters.fromValue(reqBody))
         .exchange()
         .expectStatus().isOk()
         .expectBody(JobResult.class)

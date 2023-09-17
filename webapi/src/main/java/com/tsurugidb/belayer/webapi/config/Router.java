@@ -205,7 +205,7 @@ public class Router {
                 cancelBackupRestoreApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DUMP_START_API + "/{dirpath}/{table}", dumpLoadApiHandler::requestDump,
+            .POST(ApiPath.DUMP_START_API + "/{table}", dumpLoadApiHandler::requestDump,
                 dumpStartApiDoc())
             .build())
         .and(route()

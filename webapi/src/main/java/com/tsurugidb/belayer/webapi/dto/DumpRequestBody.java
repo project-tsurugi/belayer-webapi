@@ -15,20 +15,13 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class LoadRequestParam extends DumpLoadRequestParam {
+public class DumpRequestBody {
 
-    private boolean transactional = true;
-    private List<String> files = new ArrayList<>();
-    private List<ColumnMapping> mappings = new ArrayList<>();
-
+    private String dirPath;
+    private String format = DumpRequestParam.FORMAT_DETECT_BY_EXTENSION;
+    private boolean waitUntilDone = false;
+  
 }

@@ -29,7 +29,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import com.tsurugidb.belayer.webapi.api.helper.LoadHelper;
 import com.tsurugidb.belayer.webapi.dto.DumpJob;
 import com.tsurugidb.belayer.webapi.dto.DumpJobResult;
-import com.tsurugidb.belayer.webapi.dto.DumpLoadRequestParam;
+import com.tsurugidb.belayer.webapi.dto.DumpRequestBody;
 import com.tsurugidb.belayer.webapi.dto.DumpRequestParam;
 import com.tsurugidb.belayer.webapi.dto.ErrorResult;
 import com.tsurugidb.belayer.webapi.dto.Job;
@@ -78,7 +78,7 @@ public class DumpLoadApiHandler {
 
         Mono<JobResult> result = ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .map(auth -> fillDumpParams(auth, req, jobId))
+                .flatMap(auth -> fillDumpParams(auth, req, jobId))
                 .map(this::checkDir)
                 .flatMap(dumpLoadService::startDump)
                 .map(j -> this.createDumpResult((DumpJob) j));
@@ -87,7 +87,7 @@ public class DumpLoadApiHandler {
                 BodyInserters.fromProducer(result, JobResult.class));
     }
 
-    private DumpRequestParam fillDumpParams(Authentication auth, ServerRequest req, String jobId) {
+    private Mono<DumpRequestParam> fillDumpParams(Authentication auth, ServerRequest req, String jobId) {
         Objects.requireNonNull(auth);
         if (auth instanceof UserTokenAuthentication) {
             ((UserTokenAuthentication) auth).getTokenExpirationTime()
@@ -95,17 +95,19 @@ public class DumpLoadApiHandler {
                     .orElseThrow(() -> new UnauthorizationException("Token is expired.", "Token is expired."));
         }
 
-        DumpRequestParam param = new DumpRequestParam();
-        param.setUid(auth.getName());
-        param.setCredentials(auth.getCredentials());
-
-        param.setDirPath(req.pathVariable("dirpath"));
-        param.setJobId(jobId);
-        param.setTable(req.pathVariable("table"));
-        param.setFormat(req.queryParam("format").orElse(DumpLoadRequestParam.FORMAT_PARQUET));
-        param.setWaitUntilDone(Boolean.valueOf(req.queryParam("wait_until_done").orElse("false")));
-
-        return param;
+        return req.bodyToMono(DumpRequestBody.class)
+                // fill params
+                .map(body -> {
+                    var param = new DumpRequestParam();
+                    param.setUid(auth.getName());
+                    param.setCredentials(auth.getCredentials());
+                    param.setJobId(jobId);
+                    param.setTable(req.pathVariable("table"));
+                    param.setDirPath(body.getDirPath());
+                    param.setFormat(body.getFormat());
+                    param.setWaitUntilDone(body.isWaitUntilDone());
+                    return param;
+                });
     }
 
     private DumpRequestParam checkDir(DumpRequestParam param) {
@@ -151,11 +153,6 @@ public class DumpLoadApiHandler {
                     param.setCredentials(auth.getCredentials());
                     param.setJobId(jobId);
                     param.setTable(req.pathVariable("table"));
-                    param.setFormat(req.queryParam("format").orElse(DumpLoadRequestParam.FORMAT_DETECT_BY_EXTENSION));
-                    boolean useSingleTransaction = Boolean.valueOf(req.queryParam("transactional").orElse("true"));
-                    param.setSingleTransaction(useSingleTransaction);
-                    param.setWaitUntilDone(Boolean.valueOf(req.queryParam("wait_until_done").orElse("false")));
-
                     return param;
                 });
     }
