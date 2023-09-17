@@ -52,8 +52,8 @@
     * パラメータ:なし
     * Content-Type: application/x-www-form-urlencoded
     * ボディ:
-        * uid: ユーザID（必須）
-        * pw: パスワード（必須）
+        * uid: ユーザID(必須)
+        * pw: パスワード(必須)
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -110,7 +110,7 @@
     * パラメータ:なし
     * Content-Type: application/x-www-form-urlencoded
     * ボディ:
-        * rt: リフレッシュトークン（必須）
+        * rt: リフレッシュトークン(必須)
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -177,13 +177,13 @@
                         * filename: 保存するファイルのローカルファイルパス(必須)
                 * body
                     * ファイルコンテンツ(必須)
-            * FormFieldPart: 保存先ディレクトリ（必須）
+            * FormFieldPart: 保存先ディレクトリ(必須)
                 * header
                     * Content-Disposition: form-data; name=“destDir”
                     * name: 常に“destDir”(必須)
                 * body
                     * アップロードファイルの保存ディレクトリ。STRAGE_DIR/[uid]からの相対パス(必須)
-            * FormFieldPart: 上書き可否（任意）
+            * FormFieldPart: 上書き可否(任意)
                 * header
                     * Content-Disposition: form-data; name=“overwrite”
                     * name: 常に“overwrite”(必須)
@@ -307,8 +307,7 @@
 * リクエスト
     * メソッド:POST
     * パス: /api/delete/files
-    * パラメータ:
-        * なし
+    * パラメータ:なし
     * Content-Type: application/json
     * ボディ:
         * pathList: 削除対象のパスのリスト
@@ -524,7 +523,7 @@
     * メソッド:GET
     * パス: /api/br/list/{type}
     * パラメータ:
-        * type(PATHパラメータ): backup/restoreのいずれか
+        * type(PATHパラメータ): "backup","restore"のいずれか
     * ボディ:なし
 * レスポンス
     * 正常
@@ -667,7 +666,7 @@
     * メソッド:GET
     * パス: /api/br/status/{type}/{jobId}
     * パラメータ:
-        * type(PATHパラメータ): backup/restoreのいずれか
+        * type(PATHパラメータ): "backup","restore"のいずれか
         * jobId(PATHパラメータ): バックアップ/リストアを識別するジョブID。
     * ボディ:なし
 * レスポンス
@@ -970,9 +969,9 @@
     * ボディ:
         * dirPath: ダンプファイルを格納するディレクトリパス。(必須)
             * STORAGE_DIR/[uid]/[dirPath]/[jobId]にダンプファイルが保存される。
-        * format: "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。（任意）
+        * format: "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。(任意)
             * パラメータ省略時もしくは"csv"以外の場合は、はParquet形式のフォーマットでダンプファイルを取得する。
-        * waitUntilDone(クエリパラメータ): "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。（任意）
+        * waitUntilDone(クエリパラメータ): "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。(任意)
 * レスポンス
     * 正常(wait_until_done指定なしの場合)
         * ステータスコード:200
@@ -1045,15 +1044,15 @@
         * table_name(PATHパラメータ): ロード先のテーブル名
     * Content-Type: application/json
     * ボディ:
-        * waitUntilDone: "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。（任意）
-        * format: ロードするデータファイルのフォーマットを指定する。
-            * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。（任意）
+        * waitUntilDone: "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。(任意)
+        * format: ロードするデータファイルのフォーマットを指定する。(任意)
+            * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。
             * パラメータ省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
             * zipの場合、zip内のファイルの拡張子によってparquet/csvを判別してロード処理を行う。
-        * transactional: trueの場合もしくは未指定の場合、１トランザクション内でロードする。（任意）
+        * transactional: trueの場合もしくは未指定の場合、１トランザクション内でロードする。(任意)
             * falseを指定した場合はトランザクションを分割して高速ロードする。
         * files: サーバに配置したデータファイルのパス（複数、1つ以上必須）
-        * mappings: カラムマッピング（任意）
+        * mappings: カラムマッピング(任意)
             * targetColumn: ロード先テーブルのカラム名、もしくは「@N」形式のカラム番号(Nはカラム番号の数値）
             * sourceColumn: ロード元データファイル上のカラム名、もしくは「@N」形式のカラム番号(Nはカラム番号の数値）
 
@@ -1124,7 +1123,7 @@
     * メソッド:GET
     * パス: /api/dumpload/list/{type}
     * パラメータ:
-        * type(PATHパラメータ): dump/loadのいずれか
+        * type(PATHパラメータ): "dump","load"のいずれか
     * ボディ:なし
 * レスポンス
     * 正常
@@ -1181,7 +1180,7 @@
     * メソッド:GET
     * パス: /api/dumpload/status/[type]/{jobId}
     * パラメータ:
-        * type(PATHパラメータ): dump/loadのいずれか
+        * type(PATHパラメータ): "dump","load"のいずれか
         * jobId(PATHパラメータ): ダンプ/ロードを識別するジョブID。
     * ボディ:なし
 * レスポンス
@@ -1228,7 +1227,7 @@
             * errorMessage: null
             * table: テーブル名
             * dirPath: 指定したディレクトリパス(type=dumpの場合のみ)
-            * format: "parquet","csv", "detect_by_ext"のいずれか
+            * format: "parquet","csv","detect_by_ext"のいずれか
                 * ※"detect_by_ext"はフォーマットが未指定の場合
             * files: ダンプ/ロードしたファイル名(複数)
 
@@ -1261,7 +1260,7 @@
             * errorMessage: エラーメッセージ
             * table: テーブル名
             * dirPath: 指定したディレクトリパス(type=dumpの場合のみ)
-            * format: "parquet","csv", "detect_by_ext"のいずれか
+            * format: "parquet","csv","detect_by_ext"のいずれか
                 * ※"detect_by_ext"はフォーマットが未指定の場合
             * files: ダンプ/ロードしたファイル名(正常完了以外は空)
 
@@ -1290,7 +1289,7 @@
             * errorMessage: null
             * table: テーブル名
             * dirPath: 指定したディレクトリパス(type=dumpの場合のみ)
-            * format: "parquet","csv", "detect_by_ext"のいずれか
+            * format: "parquet","csv","detect_by_ext"のいずれか
                 * ※"detect_by_ext"はフォーマットが未指定の場合
             * files: ダンプ/ロードしたファイル名(正常完了以外は空)
 
@@ -1342,7 +1341,7 @@
             * errorMessage: null
             * table: テーブル名
             * dirPath: 指定したディレクトリパス(type=dumpの場合のみ)
-            * format: "parquet","csv", "detect_by_ext"のいずれか
+            * format: "parquet","csv","detect_by_ext"のいずれか
                 * ※"detect_by_ext"はフォーマットが未指定の場合
             * files: ダンプ/ロードしたファイル名(正常完了以外は空)
 
@@ -1418,7 +1417,7 @@
     * メソッド:POST
     * パス: /api/transaction/{type}/{transactionId}
     * パラメータ:
-        * type(PATHパラメータ): commit/rollbackのいずれか
+        * type(PATHパラメータ): "commit","rollback"のいずれか
         * transactionId(PATHパラメータ): トランザクションを識別するトランザクションID
     * ボディ:なし
 * レスポンス
@@ -1521,9 +1520,9 @@
         * table_name(PATHパラメータ): ダンプするテーブル名
     * Content-Type: application/json
     * ボディ:
-        * format: "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。（任意）
+        * format: "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。(任意)
             * パラメータ省略時もしくは"csv"以外の場合は、はParquet形式のフォーマットでダンプファイルを取得する。
-        * mode: 以下のいずれか（任意）
+        * mode: 以下のいずれか(任意)
             * normal(デフォルト): 生成したダンプファイルのダウンロードパス(複数)を処理完了時にまとめて受け取る。
             * sse: 生成したダンプファイルのダウンロードパスを1ファイル単位でServer-Sent Eventsで受け取る。
 * レスポンス
@@ -1608,13 +1607,13 @@
                             * COL_A,COL_1
                         * 例2）データファイルのCOL_Aカラム値をテーブルの1番目のカラムにロードする
                             * COL_A,@1
-            * FormFieldPart:フォーマット（任意）
+            * FormFieldPart:フォーマット(任意)
                 * header
                     * Content-Disposition: form-data; name="format"
                         * name: 常に"format"(必須)
                 * body
                     * ロードするデータファイルのフォーマット。
-                        * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。（任意）
+                        * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。(任意)
                         * FormFieldPart省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
 * レスポンス
     * 正常
