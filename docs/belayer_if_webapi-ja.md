@@ -163,11 +163,9 @@
 * 概要: ファイルを受け取り、指定のファイルパスに保存する。
 * リクエスト
     * メソッド:POST
-    * パス: /api/upload/{destDir}
+    * パス: /api/upload
     * パラメータ
-        * destDir(PATHパラメータ): アップロードファイルの保存ディレクトリ。STORAGE_DIR/[uid]からの相対パス。(必須)
-           * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
-        * overwrite(クエリパラメータ): trueを指定した場合、サーバの同ディレクトリに同名ファイルが存在した場合、上書きする。
+        * なし
     * Content-Type: multipart/form-data
     * ボディ:
         * マルチパート形式
@@ -179,6 +177,18 @@
                         * filename: 保存するファイルのローカルファイルパス(必須)
                 * body
                     * ファイルコンテンツ(必須)
+            * FormFieldPart: 保存先ディレクトリ（必須）
+                * header
+                    * Content-Disposition: form-data; name=“destDir”
+                    * name: 常に“destDir”(必須)
+                * body
+                    * アップロードファイルの保存ディレクトリ。STRAGE_DIR/[uid]からの相対パス(必須)
+            * FormFieldPart: 上書き可否（任意）
+                * header
+                    * Content-Disposition: form-data; name=“overwrite”
+                    * name: 常に“overwrite”(必須)
+                * body
+                    * 「true」を指定した場合、サーバの同ディレクトリに同盟ファイルが存在した場合に上書きする。
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -439,12 +449,12 @@
     * バックアップ指示が成功した段階でレスポンスを返却する。（バックアップ処理完了ではない。）
 * リクエスト
     * メソッド:POST
-    * パス: /api/backup/{dir_path}
-    * パラメータ:
-        * dir_path(PATHパラメータ): バックアップファイル(Zip)を格納するディレクトリパス。
-            * STORAGE_DIR/[uid]/[dir_path]にバックアップファイルが保存される。
-            * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
-    * ボディ:なし
+    * パス: /api/backup
+    * パラメータ:なし
+    * Content-Type：application/json
+    * ボディ
+        * dirPath: バックアップファイル(Zip)を格納するディレクトリパス。
+            * STORAGE_DIR/[uid]/[dirPath]/[jobId]にバックアップファイルが保存される。
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -478,12 +488,12 @@
     * リストア指示が成功した段階でレスポンスを返却する。（リストア処理完了ではない。）
 * リクエスト
     * メソッド:POST
-    * パス: /api/restore/{zip_file_path}
-    * パラメータ:
-        * zip_file_path(PATHパラメータ): バックアップファイル(Zip)の格納パス。
+    * パス: /api/restore
+    * パラメータ:なし
+    * Content-Type: application/json
+    * ボディ:
+        * zipFilePath: バックアップファイル(Zip)の格納パス。
             * STORAGE_DIR/[uid]/[zip_file_path]にバックアップファイルが保存されている前提。
-            * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
-    * ボディ:なし
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -953,16 +963,16 @@
 * 概要: ダンプファイルを保存するディレクトリを指定し、オフラインでダンプ取得を指示する。
 * リクエスト
     * メソッド:POST
-    * パス: /api/dump/{dir_path}/{table_name}
+    * パス: /api/dump/{table_name}
+    * Content-Type: application/json
     * パラメータ:
-        * dir_path(PATHパラメータ): ダンプファイルを格納するディレクトリパス。
-            * STORAGE_DIR/[uid]/[dir_path]/[job_id]にダンプファイルが保存される。
-            * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
         * table_name(PATHパラメータ): ターゲットのテーブル名。
-        * format(クエリパラメータ): "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。（任意）
+    * ボディ:
+        * dirPath: ダンプファイルを格納するディレクトリパス。(必須)
+            * STORAGE_DIR/[uid]/[dirPath]/[jobId]にダンプファイルが保存される。
+        * format: "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。（任意）
             * パラメータ省略時もしくは"csv"以外の場合は、はParquet形式のフォーマットでダンプファイルを取得する。
-        * wait_until_done(クエリパラメータ): "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。（任意）
-    * ボディ:なし
+        * waitUntilDone(クエリパラメータ): "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。（任意）
 * レスポンス
     * 正常(wait_until_done指定なしの場合)
         * ステータスコード:200
@@ -1033,15 +1043,15 @@
     * パス: /api/load/{table_name}
     * パラメータ:
         * table_name(PATHパラメータ): ロード先のテーブル名
-        * wait_until_done(クエリパラメータ): "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。（任意）
-        * format(クエリパラメータ): ロードするデータファイルのフォーマットを指定する。
-            * `parquet`/`csv`/`zip`/`detect_by_ext`のいずれか。（任意）
-            * パラメータ省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
-            * zipの場合、zip内のファイルの拡張子によってparquet/csvを判別してロード処理を行う。
-        * transactional(クエリパラメータ): trueの場合もしくは未指定の場合、１トランザクション内でロードする。（任意）
-            * falseを指定した場合はトランザクションを分割して高速ロードする。
     * Content-Type: application/json
     * ボディ:
+        * waitUntilDone: "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。（任意）
+        * format: ロードするデータファイルのフォーマットを指定する。
+            * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。（任意）
+            * パラメータ省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
+            * zipの場合、zip内のファイルの拡張子によってparquet/csvを判別してロード処理を行う。
+        * transactional: trueの場合もしくは未指定の場合、１トランザクション内でロードする。（任意）
+            * falseを指定した場合はトランザクションを分割して高速ロードする。
         * files: サーバに配置したデータファイルのパス（複数、1つ以上必須）
         * mappings: カラムマッピング（任意）
             * targetColumn: ロード先テーブルのカラム名、もしくは「@N」形式のカラム番号(Nはカラム番号の数値）
@@ -1049,6 +1059,9 @@
 
         ```
         {
+           waitUntilDone: true,
+           format: "csv",
+           transactional: true,
            files: [
              "dir1/FOO_TBL0.parquet",
              "dir1/FOO_TBL1.parquet",
@@ -1368,12 +1381,13 @@
     * Note: トランザクションを開始して待機する期間中は、内部処理にて定期的にタイムアウトを延長する。
 * リクエスト
     * メソッド:POST
-    * パス: /api/transaction/begin/{type}/{timeout_min}
-    * パラメータ:
-        * type(PATHパラメータ): "read_write","read_only"のいずれか(必須)
-        * timeout_min(PATHパラメータ): トランザクションタイムアウト値（分）(必須)
-        * tables(Queryパラメータ): トランザクション内で書き込みを行うテーブル名の羅列（カンマ区切り）(typeがread_writeの場合は必須)
-    * ボディ:なし
+    * パス: /api/transaction/begin
+    * パラメータ:なし
+    * Content-Type: application/json
+    * ボディ:
+        * type: "read_write","read_only"のいずれか(必須)
+        * timeoutMin: トランザクションタイムアウト値（分）(必須)
+        * tables: トランザクション内で書き込みを行うテーブル名の配列(typeがread_writeの場合は必須)
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -1505,12 +1519,13 @@
     * パラメータ:
         * transactionId(PATHパラメータ): トランザクションを識別するトランザクションID
         * table_name(PATHパラメータ): ダンプするテーブル名
-        * format(クエリパラメータ): "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。（任意）
+    * Content-Type: application/json
+    * ボディ:
+        * format: "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。（任意）
             * パラメータ省略時もしくは"csv"以外の場合は、はParquet形式のフォーマットでダンプファイルを取得する。
-        * mode(クエリパラメータ): 以下のいずれか（任意）
+        * mode: 以下のいずれか（任意）
             * normal(デフォルト): 生成したダンプファイルのダウンロードパス(複数)を処理完了時にまとめて受け取る。
             * sse: 生成したダンプファイルのダウンロードパスを1ファイル単位でServer-Sent Eventsで受け取る。
-    * ボディ:なし
 * レスポンス
     * 正常（mode=normalの場合）
         * ステータスコード:200
@@ -1571,10 +1586,6 @@
     * パラメータ:
         * transactionId(PATHパラメータ): トランザクションを識別するトランザクションID
         * table(PATHパラメータ): ロードするテーブル名
-        * format(クエリパラメータ): ロードするデータファイルのフォーマットを指定する。
-            * `parquet`/`csv`/`zip`/`detect_by_ext`のいずれか。（任意）
-            * パラメータ省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
-            * zipの場合、zip内のファイルの拡張子によってparquet/csvを判別してロード処理を行う。
     * Content-Type: multipart/form-data
     * ボディ:
         * マルチパート形式（複数指定可能）
@@ -1597,6 +1608,14 @@
                             * COL_A,COL_1
                         * 例2）データファイルのCOL_Aカラム値をテーブルの1番目のカラムにロードする
                             * COL_A,@1
+            * FormFieldPart:フォーマット（任意）
+                * header
+                    * Content-Disposition: form-data; name="format"
+                        * name: 常に"format"(必須)
+                * body
+                    * ロードするデータファイルのフォーマット。
+                        * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。（任意）
+                        * FormFieldPart省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
 * レスポンス
     * 正常
         * ステータスコード:200
