@@ -355,12 +355,15 @@ public class FileSystemApiHandler {
    * @return Response
    */
   public Mono<ServerResponse> deleteFile(ServerRequest req) {
-    String filePath = req.pathVariable("filepath");
 
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .map(Authentication::getName)
-        .flatMap(uid -> deleteFileOrDir(uid, new String[] { filePath }, true, false));
+        .flatMap(auth -> fillDeleteParams(auth, req, false))
+        .map(param -> {
+          param.setPathList(new String[] { param.getPath() });
+          return param;
+        })
+        .flatMap(param -> deleteFileOrDir(param.getUid(), param.getPathList(), true, false));
   }
 
   /**
@@ -377,13 +380,14 @@ public class FileSystemApiHandler {
 
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .flatMap(auth -> fillDeleteParams(auth, req))
+        .flatMap(auth -> fillDeleteParams(auth, req, true))
         .flatMap(target -> deleteFileOrDir(target.getUid(), target.getPathList(), true, false));
   }
 
-  private Mono<DeleteTarget> fillDeleteParams(Authentication auth, ServerRequest req) {
+  private Mono<DeleteTarget> fillDeleteParams(Authentication auth, ServerRequest req, boolean deleteMultiFile) {
 
     return req.bodyToMono(DeleteTarget.class)
+        .switchIfEmpty(Mono.just(new DeleteTarget()))
         // fill params
         .map(param -> {
           param.setUid(auth.getName());
@@ -403,15 +407,11 @@ public class FileSystemApiHandler {
    * @return Response
    */
   public Mono<ServerResponse> deleteDir(ServerRequest req) {
-    String filePath = req.pathVariable("dirpath");
-
-    Optional<String> force = req.queryParam("force");
-    final boolean forceDelete = Boolean.valueOf(force.orElse("false"));
 
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .map(Authentication::getName)
-        .flatMap(uid -> deleteFileOrDir(uid, new String[] { filePath }, false, forceDelete));
+        .flatMap(auth -> fillDeleteParams(auth,req,false))
+        .flatMap(param -> deleteFileOrDir(param.getUid(), new String[] { param.getPath() }, false, param.isForce()));
   }
 
   private Mono<ServerResponse> deleteFileOrDir(String uid, String[] filePathList, boolean targetIsFile, boolean force) {
@@ -420,7 +420,7 @@ public class FileSystemApiHandler {
     if (!targetIsFile) {
       // delete directory
 
-      if (filePathList.length == 0) {
+      if (filePathList == null || filePathList.length == 0) {
         // not reach here.
         throw new IllegalArgumentException("dir param is empty.");
       }
@@ -456,7 +456,7 @@ public class FileSystemApiHandler {
       return ServerResponse.ok()
           .contentType(MediaType.APPLICATION_JSON)
           .body(
-              BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, filePathList[0], null)), DeleteTarget.class));
+              BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, filePathList[0], null, false)), DeleteTarget.class));
     }
 
     // delete single file
@@ -484,7 +484,7 @@ public class FileSystemApiHandler {
     }
 
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, null, filePathList)), DeleteTarget.class));
+        .body(BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, null, filePathList, false)), DeleteTarget.class));
   }
 
 }

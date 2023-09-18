@@ -270,11 +270,11 @@
 * 概要: パスを指定し、1ファイルを削除する。
 * リクエスト
     * メソッド:POST
-    * パス: /api/delete/file/{path_to_file}
-    * パラメータ:
-        * path_to_file(PATHパラメータ): 削除するファイルパス。STORAGE_DIR/[uid]からの相対パス。
-           * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
-    * ボディ:なし
+    * パス: /api/delete/file
+    * パラメータ:なし
+    * Content-Type: application/json
+    * ボディ:
+        * path: 削除するファイルパス。STORAGE_DIR/[uid]からの相対パス。
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -357,12 +357,12 @@
 * 概要: パスを指定し、1ディレクトリを削除する。
 * リクエスト
     * メソッド:POST
-    * パス: /api/delete/dir/{path_to_dir}
-    * パラメータ:
-        * path_to_dir(PATHパラメータ): 削除するディレクトリパス。STORAGE_DIR/[uid]からの相対パス。
-           * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
-        * force=true(クエリパラメータ): ディレクトリ内のファイルごと削除する。
-    * ボディ:なし
+    * パス: /api/delete/dir
+    * パラメータ:なし
+    * Content-Type: application/json
+    * ボディ:
+        * path: 削除するディレクトリパス。STORAGE_DIR/[uid]からの相対パス。(必須)
+        * force: trueの場合、ディレクトリ内のファイルごと削除する。デフォルトはfalse。(任意)
 * レスポンス
     * 正常
         * ステータスコード:200

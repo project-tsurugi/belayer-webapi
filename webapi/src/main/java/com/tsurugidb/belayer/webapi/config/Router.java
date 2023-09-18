@@ -176,14 +176,14 @@ public class Router {
             .GET(ApiPath.LIST_FILES_API + "/{dirpath}", fileSystemApiHandler::listFiles, fileListApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_FILE_API + "/{filepath}", fileSystemApiHandler::deleteFile,
+            .POST(ApiPath.DELETE_FILE_API, fileSystemApiHandler::deleteFile,
                 deleteFileApiDoc())
             .build())
         .and(route()
             .POST(ApiPath.DELETE_FILES_API, fileSystemApiHandler::deleteFiles, deleteFilesApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_DIR_API + "/{dirpath}", fileSystemApiHandler::deleteDir, deleteDirApiDoc())
+            .POST(ApiPath.DELETE_DIR_API, fileSystemApiHandler::deleteDir, deleteDirApiDoc())
             .build())
         .and(route()
             .POST(ApiPath.BACKUP_START_API, backupRestoreApiHandler::requestBackup,
