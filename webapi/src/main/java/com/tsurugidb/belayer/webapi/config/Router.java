@@ -59,8 +59,10 @@ import com.tsurugidb.belayer.webapi.api.HelloHandler;
 import com.tsurugidb.belayer.webapi.api.StatefulApiHandler;
 import com.tsurugidb.belayer.webapi.dto.AuthRequest;
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
+import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
+import com.tsurugidb.belayer.webapi.dto.DumpRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
 import com.tsurugidb.belayer.webapi.dto.JobResult;
@@ -183,11 +185,11 @@ public class Router {
             .POST(ApiPath.DELETE_DIR_API + "/{dirpath}", fileSystemApiHandler::deleteDir, deleteDirApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.BACKUP_START_API + "/{dirpath}", backupRestoreApiHandler::requestBackup,
+            .POST(ApiPath.BACKUP_START_API, backupRestoreApiHandler::requestBackup,
                 backupStartApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.RESTORE_START_API + "/{zip_file_path}", backupRestoreApiHandler::requestRestore,
+            .POST(ApiPath.RESTORE_START_API, backupRestoreApiHandler::requestRestore,
                 restoreStartApiDoc())
             .build())
         .and(route()
@@ -451,8 +453,10 @@ public class Router {
         .operationId("backup_start")
         .summary("start backup and save backup files in specified directory path.")
         .method("POST")
-        .parameter(parameterBuilder().in(ParameterIn.PATH).name("dirpath")
-            .description("directory path to save files."))
+        .requestBody(requestBodyBuilder().content(
+            contentBuilder()
+                .mediaType("application/json")
+                .schema(schemaBuilder().type("object").implementation(BackupRestoreStartRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Back up execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
@@ -467,8 +471,10 @@ public class Router {
         .operationId("restore_start")
         .summary("start restore with a directory that holds backup files in specified directory path.")
         .method("POST")
-        .parameter(parameterBuilder().in(ParameterIn.PATH).name("dirpath")
-            .description("directory path to save files."))
+        .requestBody(requestBodyBuilder().content(
+            contentBuilder()
+                .mediaType("application/json")
+                .schema(schemaBuilder().type("object").implementation(BackupRestoreStartRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Restore execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
@@ -537,10 +543,12 @@ public class Router {
         .operationId("dump_start")
         .summary("start dump and save dump files in specified directory path.")
         .method("POST")
-        .parameter(parameterBuilder().in(ParameterIn.PATH).name("dirpath")
-            .description("directory path to save files."))
         .parameter(parameterBuilder().in(ParameterIn.PATH).name("table")
             .description("table name to dump."))
+        .requestBody(requestBodyBuilder().content(
+            contentBuilder()
+                .mediaType("application/json")
+                .schema(schemaBuilder().type("object").implementation(DumpRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Back up execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
