@@ -164,7 +164,7 @@ public class Router {
       DumpLoadApiHandler dumpLoadApiHandler, StatefulApiHandler statefulApiHandler,
       DbControlApiHandler dbControlHandler, HelloHandler helloHandler) {
 
-      RouterFunction<ServerResponse> route = route().POST(ApiPath.AUTH_API, authHandler::auth, authApiDoc()).build()
+    RouterFunction<ServerResponse> route = route().POST(ApiPath.AUTH_API, authHandler::auth, authApiDoc()).build()
         .and(route().POST(ApiPath.AUTH_REFRESH_API, authHandler::refresh, authRefreshApiDoc()).build())
         .and(route().GET("/api/hello", helloHandler::hello, opt -> opt.operationId("hello").build()).build())
         .and(route().POST(ApiPath.UPLOAD_API + "/{destDir}", fileSystemApiHandler::uploadFiles, uploadApiDoc())
@@ -176,9 +176,10 @@ public class Router {
             .GET(ApiPath.LIST_FILES_API + "/{dirpath}", fileSystemApiHandler::listFiles, fileListApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_FILE_API + "/{filepath}", fileSystemApiHandler::deleteFile, deleteFileApiDoc())
+            .POST(ApiPath.DELETE_FILE_API + "/{filepath}", fileSystemApiHandler::deleteFile,
+                deleteFileApiDoc())
             .build())
-            .and(route()
+        .and(route()
             .POST(ApiPath.DELETE_FILES_API, fileSystemApiHandler::deleteFiles, deleteFilesApiDoc())
             .build())
         .and(route()
@@ -259,11 +260,11 @@ public class Router {
                 opt -> opt.operationId("db").build())
             .build());
 
-        if (adminPageEnabled) {
-            route = route.and(RouterFunctions.route(RequestPredicates.GET(adminPagePath), this::adminIndex));
-        }
+    if (adminPageEnabled) {
+      route = route.and(RouterFunctions.route(RequestPredicates.GET(adminPagePath), this::adminIndex));
+    }
 
-        return route;
+    return route;
   }
 
   @Bean
@@ -296,7 +297,8 @@ public class Router {
   }
 
   public class Iso8601WithoutMillisInstantSerializer extends JsonSerializer<Instant> {
-    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx").withZone(ZoneOffset.UTC);
+    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
+        .withZone(ZoneOffset.UTC);
 
     @Override
     public void serialize(Instant value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -305,7 +307,8 @@ public class Router {
   }
 
   public class Iso8601WithoutMillisInstantDeserializer extends JsonDeserializer<Instant> {
-    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx").withZone(ZoneOffset.UTC);
+    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
+        .withZone(ZoneOffset.UTC);
 
     @Override
     public Instant deserialize(JsonParser p, DeserializationContext ctxt)
@@ -413,7 +416,7 @@ public class Router {
             .implementation(DeleteTarget.class));
   }
 
-    /**
+  /**
    * API Doc for Delete File API.
    */
   private Consumer<Builder> deleteFilesApiDoc() {
@@ -439,7 +442,8 @@ public class Router {
         .summary("delete a file in specified directory path.")
         .method("POST")
         .parameter(
-            parameterBuilder().in(ParameterIn.PATH).name("dirpath").description("directory path to delete."))
+            parameterBuilder().in(ParameterIn.PATH).name("dirpath")
+                .description("directory path to delete."))
         .response(responseBuilder().responseCode("200").description("Deletion Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(DeleteTarget.class));
