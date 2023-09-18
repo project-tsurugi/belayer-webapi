@@ -65,7 +65,7 @@ public class DumpLoadApiHandler {
 
     @Autowired
     SystemTime systemTime;
-  
+
     /**
      * Start Dump API
      *
@@ -96,6 +96,7 @@ public class DumpLoadApiHandler {
         }
 
         return req.bodyToMono(DumpRequestBody.class)
+                .switchIfEmpty(Mono.just(new DumpRequestBody()))
                 // fill params
                 .map(body -> {
                     var param = new DumpRequestParam();

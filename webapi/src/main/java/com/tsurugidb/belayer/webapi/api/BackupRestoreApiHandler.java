@@ -128,17 +128,18 @@ public class BackupRestoreApiHandler {
     }
 
     return req.bodyToMono(BackupRestoreStartRequestBody.class)
-    // fill params
-    .map(body -> {
-        var param = new BackupRestoreRequestParam();
-        param.setUid(auth.getName());
-        param.setCredentials(auth.getCredentials());
-    
-        param.setDirPath(body.getDirPath());
-        param.setZipFilePath(body.getZipFilePath());
-        param.setJobId(jobId);
-        return param;
-    });
+        .switchIfEmpty(Mono.just(new BackupRestoreStartRequestBody()))
+        .map(body -> {
+          // fill params
+          var param = new BackupRestoreRequestParam();
+          param.setUid(auth.getName());
+          param.setCredentials(auth.getCredentials());
+
+          param.setDirPath(body.getDirPath());
+          param.setZipFilePath(body.getZipFilePath());
+          param.setJobId(jobId);
+          return param;
+        });
 
   }
 
