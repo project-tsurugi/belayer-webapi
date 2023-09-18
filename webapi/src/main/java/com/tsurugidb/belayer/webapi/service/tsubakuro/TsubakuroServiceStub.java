@@ -17,8 +17,10 @@ package com.tsurugidb.belayer.webapi.service.tsubakuro;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -166,7 +168,7 @@ public class TsubakuroServiceStub implements TsubakuroService {
                 try {
                     log.debug("copy {}->{}", targetFile, destPath);
                     Thread.sleep(3 * 1000l);
-                    Files.copy(targetFile, destPath);
+                    Files.copy(targetFile, destPath, StandardCopyOption.REPLACE_EXISTING);
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();

@@ -37,7 +37,8 @@ describe('Stateful API', () => {
   });
 
   it('case start transaction', () => {
-    const cmd = `curl -s -X POST -H 'Authorization: Bearer ${ApiCommon.getAccessToken()}' ${baseURL}/transaction/begin/read_write/1?tables=demo -i `;
+    const bodyParam = '{\\"type\\": \\"read_write\\", \\"timeoutMin\\": 1, \\"tables\\":[\\"demo\\"]}'
+    const cmd = `curl -s -X POST -H 'Authorization: Bearer ${ApiCommon.getAccessToken()}' -H "Content-Type: application/json" -d "${bodyParam}" ${baseURL}/transaction/begin -i `;
     const ret = ExecSync(cmd);
     const [header, body] = parseHttpResponse(ret.toString());
 
@@ -92,7 +93,7 @@ describe('Stateful API', () => {
   });
 
   it('case start dump(CSV)', () => {
-    const cmd = `curl -s -X POST -H 'Authorization: Bearer ${ApiCommon.getAccessToken()}' ${baseURL}/transaction/dump/${transactionId}/demo?format=csv -i`;
+    const cmd = `curl -s -X POST -H 'Authorization: Bearer ${ApiCommon.getAccessToken()}' -H "Content-Type: application/json" -d "{\\"format\\": \\"csv\\"}" ${baseURL}/transaction/dump/${transactionId}/demo -i`;
     const ret = ExecSync(cmd);
     const [header, body] = parseHttpResponse(ret.toString());
     console.log(body)

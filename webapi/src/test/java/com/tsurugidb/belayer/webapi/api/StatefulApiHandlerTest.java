@@ -52,6 +52,7 @@ import com.tsurugidb.belayer.webapi.dto.DumpLoadRequestParam;
 import com.tsurugidb.belayer.webapi.dto.DumpResult;
 import com.tsurugidb.belayer.webapi.dto.Job.JobStatus;
 import com.tsurugidb.belayer.webapi.dto.LoadResult;
+import com.tsurugidb.belayer.webapi.dto.TransactionStartBody;
 import com.tsurugidb.belayer.webapi.dto.TransactionStatus;
 import com.tsurugidb.belayer.webapi.model.SystemTime;
 import com.tsurugidb.belayer.webapi.service.DumpLoadService;
@@ -130,16 +131,17 @@ public class StatefulApiHandlerTest {
         status.setStartTime(now);
 
         when(jobIdService.createNewJobId()).thenReturn(jobId);
-        when(tsubakuroService.createTransaction(any(), any(), any(), any(), anyBoolean(), any())).thenCallRealMethod();
+        when(tsubakuroService.createTransaction(any(), any(), any(), any(), anyBoolean(), any()))
+                .thenCallRealMethod();
 
-        String url = ApiPath.START_TRANSACTION_API + "/{mode}/{timeout_min}";
-        client.post().uri(url, mode, 10)
+        client.post().uri(ApiPath.START_TRANSACTION_API)
+                .body(BodyInserters.fromValue(new TransactionStartBody(mode, "10", null)))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TransactionStatus.class)
                 .isEqualTo(status);
 
-        url = ApiPath.SHOW_TRANSACTION_STATUS_API + "/{transactionid}";
+        String url = ApiPath.SHOW_TRANSACTION_STATUS_API + "/{transactionid}";
         client.get().uri(url, jobId)
                 .exchange()
                 .expectStatus().isOk()
@@ -158,6 +160,8 @@ public class StatefulApiHandlerTest {
 
         url = ApiPath.STREAM_DUMP_API + "/{transactionid}/{table_name}";
         client.post().uri(url, jobId, tableName)
+                // .body(BodyInserters.fromValue(new StreamDumpRequestBody("parquet",
+                // "normal")))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(DumpResult.class)

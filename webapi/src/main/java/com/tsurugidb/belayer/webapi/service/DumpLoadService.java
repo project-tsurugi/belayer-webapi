@@ -397,7 +397,7 @@ public class DumpLoadService {
      *
      * @param param        Load paremeter.
      * @param dumpFilePath absolute full path of dump file.
-     * @return path list of parquet files.
+     * @return path of the uploaded file.
      */
     public Mono<String> loadDumpFile(LoadParameter param, Path dumpFilePath) {
         var job = param.getTransactionJob();
@@ -408,7 +408,9 @@ public class DumpLoadService {
 
         Mono<String> downloadPath = Mono.just(job)
                 .map(j -> this.convertToLoadJob(j, param))
-                .flatMap(j -> tsubakuroService.loadFile(j, loadFileInfo));
+                .flatMap(j -> tsubakuroService.loadFile(j, loadFileInfo))
+                .map(parquetFilePath -> fileSystemService.convertToDownloadPath(param.getUid(), dumpFilePath.toString())
+                        .toString());
 
         return downloadPath;
 

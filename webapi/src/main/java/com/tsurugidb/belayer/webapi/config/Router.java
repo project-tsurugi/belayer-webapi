@@ -62,7 +62,7 @@ import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
-import com.tsurugidb.belayer.webapi.dto.DumpRequestBody;
+import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
 import com.tsurugidb.belayer.webapi.dto.JobResult;
@@ -230,7 +230,7 @@ public class Router {
                 cancelDumpLoadApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.START_TRANSACTION_API + "/{mode}/{timeout_min}",
+            .POST(ApiPath.START_TRANSACTION_API,
                 statefulApiHandler::startTransaction,
                 opt -> opt.operationId("stateful").build())
             .build())
@@ -552,7 +552,7 @@ public class Router {
         .requestBody(requestBodyBuilder().content(
             contentBuilder()
                 .mediaType("application/json")
-                .schema(schemaBuilder().type("object").implementation(DumpRequestBody.class))))
+                .schema(schemaBuilder().type("object").implementation(StreamDumpRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Back up execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
