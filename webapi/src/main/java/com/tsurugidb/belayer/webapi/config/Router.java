@@ -167,7 +167,7 @@ public class Router {
     RouterFunction<ServerResponse> route = route().POST(ApiPath.AUTH_API, authHandler::auth, authApiDoc()).build()
         .and(route().POST(ApiPath.AUTH_REFRESH_API, authHandler::refresh, authRefreshApiDoc()).build())
         .and(route().GET("/api/hello", helloHandler::hello, opt -> opt.operationId("hello").build()).build())
-        .and(route().POST(ApiPath.UPLOAD_API + "/{destDir}", fileSystemApiHandler::uploadFiles, uploadApiDoc())
+        .and(route().POST(ApiPath.UPLOAD_API, fileSystemApiHandler::uploadFiles, uploadApiDoc())
             .build())
         .and(route()
             .GET(ApiPath.DOWNLOAD_API + "/{filepath}", fileSystemApiHandler::downloadFile, downloadApiDoc())

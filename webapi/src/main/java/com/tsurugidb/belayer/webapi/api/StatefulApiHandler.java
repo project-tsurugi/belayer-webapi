@@ -410,7 +410,7 @@ public class StatefulApiHandler {
                 .flatMap(filePart -> {
                     log.debug("fp:" + filePart);
                     Path absolutePath = fileSystemService.convertToAbsolutePath(param.getUid(), param.getDestDirPath());
-                    Mono<String> path = uploadHelper.saveFile(param.getUid(), true, absolutePath, filePart);
+                    Mono<String> path = uploadHelper.saveFile(param.getUid(), absolutePath, filePart);
                     return path;
                 });
 

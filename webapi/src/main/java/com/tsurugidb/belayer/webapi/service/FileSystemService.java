@@ -75,6 +75,13 @@ public class FileSystemService {
     return distPath.toString();
   }
 
+  /**
+   * Create specified directory.
+   * 
+   * @param uid userId
+   * @param dir Directory path to create
+   * @return path of created directory.
+   */
   public Path createDirectory(String uid, String dir) {
     log.debug("create dir: " + uid + "/" + dir);
 

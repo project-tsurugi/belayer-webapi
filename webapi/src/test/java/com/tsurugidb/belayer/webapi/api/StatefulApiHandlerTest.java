@@ -18,15 +18,14 @@ package com.tsurugidb.belayer.webapi.api;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +59,6 @@ import com.tsurugidb.belayer.webapi.service.FileSystemService;
 import com.tsurugidb.belayer.webapi.service.JobIdService;
 import com.tsurugidb.belayer.webapi.service.StatefulDumpLoadService;
 import com.tsurugidb.belayer.webapi.service.tsubakuro.TsubakuroServiceStub;
-import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -173,7 +171,7 @@ public class StatefulApiHandlerTest {
         loadResult.setDumpFiles(List.of(jobId + "/" + fileName));
 
         when(tsubakuroService.loadFile(any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
-        when(uploadHelper.saveFile(anyString(), anyBoolean(), any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
+        when(uploadHelper.saveFile(anyString(), any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
         when(fileSystemService.convertToAbsolutePath(any(), any())).thenCallRealMethod();
         doNothing().when(fileSystemService).deleteFile(anyString(), anyString());
 

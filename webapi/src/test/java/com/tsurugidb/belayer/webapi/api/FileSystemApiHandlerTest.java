@@ -104,14 +104,14 @@ public class FileSystemApiHandlerTest {
     MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
     bodyBuilder.part("file", "abcd".getBytes(StandardCharsets.US_ASCII)).header("Content-Disposition",
         "form-data; name=file; filename=" + fileName);
+    bodyBuilder.part("destDir", destDir.getBytes(StandardCharsets.US_ASCII)).header("Content-Disposition",
+        "form-data; name=destDir");
+    bodyBuilder.part("overwrite", "true".getBytes(StandardCharsets.US_ASCII)).header("Content-Disposition",
+        "form-data; name=overwrite");
 
     String[] expectFileNames = { destDir + "/" + fileName };
 
-    String url = ApiPath.UPLOAD_API + "/{destDir}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).queryParam("overwrite", "true")
-        .build(destDir));
-
-    client.post().uri(uriBuilder)
+    client.post().uri(ApiPath.UPLOAD_API)
         .contentType(MediaType.MULTIPART_FORM_DATA)
         .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
         .exchange()
@@ -443,15 +443,15 @@ public class FileSystemApiHandlerTest {
 
     String deleteFile = destDir + "/" + fileName1;
 
-    String url = ApiPath.DELETE_FILE_API + "/{path}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(deleteFile));
+    var param = new DeleteTarget();
+    param.setPath(deleteFile);
 
-    client.post().uri(uriBuilder)
+    client.post().uri(ApiPath.DELETE_FILE_API)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
         .expectBody(DeleteTarget.class)
-        .isEqualTo(new DeleteTarget(TEST_USER, null, new String[] { deleteFile }));
+        .isEqualTo(new DeleteTarget(TEST_USER, null, new String[] { deleteFile }, false));
   }
 
   @Test
@@ -470,7 +470,7 @@ public class FileSystemApiHandlerTest {
 
     String deleteFile1 = destDir + "/" + fileName1;
     String deleteFile2 = destDir + "/" + fileName2;
-    String[] files = new String[] { deleteFile1, deleteFile2};
+    String[] files = new String[] { deleteFile1, deleteFile2 };
     var param = new DeleteTarget();
     param.setPathList(files);
 
@@ -483,7 +483,7 @@ public class FileSystemApiHandlerTest {
         .exchange()
         .expectStatus().isOk()
         .expectBody(DeleteTarget.class)
-        .isEqualTo(new DeleteTarget(TEST_USER, null, files));
+        .isEqualTo(new DeleteTarget(TEST_USER, null, files, false));
   }
 
   @Test
@@ -534,11 +534,11 @@ public class FileSystemApiHandlerTest {
 
     String destDir = "../aaa/test1.txt";
 
-    String url = ApiPath.DELETE_FILE_API + "/{path}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(destDir));
+    var param = new DeleteTarget();
+    param.setPath(destDir);
 
-    client.post().uri(uriBuilder)
+    client.post().uri(ApiPath.DELETE_FILE_API)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isBadRequest();
   }
@@ -552,15 +552,15 @@ public class FileSystemApiHandlerTest {
     Path dir = Path.of(storageRootDir, TEST_USER, destDir);
     Files.createDirectories(dir);
 
-    String url = ApiPath.DELETE_DIR_API + "/{path}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(destDir));
+    var param = new DeleteTarget();
+    param.setPath(destDir);
 
-    client.post().uri(uriBuilder)
+    client.post().uri(ApiPath.DELETE_DIR_API)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
         .expectBody(DeleteTarget.class)
-        .isEqualTo(new DeleteTarget(TEST_USER, destDir, null));
+        .isEqualTo(new DeleteTarget(TEST_USER, destDir, null, false));
   }
 
   @Test
@@ -576,11 +576,11 @@ public class FileSystemApiHandlerTest {
     Files.createDirectories(dir);
     Files.write(Path.of(dir.toString(), fileName1), contents);
 
-    String url = ApiPath.DELETE_DIR_API + "/{path}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(destDir));
+    var param = new DeleteTarget();
+    param.setPath(destDir);
 
-    client.post().uri(uriBuilder)
+    client.post().uri(ApiPath.DELETE_DIR_API)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isBadRequest();
   }
@@ -606,11 +606,11 @@ public class FileSystemApiHandlerTest {
 
     String destDir = "../aaa";
 
-    String url = ApiPath.DELETE_DIR_API + "/{path}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(destDir));
+    var param = new DeleteTarget();
+    param.setPath(destDir);
 
-    client.post().uri(uriBuilder)
+    client.post().uri(ApiPath.DELETE_DIR_API)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isBadRequest();
   }
@@ -650,15 +650,16 @@ public class FileSystemApiHandlerTest {
     Files.createDirectories(dir);
     Files.write(Path.of(dir.toString(), fileName1), contents);
 
-    String url = ApiPath.DELETE_DIR_API + "/{path}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).queryParam("force", "true")
-        .build(destDir));
+    var param = new DeleteTarget();
+    param.setPath(destDir);
+    param.setForce(true);
 
-    client.post().uri(uriBuilder)
+    client.post().uri(ApiPath.DELETE_DIR_API)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
         .expectBody(DeleteTarget.class)
-        .isEqualTo(new DeleteTarget(TEST_USER, destDir, null));
+        .isEqualTo(new DeleteTarget(TEST_USER, destDir, null, false));
   }
 
   @Test

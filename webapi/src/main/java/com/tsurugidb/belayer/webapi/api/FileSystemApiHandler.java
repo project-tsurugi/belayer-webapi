@@ -35,6 +35,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -101,58 +102,86 @@ public class FileSystemApiHandler {
    */
   public Mono<ServerResponse> uploadFiles(final ServerRequest request) {
 
-    String destDirPath = request.pathVariable("destDir");
-    boolean overwrite = Boolean.valueOf(request.queryParam("overwrite").orElse("false"));
-
     uploadHelper.checkRequestHeader(request);
 
     var param = new UploadParameter();
-    param.setDestDirPath(destDirPath);
-    param.setOverwrite(overwrite);
 
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .map(auth -> {
-          param.setUid(auth.getName());
-          param.setCredentials(auth.getCredentials());
-
-          return param;
-        })
-        .flatMapMany(p -> this.upload(request, param))
+        .map(auth -> this.fillParams(auth, request, param))
+        .flatMap(p -> this.extractParamFromMultipart(request, param))
+        .flatMapMany(p -> this.saveFile(param))
         .collectList()
-        .map(this::checkResult)
         .flatMap(res -> ServerResponse.ok()
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromProducer(Mono.just(new DownloadPathList(res, null)), DownloadPathList.class)));
   }
 
-  private Flux<String> upload(ServerRequest request, UploadParameter param) {
+  private UploadParameter fillParams(Authentication auth, ServerRequest req, UploadParameter param) {
 
-    Flux<String> pathFlux = Mono.just(param)
-        .map(p -> fileSystemService.createDirectory(p.getUid(), p.getDestDirPath()))
-        .flatMapMany(dirPath -> saveFileToDir(param.getUid(), param.isOverwrite(), dirPath, request));
+    param.setUid(auth.getName());
+    param.setCredentials(auth.getCredentials());
 
-    return pathFlux;
+    return param;
   }
 
-  private Flux<String> saveFileToDir(String uid, boolean overwrite, Path dirPath, ServerRequest request) {
+  private Mono<UploadParameter> extractParamFromMultipart(ServerRequest request, UploadParameter param) {
 
     return request.body(BodyExtractors.toParts())
-        .filter(part -> part.name().equals("file"))
-        .filter(part -> part instanceof FilePart) // only retain file parts
-        .ofType(FilePart.class) // convert the flux to FilePart
-        .flatMap(filePart -> uploadHelper.saveFile(uid, overwrite, dirPath, filePart))
-        .switchIfEmpty(Mono.error(new BadRequestException("No files to upload.", null)));
+        .map(part -> {
+          if (part instanceof FilePart && part.name().equals("file")) {
+            var filePart = (FilePart) part;
+            param.addFilePart(filePart);
+
+          } else if (part instanceof FormFieldPart) {
+            var name = part.name();
+            var value = ((FormFieldPart) part).value();
+            if ("overwrite".equals(name)) {
+              param.setOverwrite(Boolean.valueOf(value));
+            } else if ("destDir".equals(name)) {
+              param.setDestDirPath(value);
+            }
+          }
+          return "dumy";
+        })
+        .collectList()
+        .map(dummy -> {
+          // when 0 files uploaded
+          var list = param.getFileParts();
+          if (list.size() == 0) {
+            throw new BadRequestException("No files to upload.",
+                "no files to upload.", null);
+          }
+
+          var destDir = fileSystemService.createDirectory(param.getUid(), param.getDestDirPath());
+          return destDir;
+        })
+        .then(Mono.just(param));
   }
 
-  private List<String> checkResult(List<String> filePathToDownload) {
-    // when 0 files uploaded
-    if (filePathToDownload.size() == 0) {
-      throw new BadRequestException("No files to upload.",
-          "no files to upload.", null);
-    }
+  private Flux<String> saveFile(UploadParameter param) {
+    var destDir = fileSystemService.convertToAbsolutePath(param.getUid(), param.getDestDirPath());
+    return Flux.fromIterable(param.getFileParts())
+        .flatMap(filePart -> {
+          var realFilePath = Path.of(destDir.toString(), filePart.filename());
+          Resource resource = new FileSystemResource(realFilePath);
+          if (Files.exists(realFilePath) && resource.isFile()) {
+            if (param.isOverwrite()) {
+              log.debug("overwrite file: " + realFilePath);
+            } else {
+              var msg = String.format("target file exists. file:{}, dir:{}", realFilePath.toString(),
+                  destDir.toString());
+              throw new BadRequestException(msg, msg);
+            }
+          }
 
-    return filePathToDownload;
+          return uploadHelper.saveFile(param.getUid(), destDir, filePart);
+        })
+        .map(realPath -> {
+          var downloadPath = fileSystemService.convertToDownloadPath(param.getUid(), realPath);
+          return downloadPath.toString();
+        });
+
   }
 
   /**
@@ -326,15 +355,15 @@ public class FileSystemApiHandler {
       }
 
       return fileSystemService.getFileList(targetDir, hideFile, hideDir)
-      .stream()
-      .map(path -> {
-        String relativePath = downloadRootPath.relativize(Path.of(path)).toString();
-        if (Files.isDirectory(Path.of(path))) {
-          return relativePath + "/";
-        }
-        return relativePath;
-      })
-      .collect(Collectors.toList());
+          .stream()
+          .map(path -> {
+            String relativePath = downloadRootPath.relativize(Path.of(path)).toString();
+            if (Files.isDirectory(Path.of(path))) {
+              return relativePath + "/";
+            }
+            return relativePath;
+          })
+          .collect(Collectors.toList());
 
     } catch (IOException ex) {
       // log.info("error occured.", ex);
@@ -410,7 +439,7 @@ public class FileSystemApiHandler {
 
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .flatMap(auth -> fillDeleteParams(auth,req,false))
+        .flatMap(auth -> fillDeleteParams(auth, req, false))
         .flatMap(param -> deleteFileOrDir(param.getUid(), new String[] { param.getPath() }, false, param.isForce()));
   }
 
@@ -456,7 +485,8 @@ public class FileSystemApiHandler {
       return ServerResponse.ok()
           .contentType(MediaType.APPLICATION_JSON)
           .body(
-              BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, filePathList[0], null, false)), DeleteTarget.class));
+              BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, filePathList[0], null, false)),
+                  DeleteTarget.class));
     }
 
     // delete single file
@@ -484,7 +514,8 @@ public class FileSystemApiHandler {
     }
 
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, null, filePathList, false)), DeleteTarget.class));
+        .body(BodyInserters.fromProducer(Mono.just(new DeleteTarget(uid, null, filePathList, false)),
+            DeleteTarget.class));
   }
 
 }

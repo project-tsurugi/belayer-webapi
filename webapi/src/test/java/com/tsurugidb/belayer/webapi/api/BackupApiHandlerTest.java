@@ -17,7 +17,6 @@ package com.tsurugidb.belayer.webapi.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
