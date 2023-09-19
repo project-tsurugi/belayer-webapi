@@ -177,6 +177,7 @@ public class StatefulApiHandlerTest {
         when(tsubakuroService.loadFile(any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
         when(uploadHelper.saveFile(anyString(), any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
         when(fileSystemService.convertToAbsolutePath(any(), any())).thenCallRealMethod();
+        when(fileSystemService.convertToDownloadPath(any(), any())).thenReturn(Path.of("TESTJOBID/test-file.parquet"));
         doNothing().when(fileSystemService).deleteFile(anyString(), anyString());
 
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
