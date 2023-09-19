@@ -183,12 +183,12 @@
                     * name: 常に“destDir”(必須)
                 * body
                     * アップロードファイルの保存ディレクトリ。STRAGE_DIR/[uid]からの相対パス(必須)
-            * FormFieldPart: 上書き可否(任意)
+            * FormFieldPart: 上書き可否。未指定時は上書き不可。(任意)
                 * header
                     * Content-Disposition: form-data; name=“overwrite”
                     * name: 常に“overwrite”(必須)
                 * body
-                    * 「true」を指定した場合、サーバの同ディレクトリに同盟ファイルが存在した場合に上書きする。
+                    * "true"を指定した場合、サーバの同ディレクトリに同盟ファイルが存在した場合に上書きする。
 * レスポンス
     * 正常
         * ステータスコード:200
@@ -240,7 +240,7 @@
     * パラメータ:
         * path_to_file(PATHパラメータ): ダウンロードするファイルパス。STORAGE_DIR/[uid]からの相対パス。
            * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
-        * csv(クエリパラメータ): trueを指定した場合、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換してダウンロードする。
+        * csv(クエリパラメータ): trueを指定し、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換してダウンロードする。
     * ボディ:なし
 * レスポンス
     * 正常
@@ -971,7 +971,7 @@
             * STORAGE_DIR/[uid]/[dirPath]/[jobId]にダンプファイルが保存される。
         * format: "csv"をパラメータ値を指定した場合、CSV形式のフォーマットでダンプファイルを取得する。(任意)
             * パラメータ省略時もしくは"csv"以外の場合は、はParquet形式のフォーマットでダンプファイルを取得する。
-        * waitUntilDone(クエリパラメータ): "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。(任意)
+        * waitUntilDone: trueを値に指定した場合、完了（正常or異常）までレスポンスを返さない。デフォルトはfalse。(任意)
 * レスポンス
     * 正常(wait_until_done指定なしの場合)
         * ステータスコード:200
@@ -1049,9 +1049,9 @@
             * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。
             * パラメータ省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
             * zipの場合、zip内のファイルの拡張子によってparquet/csvを判別してロード処理を行う。
-        * transactional: trueの場合もしくは未指定の場合、１トランザクション内でロードする。(任意)
+        * transactional: trueの場合もしくは未指定の場合、１トランザクション内でロードする。デフォルトはtrue。(任意)
             * falseを指定した場合はトランザクションを分割して高速ロードする。
-        * waitUntilDone: "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。(任意)
+        * waitUntilDone: trueを値に指定した場合、完了（正常or異常）までレスポンスを返さない。デフォルトはfalse。(任意)
         * mappings: カラムマッピング(任意)
             * targetColumn: ロード先テーブルのカラム名、もしくは「@N」形式のカラム番号(Nはカラム番号の数値）
             * sourceColumn: ロード元データファイル上のカラム名、もしくは「@N」形式のカラム番号(Nはカラム番号の数値）
@@ -1613,7 +1613,7 @@
                         * name: 常に"format"(必須)
                 * body
                     * ロードするデータファイルのフォーマット。
-                        * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。(任意)
+                        * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。
                         * FormFieldPart省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
 * レスポンス
     * 正常
