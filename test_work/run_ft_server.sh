@@ -2,9 +2,6 @@
 
 cd `dirname $0`
 
-cd ../remotecli
-make build_stub
-
 cd ../webapi
 ./gradlew build -x test -Dtsubakuro-auth=mock
 
