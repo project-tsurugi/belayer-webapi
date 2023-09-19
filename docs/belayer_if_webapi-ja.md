@@ -1044,27 +1044,27 @@
         * table_name(PATHパラメータ): ロード先のテーブル名
     * Content-Type: application/json
     * ボディ:
-        * waitUntilDone: "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。(任意)
+        * files: サーバに配置したデータファイルのパス（複数、1つ以上必須）
         * format: ロードするデータファイルのフォーマットを指定する。(任意)
             * "parquet"/"csv"/"zip"/"detect_by_ext"のいずれか。
             * パラメータ省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
             * zipの場合、zip内のファイルの拡張子によってparquet/csvを判別してロード処理を行う。
         * transactional: trueの場合もしくは未指定の場合、１トランザクション内でロードする。(任意)
             * falseを指定した場合はトランザクションを分割して高速ロードする。
-        * files: サーバに配置したデータファイルのパス（複数、1つ以上必須）
+        * waitUntilDone: "true"を値に指定した場合、完了（正常or異常）までレスポンスを返さない。(任意)
         * mappings: カラムマッピング(任意)
             * targetColumn: ロード先テーブルのカラム名、もしくは「@N」形式のカラム番号(Nはカラム番号の数値）
             * sourceColumn: ロード元データファイル上のカラム名、もしくは「@N」形式のカラム番号(Nはカラム番号の数値）
 
         ```
         {
-           waitUntilDone: true,
-           format: "csv",
-           transactional: true,
            files: [
              "dir1/FOO_TBL0.parquet",
              "dir1/FOO_TBL1.parquet",
            ],
+           format: "csv",
+           transactional: true,
+           waitUntilDone: true,
            mappings: [
              {
                targetColumn: "tabel_col1",
