@@ -4,13 +4,17 @@ plugins {
 	id 'java'
 	id 'jacoco'
 	id 'maven-publish'
+	id 'signing'
 	id 'com.github.jk1.dependency-license-report' version '2.0'
 }
 
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
 version = versionString
-sourceCompatibility = '11'
+
+ext {
+	isReleaseVersion = !version.endsWith("SNAPSHOT")
+}
 
 configurations {
 	compileOnly {
@@ -21,6 +25,14 @@ configurations {
 
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
 if (hasProperty('mavenLocal')) {
 	repositories {
 		mavenLocal()
@@ -28,24 +40,17 @@ if (hasProperty('mavenLocal')) {
 } else {
 	repositories {
 		maven {
-			url 'https://maven.pkg.github.com/project-tsurugi/*'
+			url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
 			content {
 				includeGroupByRegex 'com\\.tsurugidb.*'
-			}
-			credentials {
-				username findProperty('gpr.user') ?: System.getenv('GPR_USER')
-				password findProperty('gpr.key') ?: System.getenv('GPR_KEY')
 			}
 		}
 	}
 }
 repositories {
-	mavenCentral {
-		content {
-			excludeGroupByRegex 'com\\.tsurugidb.*'
-		}
-	}
+	mavenCentral()
 }
+
 configurations.all {
 	resolutionStrategy.cacheChangingModulesFor 8, 'hours'
 }
@@ -110,17 +115,49 @@ task showTsubakuroManifest {
 publishing {
     repositories {
         maven {
-            name 'GitHubPackages'
-            url 'https://maven.pkg.github.com/project-tsurugi/belayer-webapi'
+            name 'OSSRH'
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
             credentials {
-                username findProperty('gpr.user') ?: System.getenv('GPR_USER')
-                password findProperty('gpr.key') ?: System.getenv('GPR_KEY')
+                username findProperty('st.ossrh.user') ?: System.getenv('ST_OSSRH_USER')
+                password findProperty('st.ossrh.password') ?: System.getenv('ST_OSSRH_PASSWORD')
             }
         }
     }
     publications {
         mavenJava(MavenPublication) {
             artifact bootJar
+            pom {
+                name = 'Belayer Web-API'
+                description = 'Runtime and library to access Tsurugi directly via REST API'
+                url = 'https://github.com/project-tsurugi/belayer-webapi'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'project-tsurugi'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/project-tsurugi/belayer-webapi.git'
+                    developerConnection = 'scm:git:https://github.com/project-tsurugi/belayer-webapi.git'
+                    url = 'https://github.com/project-tsurugi/belayer-webapi'
+                }
+            }
         }
     }
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask(":${project.name}:publishMavenJavaPublicationToOSSRHRepository") }
+    def signingKeyId = findProperty("signingKeyId")
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
 }

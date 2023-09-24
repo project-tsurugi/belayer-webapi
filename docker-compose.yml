@@ -5,9 +5,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-      args:
-        GPR_USER: ${GPR_USER}
-        GPR_KEY: ${GPR_KEY}
     tty: true
     volumes:
       - ./test_work/storage:/usr/lib/tsurugi-webapp/storage
