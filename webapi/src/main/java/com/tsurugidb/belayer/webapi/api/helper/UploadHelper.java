@@ -60,7 +60,6 @@ public class UploadHelper {
      * Save uploaded file.
      * 
      * @param uid       UID
-     * @param overwrite overwrite a file when the file exists.
      * @param dirPath   absolute dir path to place file.
      * @param filePart  FilePart.
      * @return absolute path of a uploaded file.

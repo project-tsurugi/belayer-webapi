@@ -480,7 +480,8 @@ public class DumpLoadService {
     /**
      * Return list of jobs.
      *
-     * @param jobId JobId
+     * @param type backup or restore
+     * @param uid User ID
      * @return List of Jobs
      */
     public Flux<Job> getJobList(String type, String uid) {
