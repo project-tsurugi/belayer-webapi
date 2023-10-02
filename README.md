@@ -86,12 +86,7 @@ See the env var table below.
 
 1. pull Tsurugi Docker image
 
-Create `Personal Access Token(PAT)` for GitHub Container Registory.
-Firstly, set PAT Value as ENV `CR_PAT` then docker login to ghcr.io.
-Secondly, pull Tsurugi Docker Image.
-
 ```console
-$ echo $CR_PAT | sudo docker login ghcr.io -u my_user_name --password-stdin
 $ sudo docker pull ghcr.io/project-tsurugi/tsurugi:latest
 ```
 
