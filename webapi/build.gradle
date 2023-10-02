@@ -32,6 +32,8 @@ java {
     withJavadocJar()
 }
 
+javadoc.failOnError = false
+
 if (hasProperty('mavenLocal')) {
 	repositories {
 		mavenLocal()
