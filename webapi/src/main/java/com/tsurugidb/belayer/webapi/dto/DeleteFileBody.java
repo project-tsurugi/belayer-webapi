@@ -22,10 +22,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeleteTarget {
+public class DeleteFileBody {
 
-    private String uid;
     private String path;
-    private String[] pathList;
-    private boolean force = false;
 }

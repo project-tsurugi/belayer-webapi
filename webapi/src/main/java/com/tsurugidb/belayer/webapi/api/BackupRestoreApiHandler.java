@@ -28,6 +28,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.BackupRestoreRequestParam;
+import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
 import com.tsurugidb.belayer.webapi.dto.JobResult;
@@ -66,7 +67,6 @@ public class BackupRestoreApiHandler {
    */
   public Mono<ServerResponse> requestBackup(ServerRequest req) {
 
-    String saveDirPath = req.pathVariable("dirpath");
     String jobId = jobIdService.createNewJobId();
 
     // // alternative way to obtain Authentication.
@@ -83,7 +83,7 @@ public class BackupRestoreApiHandler {
 
     Mono<JobResult> result = ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .map(auth -> fillParams(auth, saveDirPath, jobId, null))
+        .flatMap(auth -> fillParams(auth, req, jobId))
         .map(this::checkDir)
         .flatMap(backupRestoreService::startBackup)
         .map(this::createResult);
@@ -100,14 +100,13 @@ public class BackupRestoreApiHandler {
    */
   public Mono<ServerResponse> requestRestore(ServerRequest req) {
 
-    String zipFilePath = req.pathVariable("zip_file_path");
     String jobId = jobIdService.createNewJobId();
 
     Mono<JobResult> result = ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
-        .map(auth -> fillParams(auth, null, jobId, zipFilePath))
-        .map(this::checkFileDir)
+        .flatMap(auth -> fillParams(auth, req, jobId))
         .map(this::checkFileExists)
+        .map(this::checkFileDir)
         // exec restore
         .flatMap(backupRestoreService::startRestore)
         .map(this::createResult);
@@ -116,7 +115,7 @@ public class BackupRestoreApiHandler {
         BodyInserters.fromProducer(result, JobResult.class));
   }
 
-  private BackupRestoreRequestParam fillParams(Authentication auth, String dirPath, String jobId, String zipFilePath) {
+  private Mono<BackupRestoreRequestParam> fillParams(Authentication auth, ServerRequest req, String jobId) {
 
     Objects.requireNonNull(auth);
     if (auth instanceof UserTokenAuthentication) {
@@ -128,14 +127,20 @@ public class BackupRestoreApiHandler {
 
     }
 
-    BackupRestoreRequestParam param = new BackupRestoreRequestParam();
-    param.setUid(auth.getName());
-    param.setCredentials(auth.getCredentials());
+    return req.bodyToMono(BackupRestoreStartRequestBody.class)
+        .switchIfEmpty(Mono.just(new BackupRestoreStartRequestBody()))
+        .map(body -> {
+          // fill params
+          var param = new BackupRestoreRequestParam();
+          param.setUid(auth.getName());
+          param.setCredentials(auth.getCredentials());
 
-    param.setDirPath(dirPath);
-    param.setZipFilePath(zipFilePath);
-    param.setJobId(jobId);
-    return param;
+          param.setDirPath(body.getDirPath());
+          param.setZipFilePath(body.getZipFilePath());
+          param.setJobId(jobId);
+          return param;
+        });
+
   }
 
   private BackupRestoreRequestParam checkDir(BackupRestoreRequestParam param) {

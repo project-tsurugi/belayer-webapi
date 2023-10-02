@@ -280,7 +280,7 @@ public class DumpLoadService {
         job.setJobId(param.getJobId());
         job.setFiles(param.getFiles());
         job.setFormat(param.getFormat());
-        job.setTransactionNeeded(param.isSingleTransaction());
+        job.setTransactionNeeded(param.isTransactional());
         job.setMappings(param.getMappings());
         job.setStatus(JobStatus.RUNNING);
 
@@ -397,7 +397,7 @@ public class DumpLoadService {
      *
      * @param param        Load paremeter.
      * @param dumpFilePath absolute full path of dump file.
-     * @return path list of parquet files.
+     * @return path of the uploaded file.
      */
     public Mono<String> loadDumpFile(LoadParameter param, Path dumpFilePath) {
         var job = param.getTransactionJob();
@@ -408,7 +408,9 @@ public class DumpLoadService {
 
         Mono<String> downloadPath = Mono.just(job)
                 .map(j -> this.convertToLoadJob(j, param))
-                .flatMap(j -> tsubakuroService.loadFile(j, loadFileInfo));
+                .flatMap(j -> tsubakuroService.loadFile(j, loadFileInfo))
+                .map(parquetFilePath -> fileSystemService.convertToDownloadPath(param.getUid(), dumpFilePath.toString())
+                        .toString());
 
         return downloadPath;
 
@@ -478,7 +480,8 @@ public class DumpLoadService {
     /**
      * Return list of jobs.
      *
-     * @param jobId JobId
+     * @param type backup or restore
+     * @param uid User ID
      * @return List of Jobs
      */
     public Flux<Job> getJobList(String type, String uid) {

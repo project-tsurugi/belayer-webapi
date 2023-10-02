@@ -15,17 +15,14 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class DeleteTarget {
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class StreamDumpRequestParam extends DumpRequestParam {
 
-    private String uid;
-    private String path;
-    private String[] pathList;
-    private boolean force = false;
+    private String mode = "normal";
 }

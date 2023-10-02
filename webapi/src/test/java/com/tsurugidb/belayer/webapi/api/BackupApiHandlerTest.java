@@ -35,11 +35,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
 import com.tsurugidb.belayer.webapi.dto.BackupJob;
+import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
 import com.tsurugidb.belayer.webapi.dto.JobResult;
@@ -101,10 +103,13 @@ public class BackupApiHandlerTest {
     when(jobIdService.createNewJobId()).thenReturn(jobId);
     when(backupService.startBackup(any())).thenReturn(Mono.just(exp));
 
-    String url = ApiPath.BACKUP_START_API + "/{dirpath}";
+    String url = ApiPath.BACKUP_START_API;
     String dirPath = "path/to/savedir";
+    var reqBody = new BackupRestoreStartRequestBody();
+    reqBody.setDirPath(dirPath);
 
-    client.post().uri(url, dirPath)
+    client.post().uri(url)
+        .body(BodyInserters.fromValue(reqBody))
         .exchange()
         .expectStatus().isOk()
         .expectBody(JobResult.class)
@@ -186,10 +191,13 @@ public class BackupApiHandlerTest {
     doNothing().when(fileSystemService).checkDirPath(anyString(), anyString());
     doNothing().when(fileSystemService).checkFileExists(anyString(), anyString());
 
-    String url = ApiPath.RESTORE_START_API + "/{zip_file_path}";
+    String url = ApiPath.RESTORE_START_API;
     String zipFilePath = "path/to/backup.zip";
+    var reqBody = new BackupRestoreStartRequestBody();
+    reqBody.setZipFilePath(zipFilePath);
 
-    client.post().uri(url, zipFilePath)
+    client.post().uri(url)
+        .body(BodyInserters.fromValue(reqBody))
         .exchange()
         .expectStatus().isOk()
         .expectBody(JobResult.class)

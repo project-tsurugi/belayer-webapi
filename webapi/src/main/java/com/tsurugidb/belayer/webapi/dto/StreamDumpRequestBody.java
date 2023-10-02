@@ -22,10 +22,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeleteTarget {
+public class StreamDumpRequestBody {
 
-    private String uid;
-    private String path;
-    private String[] pathList;
-    private boolean force = false;
+    private String format = "parquet";
+    private String mode = "normal";
 }

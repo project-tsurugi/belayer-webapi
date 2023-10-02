@@ -22,10 +22,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeleteTarget {
+public class DumpRequestBody {
 
-    private String uid;
-    private String path;
-    private String[] pathList;
-    private boolean force = false;
+    private String dirPath;
+    private String format = DumpRequestParam.FORMAT_DETECT_BY_EXTENSION;
+    private boolean waitUntilDone = false;
+  
 }

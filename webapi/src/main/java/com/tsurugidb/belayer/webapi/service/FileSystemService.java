@@ -24,13 +24,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 import com.tsurugidb.belayer.webapi.exception.InternalServerErrorException;
-import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,6 +75,13 @@ public class FileSystemService {
     return distPath.toString();
   }
 
+  /**
+   * Create specified directory.
+   * 
+   * @param uid userId
+   * @param dir Directory path to create
+   * @return path of created directory.
+   */
   public Path createDirectory(String uid, String dir) {
     log.debug("create dir: " + uid + "/" + dir);
 
@@ -121,6 +128,11 @@ public class FileSystemService {
    * @param toDir destination directory path
    */
   public void checkDirPath(String uid, String toDir) {
+    if (StringUtil.isEmpty(toDir)) {
+      throw new BadRequestException("Invalid path. path:" + toDir,
+          "Invalid path. path:" + toDir, null);
+    }
+
     Path downlaodRootPath = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
     Path destDirPath = Path.of(storageRootDir, uid, toDir).toAbsolutePath().normalize();
 
@@ -141,6 +153,11 @@ public class FileSystemService {
    * @throws BadRequestException if directory is not exists.
    */
   public void checkDirExists(String uid, String toDir) throws BadRequestException {
+    if (StringUtil.isEmpty(toDir)) {
+      throw new BadRequestException("Invalid path. path:" + toDir,
+          "Invalid path. path:" + toDir, null);
+    }
+
     Path destDirPath = Path.of(storageRootDir, uid, toDir).toAbsolutePath().normalize();
 
     log.debug("check dir path. dest:{}", destDirPath);
@@ -158,6 +175,11 @@ public class FileSystemService {
    * @throws BadRequestException if file is not exists.
    */
   public void checkFileExists(String uid, String filePath) throws BadRequestException {
+    if (StringUtil.isEmpty(filePath)) {
+      throw new BadRequestException("Invalid path. path:" + filePath,
+          "Invalid path. path:" + filePath, null);
+    }
+
     Path fp = Path.of(storageRootDir, uid, filePath).toAbsolutePath().normalize();
 
     log.debug("check file path. dest:{}", fp);
@@ -193,7 +215,7 @@ public class FileSystemService {
   }
 
   public List<String> getFileList(Path targetDir, boolean hideFile, boolean hideDir) throws IOException {
-  
+
     List<String> fileList = Files.walk(targetDir, MAX_DEPTH)
         .filter(path -> {
           if (hideFile) {

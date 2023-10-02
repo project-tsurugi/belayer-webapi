@@ -22,10 +22,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeleteTarget {
+public class TransactionStartBody {
 
-    private String uid;
-    private String path;
-    private String[] pathList;
-    private boolean force = false;
+    private String type;
+    private String timeoutMin;
+    private String[] tables;
 }

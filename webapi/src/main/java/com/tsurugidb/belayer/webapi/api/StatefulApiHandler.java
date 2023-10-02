@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
@@ -41,15 +40,17 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import com.tsurugidb.belayer.webapi.api.helper.LoadHelper;
 import com.tsurugidb.belayer.webapi.api.helper.UploadHelper;
 import com.tsurugidb.belayer.webapi.dto.ColumnMapping;
-import com.tsurugidb.belayer.webapi.dto.DumpLoadRequestParam;
 import com.tsurugidb.belayer.webapi.dto.DumpRequestParam;
 import com.tsurugidb.belayer.webapi.dto.DumpResult;
 import com.tsurugidb.belayer.webapi.dto.LoadParameter;
 import com.tsurugidb.belayer.webapi.dto.LoadResult;
 import com.tsurugidb.belayer.webapi.dto.LongTransactionJob;
+import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
+import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestParam;
 import com.tsurugidb.belayer.webapi.dto.TransactionApiParameter;
 import com.tsurugidb.belayer.webapi.dto.TransactionFinishType;
 import com.tsurugidb.belayer.webapi.dto.TransactionMode;
+import com.tsurugidb.belayer.webapi.dto.TransactionStartBody;
 import com.tsurugidb.belayer.webapi.dto.TransactionStatus;
 import com.tsurugidb.belayer.webapi.dto.UploadContext;
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
@@ -113,7 +114,7 @@ public class StatefulApiHandler {
 
         Mono<TransactionStatus> status = ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .map(auth -> this.createParameter(auth, req, jobId, false))
+                .flatMap(auth -> this.createTransactionStartParameter(auth, req, jobId))
                 .flatMap(statefulDumploadService::startTransaction)
                 .map(this::createTransactionStatus);
 
@@ -131,7 +132,7 @@ public class StatefulApiHandler {
 
         Mono<TransactionStatus> status = ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .map(auth -> this.createParameter(auth, req, null, true))
+                .map(auth -> this.createParameter(auth, req, true))
                 .flatMap(statefulDumploadService::finishTransaction)
                 .map(this::createTransactionStatus);
 
@@ -149,7 +150,7 @@ public class StatefulApiHandler {
 
         Mono<TransactionStatus> status = ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .map(auth -> this.createParameter(auth, req, null, false))
+                .map(auth -> this.createParameter(auth, req, false))
                 .flatMap(statefulDumploadService::finishTransaction)
                 .map(this::createTransactionStatus);
 
@@ -157,8 +158,49 @@ public class StatefulApiHandler {
                 BodyInserters.fromProducer(status, TransactionStatus.class));
     }
 
-    private TransactionApiParameter createParameter(Authentication auth, ServerRequest req, String jobId,
-            boolean finishTransaction) {
+    private Mono<TransactionApiParameter> createTransactionStartParameter(Authentication auth, ServerRequest req,
+            String jobId) {
+
+        Objects.requireNonNull(auth);
+        if (auth instanceof UserTokenAuthentication) {
+            ((UserTokenAuthentication) auth).getTokenExpirationTime()
+                    .filter((it) -> systemTime.now().isBefore(it))
+                    .orElseThrow(() -> new UnauthorizationException("Token is expired.", "Token is expired."));
+        }
+
+        return req.bodyToMono(TransactionStartBody.class)
+                .switchIfEmpty(Mono.just(new TransactionStartBody()))
+                .map(body -> {
+
+                    var param = new TransactionApiParameter();
+                    param.setUid(auth.getName());
+                    param.setCredentials(auth.getCredentials().toString());
+                    param.setTransactionId(jobId);
+
+                    var type = body.getType();
+                    var tranMode = TransactionMode.fromName(type);
+                    if (tranMode == null) {
+                        var msg = "Invalid parameter. Specify read_only/read_write. transaction_type:" + type;
+                        throw new BadRequestException(msg, msg);
+                    }
+                    param.setTransactionMode(tranMode);
+
+                    try {
+                        int timeoutMin = Integer.parseInt(body.getTimeoutMin());
+                        param.setTimeoutMin(timeoutMin);
+                    } catch (NumberFormatException ex) {
+                        var msg = "Invalid timeout value.";
+                        throw new BadRequestException(msg, msg);
+                    }
+
+                    param.setTables(body.getTables());
+
+                    return param;
+                });
+
+    }
+
+    private TransactionApiParameter createParameter(Authentication auth, ServerRequest req, boolean finishTransaction) {
 
         Objects.requireNonNull(auth);
         if (auth instanceof UserTokenAuthentication) {
@@ -170,29 +212,7 @@ public class StatefulApiHandler {
         var param = new TransactionApiParameter();
         param.setUid(auth.getName());
         param.setCredentials(auth.getCredentials().toString());
-
-        if (jobId == null) {
-            jobId = req.pathVariable("transactionid");
-        } else {
-            var mode = req.pathVariable("mode");
-            var tranMode = TransactionMode.fromName(mode);
-            if (tranMode == null) {
-                var msg = "Invalid parameter. Specify read_only/read_write. transaction_type:" + mode;
-                throw new BadRequestException(msg, msg);
-            }
-            param.setTransactionMode(tranMode);
-
-            if (!finishTransaction) {
-                try {
-                    int timeoutMin = Integer.parseInt(req.pathVariable("timeout_min"));
-                    param.setTimeoutMin(timeoutMin);
-                } catch (NumberFormatException ex) {
-                    var msg = "Invalid timeout value.";
-                    throw new BadRequestException(msg, msg);
-                }
-            }
-        }
-        param.setTransactionId(jobId);
+        param.setTransactionId(req.pathVariable("transactionid"));
 
         String type = "status";
         if (finishTransaction) {
@@ -205,15 +225,6 @@ public class StatefulApiHandler {
             throw new BadRequestException(msg, msg);
         }
         param.setFinishType(finishType);
-
-        Optional<String> tables = req.queryParam("tables");
-        if (tables.isPresent()) {
-            String[] tbls = tables.get().split(",");
-            for (int i = 0; i < tbls.length; i++) {
-                tbls[i] = tbls[i].trim();
-            }
-            param.setTables(tbls);
-        }
 
         return param;
     }
@@ -237,52 +248,64 @@ public class StatefulApiHandler {
      */
     public Mono<ServerResponse> getDump(ServerRequest req) {
 
-        Flux<String> downloadPathList = ReactiveSecurityContextHolder.getContext()
+        return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .map(auth -> fillDumpParams(auth, req))
-                .flatMapMany(dumpLoadService::getDump);
-
-        var mode = req.queryParam("mode").orElse("normal");
-
-        if (mode.equals("normal")) {
-
-            return downloadPathList.collectList()
-                    .flatMap(list -> this.createNormalResponse(list, req));
-        }
-
-        // return as SSE
-        return createSseRespose(downloadPathList, req);
+                .flatMap(auth -> fillDumpParams(auth, req))
+                .flatMap(param -> {
+                    var mode = param.getMode();
+                    log.debug("mode: " + mode);
+                    if (mode == null || mode.equals("normal")) {
+                        // return as normal response
+                        return Mono.just(param)
+                                .flatMapMany(dumpLoadService::getDump)
+                                .collectList()
+                                .flatMap(list -> this.createNormalResponse(list, req, param.getFormat()));
+                    } else {
+                        // return as SSE
+                        return createSseRespose(Mono.just(param).flatMapMany(dumpLoadService::getDump),
+                                req, param.getFormat());
+                    }
+                });
     }
 
-    private DumpRequestParam fillDumpParams(Authentication auth, ServerRequest req) {
+    private Mono<StreamDumpRequestParam> fillDumpParams(Authentication auth, ServerRequest req) {
 
-        DumpRequestParam param = new DumpRequestParam();
-        param.setUid(auth.getName());
-        param.setCredentials(auth.getCredentials());
+        return req.bodyToMono(StreamDumpRequestBody.class)
+                .switchIfEmpty(Mono.just(new StreamDumpRequestBody()))
+                .map(body -> {
+                    StreamDumpRequestParam param = new StreamDumpRequestParam();
+                    param.setUid(auth.getName());
+                    param.setCredentials(auth.getCredentials());
 
-        param.setDirPath("./");
-        param.setJobId(req.pathVariable("transactionid"));
-        param.setTable(req.pathVariable("table_name"));
-        param.setFormat(req.queryParam("format").orElse(DumpLoadRequestParam.FORMAT_PARQUET));
+                    param.setDirPath("./");
+                    param.setJobId(req.pathVariable("transactionid"));
+                    param.setTable(req.pathVariable("table_name"));
+                    var format = body.getFormat();
+                    if (format != null && format.equals(DumpRequestParam.FORMAT_CSV)) {
+                        param.setFormat(DumpRequestParam.FORMAT_CSV);
+                    } else {
+                        param.setFormat(DumpRequestParam.FORMAT_PARQUET);
+                    }
+                    param.setMode(body.getMode());
 
-        return param;
+                    return param;
+                });
     }
 
-    private Mono<ServerResponse> createNormalResponse(List<String> list, ServerRequest req) {
+    private Mono<ServerResponse> createNormalResponse(List<String> list, ServerRequest req, String format) {
         var result = new DumpResult();
         result.setDownloadPathList(list);
         result.setTable(req.pathVariable("table_name"));
         result.setTransactionId(req.pathVariable("transactionid"));
-        result.setFormat(req.queryParam("format").orElse(DumpLoadRequestParam.FORMAT_PARQUET));
+        result.setFormat(format);
 
         return ServerResponse.ok().body(BodyInserters.fromValue(result));
     }
 
-    private Mono<ServerResponse> createSseRespose(Flux<String> downloadPathList, ServerRequest req) {
-
+    private Mono<ServerResponse> createSseRespose(Flux<String> downloadPathList, ServerRequest req, String format) {
         Flux<String> params = Flux.just("table_name=" + req.pathVariable("table_name"),
                 "transactionid=" + req.pathVariable("transactionid"),
-                "format=" + req.queryParam("format").orElse(DumpLoadRequestParam.FORMAT_PARQUET));
+                "format=" + format);
         Flux<String> dlPath = downloadPathList
                 .map(downloadPath -> "download_path=" + downloadPath.replace("/", "%2F"));
         Flux<ServerSentEvent<String>> eventsPublisher = Flux.concat(params, dlPath)
@@ -306,7 +329,6 @@ public class StatefulApiHandler {
         param.setDestDirPath(transactionId);
         param.setJobId(transactionId);
         param.setTable(req.pathVariable("table_name"));
-        param.setFormat(req.queryParam("format").orElse(DumpLoadRequestParam.FORMAT_DETECT_BY_EXTENSION));
 
         uploadHelper.checkRequestHeader(req);
 
@@ -334,9 +356,8 @@ public class StatefulApiHandler {
                 .parallel()
                 .runOn(Schedulers.fromExecutor(threadPoolTaskExecutor))
                 .flatMap(dumpFilePath -> {
-                    Path fullPath = fileSystemService.convertToAbsolutePath(param.getUid(), dumpFilePath);
-                    log.debug("upload path:" + fullPath);
-                    return dumpLoadService.loadDumpFile(param, fullPath);
+                    log.debug("upload path:" + dumpFilePath);
+                    return dumpLoadService.loadDumpFile(param, Path.of(dumpFilePath));
                 })
                 .map(filePath -> {
                     fileSystemService.deleteFile(param.getUid(), filePath);
@@ -377,6 +398,10 @@ public class StatefulApiHandler {
                             param.addColMapping(colMapping);
                         }
                     }
+                    if (part.name().equals("format") && part instanceof FormFieldPart) {
+                        String value = ((FormFieldPart) part).value();
+                        param.setFormat(value);
+                    }
                     return "dummy";
                 })
                 .collectList()
@@ -410,7 +435,7 @@ public class StatefulApiHandler {
                 .flatMap(filePart -> {
                     log.debug("fp:" + filePart);
                     Path absolutePath = fileSystemService.convertToAbsolutePath(param.getUid(), param.getDestDirPath());
-                    Mono<String> path = uploadHelper.saveFile(param.getUid(), true, absolutePath, filePart);
+                    Mono<String> path = uploadHelper.saveFile(param.getUid(), absolutePath, filePart);
                     return path;
                 });
 

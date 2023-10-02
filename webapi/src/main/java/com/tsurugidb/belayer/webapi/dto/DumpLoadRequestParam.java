@@ -34,7 +34,7 @@ public abstract class DumpLoadRequestParam {
   private Object credentials;
   private String table;
   private String jobId;
-  private String format;
-  private boolean waitUntilDone;
+  private String format = FORMAT_DETECT_BY_EXTENSION;
+  private boolean waitUntilDone = false;
   
 }

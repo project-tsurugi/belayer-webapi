@@ -18,15 +18,14 @@ package com.tsurugidb.belayer.webapi.api;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +52,7 @@ import com.tsurugidb.belayer.webapi.dto.DumpLoadRequestParam;
 import com.tsurugidb.belayer.webapi.dto.DumpResult;
 import com.tsurugidb.belayer.webapi.dto.Job.JobStatus;
 import com.tsurugidb.belayer.webapi.dto.LoadResult;
+import com.tsurugidb.belayer.webapi.dto.TransactionStartBody;
 import com.tsurugidb.belayer.webapi.dto.TransactionStatus;
 import com.tsurugidb.belayer.webapi.model.SystemTime;
 import com.tsurugidb.belayer.webapi.service.DumpLoadService;
@@ -60,7 +60,6 @@ import com.tsurugidb.belayer.webapi.service.FileSystemService;
 import com.tsurugidb.belayer.webapi.service.JobIdService;
 import com.tsurugidb.belayer.webapi.service.StatefulDumpLoadService;
 import com.tsurugidb.belayer.webapi.service.tsubakuro.TsubakuroServiceStub;
-import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -132,16 +131,17 @@ public class StatefulApiHandlerTest {
         status.setStartTime(now);
 
         when(jobIdService.createNewJobId()).thenReturn(jobId);
-        when(tsubakuroService.createTransaction(any(), any(), any(), any(), anyBoolean(), any())).thenCallRealMethod();
+        when(tsubakuroService.createTransaction(any(), any(), any(), any(), anyBoolean(), any()))
+                .thenCallRealMethod();
 
-        String url = ApiPath.START_TRANSACTION_API + "/{mode}/{timeout_min}";
-        client.post().uri(url, mode, 10)
+        client.post().uri(ApiPath.START_TRANSACTION_API)
+                .body(BodyInserters.fromValue(new TransactionStartBody(mode, "10", null)))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TransactionStatus.class)
                 .isEqualTo(status);
 
-        url = ApiPath.SHOW_TRANSACTION_STATUS_API + "/{transactionid}";
+        String url = ApiPath.SHOW_TRANSACTION_STATUS_API + "/{transactionid}";
         client.get().uri(url, jobId)
                 .exchange()
                 .expectStatus().isOk()
@@ -160,6 +160,8 @@ public class StatefulApiHandlerTest {
 
         url = ApiPath.STREAM_DUMP_API + "/{transactionid}/{table_name}";
         client.post().uri(url, jobId, tableName)
+                // .body(BodyInserters.fromValue(new StreamDumpRequestBody("parquet",
+                // "normal")))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(DumpResult.class)
@@ -173,8 +175,9 @@ public class StatefulApiHandlerTest {
         loadResult.setDumpFiles(List.of(jobId + "/" + fileName));
 
         when(tsubakuroService.loadFile(any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
-        when(uploadHelper.saveFile(anyString(), anyBoolean(), any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
+        when(uploadHelper.saveFile(anyString(), any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
         when(fileSystemService.convertToAbsolutePath(any(), any())).thenCallRealMethod();
+        when(fileSystemService.convertToDownloadPath(any(), any())).thenReturn(Path.of("TESTJOBID/test-file.parquet"));
         doNothing().when(fileSystemService).deleteFile(anyString(), anyString());
 
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();

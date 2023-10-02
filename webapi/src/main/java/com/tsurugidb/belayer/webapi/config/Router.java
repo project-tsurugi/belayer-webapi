@@ -59,8 +59,10 @@ import com.tsurugidb.belayer.webapi.api.HelloHandler;
 import com.tsurugidb.belayer.webapi.api.StatefulApiHandler;
 import com.tsurugidb.belayer.webapi.dto.AuthRequest;
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
+import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
+import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
 import com.tsurugidb.belayer.webapi.dto.JobResult;
@@ -162,10 +164,10 @@ public class Router {
       DumpLoadApiHandler dumpLoadApiHandler, StatefulApiHandler statefulApiHandler,
       DbControlApiHandler dbControlHandler, HelloHandler helloHandler) {
 
-      RouterFunction<ServerResponse> route = route().POST(ApiPath.AUTH_API, authHandler::auth, authApiDoc()).build()
+    RouterFunction<ServerResponse> route = route().POST(ApiPath.AUTH_API, authHandler::auth, authApiDoc()).build()
         .and(route().POST(ApiPath.AUTH_REFRESH_API, authHandler::refresh, authRefreshApiDoc()).build())
         .and(route().GET("/api/hello", helloHandler::hello, opt -> opt.operationId("hello").build()).build())
-        .and(route().POST(ApiPath.UPLOAD_API + "/{destDir}", fileSystemApiHandler::uploadFiles, uploadApiDoc())
+        .and(route().POST(ApiPath.UPLOAD_API, fileSystemApiHandler::uploadFiles, uploadApiDoc())
             .build())
         .and(route()
             .GET(ApiPath.DOWNLOAD_API + "/{filepath}", fileSystemApiHandler::downloadFile, downloadApiDoc())
@@ -174,20 +176,21 @@ public class Router {
             .GET(ApiPath.LIST_FILES_API + "/{dirpath}", fileSystemApiHandler::listFiles, fileListApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_FILE_API + "/{filepath}", fileSystemApiHandler::deleteFile, deleteFileApiDoc())
+            .POST(ApiPath.DELETE_FILE_API, fileSystemApiHandler::deleteFile,
+                deleteFileApiDoc())
             .build())
-            .and(route()
+        .and(route()
             .POST(ApiPath.DELETE_FILES_API, fileSystemApiHandler::deleteFiles, deleteFilesApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_DIR_API + "/{dirpath}", fileSystemApiHandler::deleteDir, deleteDirApiDoc())
+            .POST(ApiPath.DELETE_DIR_API, fileSystemApiHandler::deleteDir, deleteDirApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.BACKUP_START_API + "/{dirpath}", backupRestoreApiHandler::requestBackup,
+            .POST(ApiPath.BACKUP_START_API, backupRestoreApiHandler::requestBackup,
                 backupStartApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.RESTORE_START_API + "/{zip_file_path}", backupRestoreApiHandler::requestRestore,
+            .POST(ApiPath.RESTORE_START_API, backupRestoreApiHandler::requestRestore,
                 restoreStartApiDoc())
             .build())
         .and(route()
@@ -205,7 +208,7 @@ public class Router {
                 cancelBackupRestoreApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DUMP_START_API + "/{dirpath}/{table}", dumpLoadApiHandler::requestDump,
+            .POST(ApiPath.DUMP_START_API + "/{table}", dumpLoadApiHandler::requestDump,
                 dumpStartApiDoc())
             .build())
         .and(route()
@@ -227,7 +230,7 @@ public class Router {
                 cancelDumpLoadApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.START_TRANSACTION_API + "/{mode}/{timeout_min}",
+            .POST(ApiPath.START_TRANSACTION_API,
                 statefulApiHandler::startTransaction,
                 opt -> opt.operationId("stateful").build())
             .build())
@@ -257,11 +260,11 @@ public class Router {
                 opt -> opt.operationId("db").build())
             .build());
 
-        if (adminPageEnabled) {
-            route = route.and(RouterFunctions.route(RequestPredicates.GET(adminPagePath), this::adminIndex));
-        }
+    if (adminPageEnabled) {
+      route = route.and(RouterFunctions.route(RequestPredicates.GET(adminPagePath), this::adminIndex));
+    }
 
-        return route;
+    return route;
   }
 
   @Bean
@@ -294,7 +297,8 @@ public class Router {
   }
 
   public class Iso8601WithoutMillisInstantSerializer extends JsonSerializer<Instant> {
-    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx").withZone(ZoneOffset.UTC);
+    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
+        .withZone(ZoneOffset.UTC);
 
     @Override
     public void serialize(Instant value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -303,7 +307,8 @@ public class Router {
   }
 
   public class Iso8601WithoutMillisInstantDeserializer extends JsonDeserializer<Instant> {
-    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx").withZone(ZoneOffset.UTC);
+    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
+        .withZone(ZoneOffset.UTC);
 
     @Override
     public Instant deserialize(JsonParser p, DeserializationContext ctxt)
@@ -411,7 +416,7 @@ public class Router {
             .implementation(DeleteTarget.class));
   }
 
-    /**
+  /**
    * API Doc for Delete File API.
    */
   private Consumer<Builder> deleteFilesApiDoc() {
@@ -437,7 +442,8 @@ public class Router {
         .summary("delete a file in specified directory path.")
         .method("POST")
         .parameter(
-            parameterBuilder().in(ParameterIn.PATH).name("dirpath").description("directory path to delete."))
+            parameterBuilder().in(ParameterIn.PATH).name("dirpath")
+                .description("directory path to delete."))
         .response(responseBuilder().responseCode("200").description("Deletion Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(DeleteTarget.class));
@@ -451,8 +457,10 @@ public class Router {
         .operationId("backup_start")
         .summary("start backup and save backup files in specified directory path.")
         .method("POST")
-        .parameter(parameterBuilder().in(ParameterIn.PATH).name("dirpath")
-            .description("directory path to save files."))
+        .requestBody(requestBodyBuilder().content(
+            contentBuilder()
+                .mediaType("application/json")
+                .schema(schemaBuilder().type("object").implementation(BackupRestoreStartRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Back up execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
@@ -467,8 +475,10 @@ public class Router {
         .operationId("restore_start")
         .summary("start restore with a directory that holds backup files in specified directory path.")
         .method("POST")
-        .parameter(parameterBuilder().in(ParameterIn.PATH).name("dirpath")
-            .description("directory path to save files."))
+        .requestBody(requestBodyBuilder().content(
+            contentBuilder()
+                .mediaType("application/json")
+                .schema(schemaBuilder().type("object").implementation(BackupRestoreStartRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Restore execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
@@ -537,10 +547,12 @@ public class Router {
         .operationId("dump_start")
         .summary("start dump and save dump files in specified directory path.")
         .method("POST")
-        .parameter(parameterBuilder().in(ParameterIn.PATH).name("dirpath")
-            .description("directory path to save files."))
         .parameter(parameterBuilder().in(ParameterIn.PATH).name("table")
             .description("table name to dump."))
+        .requestBody(requestBodyBuilder().content(
+            contentBuilder()
+                .mediaType("application/json")
+                .schema(schemaBuilder().type("object").implementation(StreamDumpRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Back up execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))

@@ -32,7 +32,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class LoadParameter extends UploadParameter {
     private String jobId;
-    private String format;
+    private String format = DumpLoadRequestParam.FORMAT_DETECT_BY_EXTENSION;
     private String table;
     private List<FilePart> fileParts = new ArrayList<>();
     private List<ColumnMapping> colMap = new ArrayList<>();
