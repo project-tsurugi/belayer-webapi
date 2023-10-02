@@ -15,13 +15,6 @@
 
 ### How to build
 
-Define two environment variables.
-
-```console
-$ export GPR_USER=<YOUR_GITHUB_ACCOUNT_NAME>
-$ export GPR_KEY=<YOUR_PERSONAL_ACCESS_TOKEN_VALUE>
-```
-
 And build with gradle.
 
 ```console
@@ -102,14 +95,7 @@ $ echo $CR_PAT | sudo docker login ghcr.io -u my_user_name --password-stdin
 $ sudo docker pull ghcr.io/project-tsurugi/tsurugi:latest
 ```
 
-2. Define environment variables
-
-```console
-$ export GPR_USER=<YOUR_GITHUB_ACCOUNT_NAME>
-$ export GPR_KEY=<YOUR_PERSONAL_ACCESS_TOKEN_VALUE>
-```
-
-3. Start Server and Step in Docker Container.
+2. Start Server and Step in Docker Container.
 
 ```console
 $ docker-compose up -d

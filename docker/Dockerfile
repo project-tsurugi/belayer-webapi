@@ -10,11 +10,6 @@ COPY webapi ${BELAYER_SRC_DIR}
 
 WORKDIR ${BELAYER_SRC_DIR}
 
-ARG GPR_USER
-ARG GPR_KEY
-ENV GPR_USER=${GPR_USER}
-ENV GPR_KEY=${GPR_KEY}
-
 RUN gradle build -x test \
   && mkdir ${BELAYER_DIST_DIR} \
   && mv ./build/libs/belayer-webapi-`cat ../VERSION`.jar ${BELAYER_DIST_DIR}/belayer.jar

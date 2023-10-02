@@ -18,9 +18,6 @@ jobs:
     defaults:
       run:
         shell: bash
-    env:
-      GPR_USER: ${{ github.repository_owner }}
-      GPR_KEY: ${{ secrets.GHCR_PAT }}
 
     steps:
       - name: Setup_Java
