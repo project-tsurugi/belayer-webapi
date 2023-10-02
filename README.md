@@ -54,7 +54,6 @@ See the env var table below.
 |:----|:----|:----|
 |BELAYER_SERVER_PORT|server port for this web application.|`8000`|
 |BELAYER_MANAGEMENT_PORT|management port for this web application.|`18000`|
-|BELAYER_WEBADMIN_LOCATION|Location for Belayer WebAdmin contents.|`file://usr/lib/tsurugi-webapp/webadmin/`|
 |BELAYER_LOG_LEVEL|Log level for belaer WebAPI Server.|`WARN`|
 |BELAYER_STORAGE_ROOT|The directory path to use as Belayer storage.|`/opt/belayer/storage`|
 |TSURUGI_URL|URL to connect Tsurugi database.|`tcp://localhost:12345/`|
@@ -122,7 +121,7 @@ tsurugi-webapp-x.x.x.tar.gz
 ```
 
 * tsurugi-webapp-x.x.x.tar.gz
-    * WebAPI (included without WebAdmin Page) installation scripts, etc.
+    * WebAPI Server(without WebAdmin Page), installation scripts, etc.
 
 ## 4. Installing Distributions
 
