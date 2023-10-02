@@ -3,13 +3,13 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 	id 'jacoco'
-	id 'signing'
 	id 'com.github.jk1.dependency-license-report' version '2.0'
 }
 
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
 version = versionString
+def tsubarkuro_version = '1.0.0-SNAPSHOT'
 
 ext {
 	isReleaseVersion = !version.endsWith("SNAPSHOT")
@@ -75,10 +75,10 @@ dependencies {
 	implementation 'org.apache.hadoop:hadoop-common:3.3.4'
 	implementation 'org.apache.hadoop:hadoop-client:3.3.4'
 	implementation 'org.apache.commons:commons-csv:1.9.0'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-session:1.0.0-SNAPSHOT'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-connector:1.0.0-SNAPSHOT'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-auth-http:1.0.0-SNAPSHOT'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-auth-mock:1.0.0-SNAPSHOT'
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-session:${tsubarkuro_version}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-connector:${tsubarkuro_version}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-http:${tsubarkuro_version}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-mock:${tsubarkuro_version}"
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
