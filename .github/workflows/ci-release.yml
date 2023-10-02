@@ -89,8 +89,3 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BELAYER_VERSION: ${{ (github.ref_type == 'tag' && github.ref_name) || 'SNAPSHOT' }}
 
-  Publish:
-    uses: ./.github/workflows/ci-publish.yml
-    if: github.repository_owner == 'project-tsurugi' && (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
-    needs: Generate_GitHub_Release
-    secrets: inherit

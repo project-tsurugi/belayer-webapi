@@ -3,14 +3,13 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 	id 'jacoco'
-	id 'maven-publish'
-	id 'signing'
 	id 'com.github.jk1.dependency-license-report' version '2.0'
 }
 
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
 version = versionString
+def tsubarkuro_version = '1.0.0-SNAPSHOT'
 
 ext {
 	isReleaseVersion = !version.endsWith("SNAPSHOT")
@@ -78,10 +77,10 @@ dependencies {
 	implementation 'org.apache.hadoop:hadoop-common:3.3.4'
 	implementation 'org.apache.hadoop:hadoop-client:3.3.4'
 	implementation 'org.apache.commons:commons-csv:1.9.0'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-session:1.0.0-SNAPSHOT'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-connector:1.0.0-SNAPSHOT'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-auth-http:1.0.0-SNAPSHOT'
-	implementation 'com.tsurugidb.tsubakuro:tsubakuro-auth-mock:1.0.0-SNAPSHOT'
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-session:${tsubarkuro_version}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-connector:${tsubarkuro_version}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-http:${tsubarkuro_version}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-mock:${tsubarkuro_version}"
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -112,54 +111,4 @@ task showTsubakuroManifest {
 		def version = resources.text.fromArchiveEntry(tsubakuroJar, "META-INF/MANIFEST.MF")
 		print(version.asString())
 	}
-}
-
-publishing {
-    repositories {
-        maven {
-            name 'OSSRH'
-            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            url isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
-            credentials {
-                username findProperty('st.ossrh.user') ?: System.getenv('ST_OSSRH_USER')
-                password findProperty('st.ossrh.password') ?: System.getenv('ST_OSSRH_PASSWORD')
-            }
-        }
-    }
-    publications {
-        mavenJava(MavenPublication) {
-            artifact bootJar
-            pom {
-                name = 'Belayer Web-API'
-                description = 'Runtime and library to access Tsurugi directly via REST API'
-                url = 'https://github.com/project-tsurugi/belayer-webapi'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'project-tsurugi'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:https://github.com/project-tsurugi/belayer-webapi.git'
-                    developerConnection = 'scm:git:https://github.com/project-tsurugi/belayer-webapi.git'
-                    url = 'https://github.com/project-tsurugi/belayer-webapi'
-                }
-            }
-        }
-    }
-}
-
-signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask(":${project.name}:publishMavenJavaPublicationToOSSRHRepository") }
-    def signingKeyId = findProperty("signingKeyId")
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
 }
