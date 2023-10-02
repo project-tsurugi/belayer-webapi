@@ -26,7 +26,7 @@ $ ./gradlew clean build -x test
 
 ```console
 $ cd webapi
-$ java -jar build/libs/belayer-webapi-0.0.1-SNAPSHOT.jar
+$ java -jar build/libs/belayer-webapi-x.x.x.jar
 ```
 
 Ctrl-C to shutdown.
@@ -118,7 +118,7 @@ The distribution files will be in the following directory.
 
 ```console
 $ ls dist
-tsurugi-webapp-0.0.1.tar.gz
+tsurugi-webapp-x.x.x.tar.gz
 ```
 
 * tsurugi-webapp-x.x.x.tar.gz
