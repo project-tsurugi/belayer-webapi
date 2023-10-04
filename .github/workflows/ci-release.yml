@@ -2,7 +2,7 @@ name: Belayer-WebAPI-Release
 
 on:
   push:
-    tags:
+    tags-ignore:
       - '*-alpha'
   workflow_dispatch:
 
