@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class DumpRequestBody {
 
     private String dirPath;
-    private String format = DumpRequestParam.FORMAT_DETECT_BY_EXTENSION;
+    private String format = DumpRequestParam.FORMAT_PARQUET;
     private boolean waitUntilDone = false;
   
 }
