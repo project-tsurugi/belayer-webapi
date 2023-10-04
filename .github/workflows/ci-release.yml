@@ -70,12 +70,15 @@ jobs:
 
       - name: Create_Release
         run: |
-          if [[ "${BELAYER_VERSION}" == "SNAPSHOT" ]]; then
+          if [[ "${BELAYER_VERSION}" == "SNAPSHOT" || "${BELAYER_VERSION}" =~ ".*-SNAPSHOT" ]]; then
             _DELETE_OPTION=--cleanup-tag
+          fi
+          if [[ "${BELAYER_VERSION}" =~ ".*-BETA" || "${BELAYER_VERSION}" =~ ".*-SNAPSHOT" || "${BELAYER_VERSION}" == "SNAPSHOT" ]]; then
+            _PRERELEASE_OPTION=--prerelease 
           fi
           set -x
           gh release delete ${BELAYER_VERSION} -y ${_DELETE_OPTION} --repo project-tsurugi/belayer-webapi || true
-          gh release create ${BELAYER_VERSION} work/* --title ${BELAYER_VERSION} --prerelease --latest --repo project-tsurugi/belayer-webapi
+          gh release create ${BELAYER_VERSION} work/* --title ${BELAYER_VERSION} ${_PRERELEASE_OPTION} --latest --repo project-tsurugi/belayer-webapi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BELAYER_VERSION: ${{ (github.ref_type == 'tag' && github.ref_name) || 'SNAPSHOT' }}
