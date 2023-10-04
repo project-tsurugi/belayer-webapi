@@ -9,10 +9,7 @@ jobs:
       checks: write
     timeout-minutes: 30
     container:
-      image: ghcr.io/project-tsurugi/oltp-sandbox:ubuntu-22.04
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GHCR_PAT }}
+      image: ghcr.io/project-tsurugi/tsurugi-ci:ubuntu-22.04
       volumes:
         - ${{ vars.gradle_cache_dir }}:/root/.gradle
     defaults:
@@ -28,9 +25,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.GHA_PAT }}
 
       - name: Assemble_WebAPI
         run: |
