@@ -9,7 +9,7 @@ plugins {
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
 version = versionString
-def tsubarkuro_version = '1.0.0'
+def tsubarkuro_version = '1.0.1'
 
 ext {
 	isReleaseVersion = !version.endsWith("SNAPSHOT")
