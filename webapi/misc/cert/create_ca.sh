@@ -1,6 +1,7 @@
 #!/bin/bash
 
-## TODO
+## This is a sample script to create CA Certificate file.
+##
 ## install cfssl like 'apt-get install golang-cfssl'
 
 cat <<EOF > ca_csr.json

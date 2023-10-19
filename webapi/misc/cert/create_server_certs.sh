@@ -1,9 +1,8 @@
 #!/bin/bash
 
-## TODO
+## This is a sample script to create Server Certificate file.
+##
 ## install cfssl like 'apt-get install golang-cfssl'
-
-# Nomad ---------------------------
 
 CA_FILE=./my-ca.pem
 CA_KEY=./my-ca-key.pem
