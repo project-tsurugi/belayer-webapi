@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.exec;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,13 +53,14 @@ public class DbQuiesceExec {
     try {
       Path tmpDir = Files.createTempDirectory(Constants.TEMP_DIR_PREFIX_MONITOR + job.getJobId() + "_");
       Path filePath = tmpDir.resolve(String.format("monitoring-%s.log", job.getJobId()));
+      Path stdOutput = tmpDir.resolve(String.format("stdout-%s.log", job.getJobId()));
 
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> job.setOutput("quiece:" + status.toStatusString()));
       monitoringManager.addFileWatcher(watcher);
 
       var label = job.getJobId();
-      var proc = runProcess(filePath, label);
+      var proc = runProcess(filePath, label, stdOutput);
 
       proc.waitFor();
 
@@ -82,12 +84,15 @@ public class DbQuiesceExec {
     }
   }
 
-  public Process runProcess(Path monitoringFilePath, String label) {
+  public Process runProcess(Path monitoringFilePath, String label, Path outFile) {
     String argsLine = String.format(cmdString, monitoringFilePath.toString(), conf, label);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);
+    // stderr -> stdout
     pb.redirectErrorStream(true);
+    // stdout -> file
+    pb.redirectOutput(new File(outFile.toString()));
     log.debug("exec cmd: {}", Arrays.asList(args));
     try {
       var proc = pb.start();
