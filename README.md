@@ -86,7 +86,7 @@ See the env var table below.
 1. pull Tsurugi Docker image
 
 ```console
-$ sudo docker pull ghcr.io/project-tsurugi/tsurugi:latest
+$ sudo docker pull ghcr.io/project-tsurugi/tsurugidb:latest
 ```
 
 2. Start Server and Step in Docker Container.

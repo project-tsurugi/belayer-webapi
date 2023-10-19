@@ -15,7 +15,7 @@ RUN gradle build -x test \
   && mv ./build/libs/belayer-webapi-`cat ../VERSION`.jar ${BELAYER_DIST_DIR}/belayer.jar
 
 
-FROM ghcr.io/project-tsurugi/tsurugi:latest
+FROM ghcr.io/project-tsurugi/tsurugidb:latest
 
 ENV BELAYER_HOME=/usr/lib/tsurugi-webapp
 ENV BELAYER_STORAGE_ROOT=${BELAYER_HOME}/storage
