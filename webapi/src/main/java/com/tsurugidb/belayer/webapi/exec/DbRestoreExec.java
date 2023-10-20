@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.exec;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,6 +63,7 @@ public class DbRestoreExec {
     try {
       Path tmpDir = Files.createTempDirectory(Constants.TEMP_DIR_PREFIX_MONITOR + job.getJobId() + "_");
       Path filePath = tmpDir.resolve(String.format("monitoring-%s.log", job.getJobId()));
+      Path stdOutput = tmpDir.resolve(String.format("stdout-%s.log", job.getJobId()));
 
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> job.setOutput(status.toStatusString()));
@@ -71,7 +73,7 @@ public class DbRestoreExec {
 
       stopWatch.start();
 
-      Process proc = runProcess(dirPath, filePath);
+      Process proc = runProcess(dirPath, filePath, stdOutput);
       // set process as Disposable into job.
       job.setDisposable(new DisposableProcess(proc));
 
@@ -96,14 +98,17 @@ public class DbRestoreExec {
     }
   }
 
-  public Process runProcess(String dirPath, Path monitoringFilePath) {
+  public Process runProcess(String dirPath, Path monitoringFilePath, Path outFile) {
     String argsLine = String.format(cmdString, dirPath, monitoringFilePath.toString(), conf);
     String[] args = argsLine.split(" ");
 
     List<String> argList = Arrays.asList(args);
 
     var pb = new ProcessBuilder(argList);
+    // stderr -> stdout
     pb.redirectErrorStream(true);
+    // stdout -> file
+    pb.redirectOutput(new File(outFile.toString()));
     log.debug("exec cmd: {}", argList);
     try {
       var proc = pb.start();

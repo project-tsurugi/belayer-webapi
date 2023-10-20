@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.exec;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,6 +53,7 @@ public class DbStatusExec {
     try {
       Path tmpDir = Files.createTempDirectory(Constants.TEMP_DIR_PREFIX_MONITOR + jobId + "_");
       Path filePath = tmpDir.resolve(String.format("monitoring-%s.log", jobId));
+      Path stdOutput = tmpDir.resolve(String.format("stdout-%s.log", jobId));
 
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> {
@@ -62,7 +64,7 @@ public class DbStatusExec {
       });
       monitoringManager.addFileWatcher(watcher);
 
-      var proc = runProcess(filePath.toString());
+      var proc = runProcess(filePath.toString(), stdOutput.toString());
 
       proc.waitFor();
 
@@ -84,12 +86,15 @@ public class DbStatusExec {
     }
   }
 
-  public Process runProcess(String monitoringFile) {
+  public Process runProcess(String monitoringFile, String outFile) {
     String argsLine = String.format(cmdString, monitoringFile, conf);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);
+    // stderr -> stdout
     pb.redirectErrorStream(true);
+    // stdout -> file
+    pb.redirectOutput(new File(outFile));
     log.debug("exec cmd: {}", Arrays.asList(args));
     try {
       var proc = pb.start();
