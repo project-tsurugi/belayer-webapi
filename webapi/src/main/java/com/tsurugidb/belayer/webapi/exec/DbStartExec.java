@@ -35,18 +35,18 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class DbStatusExec {
+public class DbStartExec {
 
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
-  @Value("${webapi.cli.cmd.online}")
+  @Value("${webapi.cli.cmd.start}")
   String cmdString;
 
   @Autowired
   private MonitoringManager monitoringManager;
 
-  public boolean isOnline(String jobId) {
+  public void startDatabse(String jobId) {
 
     FileWatcher watcher = null;
 
@@ -71,16 +71,6 @@ public class DbStatusExec {
       ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_DATA.equals(s.getKind()));
 
       log.debug("status:" + status);
-      if (status != null) {
-        var running =  ExecStatus.STATUS_RUNNNING.equals(status.getStatus());
-        if (running) {
-          Files.delete(stdOutput);
-        }
-        return running;
-      }
-
-      throw new ProcessExecException("tsurugi oltp status is unknown.", null);
-
     } catch (IOException | InterruptedException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {

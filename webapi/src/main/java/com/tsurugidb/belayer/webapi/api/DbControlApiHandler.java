@@ -15,8 +15,6 @@
  */
 package com.tsurugidb.belayer.webapi.api;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,7 +23,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import com.tsurugidb.belayer.webapi.dto.DbStatus;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
+import com.tsurugidb.belayer.webapi.service.DbControlService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 
 import reactor.core.publisher.Mono;
@@ -34,8 +34,44 @@ import reactor.core.publisher.Mono;
 public class DbControlApiHandler {
 
     @Autowired
+    DbControlService dbControlService;
+
+    @Autowired
     TsubakuroService tsubakuroService;
-  
+
+    /**
+     * Start Tsurugi Database
+     *
+     * @param req Request
+     * @return Response
+     */
+    public Mono<ServerResponse> startDatabase(ServerRequest req) {
+        dbControlService.startDatabase("start");
+        return ServerResponse.ok().build();
+    }  
+
+        /**
+     * Shutdown Tsurugi Database
+     *
+     * @param req Request
+     * @return Response
+     */
+    public Mono<ServerResponse> shutdownDatabase(ServerRequest req) {
+        dbControlService.shutdownDatabase("shutdown");
+        return ServerResponse.ok().build();
+    }  
+
+    /**
+     * Show Status of Tsurugi Database
+     *
+     * @param req Request
+     * @return Response
+     */
+    public Mono<ServerResponse> isOnline(ServerRequest req) {
+        boolean online = dbControlService.isOnline("status");
+        return ServerResponse.ok().body(BodyInserters.fromValue(new DbStatus(online)));
+    }  
+
     /**
      * Obtain list of table names.
      *
@@ -50,6 +86,6 @@ public class DbControlApiHandler {
                 .map(tableNames -> new TableNames(tableNames));
 
         return ServerResponse.ok().body(
-                BodyInserters.fromProducer(result, TableNames.class));
+            BodyInserters.fromProducer(result, TableNames.class));
     }
 }

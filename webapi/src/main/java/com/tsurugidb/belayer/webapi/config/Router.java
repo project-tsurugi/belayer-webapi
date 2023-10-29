@@ -150,6 +150,15 @@ public class Router {
     /** API Path for Stream Load API */
     public static final String STREAM_LOAD_API = "/api/transaction/load";
 
+    /** API Path for Start DB API */
+    public static final String START_DB_API = "/api/db/start";
+
+    /** API Path for Shutdown DB API */
+    public static final String SHUTDOWN_DB_API = "/api/db/shutdown";
+
+    /** API Path for Show DB Status API */
+    public static final String SHOW_DB_STATUS_API = "/api/db/status";
+
     /** API Path for List table names API */
     public static final String LIST_TABLE_NAMES_API = "/api/db/tablenames";
 
@@ -253,6 +262,21 @@ public class Router {
             .POST(ApiPath.STREAM_LOAD_API + "/{transactionid}/{table_name}",
                 statefulApiHandler::loadDumpFiles,
                 opt -> opt.operationId("stateful").build())
+            .build())
+        .and(route()
+            .POST(ApiPath.START_DB_API,
+                dbControlHandler::startDatabase,
+                opt -> opt.operationId("db").build())
+            .build())
+        .and(route()
+            .POST(ApiPath.SHUTDOWN_DB_API,
+                dbControlHandler::shutdownDatabase,
+                opt -> opt.operationId("db").build())
+            .build())
+        .and(route()
+            .GET(ApiPath.SHOW_DB_STATUS_API,
+                dbControlHandler::isOnline,
+                opt -> opt.operationId("db").build())
             .build())
         .and(route()
             .GET(ApiPath.LIST_TABLE_NAMES_API,
@@ -460,7 +484,8 @@ public class Router {
         .requestBody(requestBodyBuilder().content(
             contentBuilder()
                 .mediaType("application/json")
-                .schema(schemaBuilder().type("object").implementation(BackupRestoreStartRequestBody.class))))
+                .schema(schemaBuilder().type("object")
+                    .implementation(BackupRestoreStartRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Back up execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
@@ -478,7 +503,8 @@ public class Router {
         .requestBody(requestBodyBuilder().content(
             contentBuilder()
                 .mediaType("application/json")
-                .schema(schemaBuilder().type("object").implementation(BackupRestoreStartRequestBody.class))))
+                .schema(schemaBuilder().type("object")
+                    .implementation(BackupRestoreStartRequestBody.class))))
         .response(responseBuilder().responseCode("200").description("Restore execution Succeeded.")
             .content(contentBuilder().mediaType("application/json"))
             .implementation(JobResult.class))
