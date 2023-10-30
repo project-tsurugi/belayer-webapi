@@ -79,7 +79,7 @@ public class DbStatusExec {
         return running;
       }
 
-      throw new ProcessExecException("tsurugi oltp status is unknown.", null);
+      throw new ProcessExecException("tsurugi status is unknown.", null);
 
     } catch (IOException | InterruptedException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
