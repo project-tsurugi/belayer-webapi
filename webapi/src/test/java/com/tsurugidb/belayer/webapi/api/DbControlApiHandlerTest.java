@@ -95,8 +95,8 @@ public class DbControlApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void isOnline() {
 
-    when(dbControlService.isOnline(anyString())).thenReturn(true);
-    var expect = new DbStatus(true);
+    when(dbControlService.getStatus(anyString())).thenReturn("running");
+    var expect = new DbStatus("running");
     client.get()
         .uri("/api/db/status")
         .exchange()

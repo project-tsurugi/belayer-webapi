@@ -275,7 +275,7 @@ public class Router {
             .build())
         .and(route()
             .GET(ApiPath.SHOW_DB_STATUS_API,
-                dbControlHandler::isOnline,
+                dbControlHandler::getStatus,
                 opt -> opt.operationId("db").build())
             .build())
         .and(route()

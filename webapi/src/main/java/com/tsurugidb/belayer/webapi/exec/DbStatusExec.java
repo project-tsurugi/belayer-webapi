@@ -20,12 +20,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Comparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.dto.ExecStatus;
+import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 import com.tsurugidb.belayer.webapi.exception.ProcessExecException;
 import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.FileWatcher;
@@ -40,13 +42,19 @@ public class DbStatusExec {
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
-  @Value("${webapi.cli.cmd.online}")
+  @Value("${webapi.cli.cmd.status}")
   String cmdString;
 
   @Autowired
   private MonitoringManager monitoringManager;
 
+  
   public boolean isOnline(String jobId) {
+
+    return ExecStatus.STATUS_RUNNNING.equals(getStatus(jobId));
+  }
+
+  public String getStatus(String jobId) {
 
     FileWatcher watcher = null;
 
@@ -72,11 +80,17 @@ public class DbStatusExec {
 
       log.debug("status:" + status);
       if (status != null) {
-        var running =  ExecStatus.STATUS_RUNNNING.equals(status.getStatus());
-        if (running) {
-          Files.delete(stdOutput);
+        var statusString =  status.getStatus();
+        try {
+          Files.walk(tmpDir)
+              .sorted(Comparator.reverseOrder())
+              .map(Path::toFile)
+              .forEach(File::delete);
+        } catch (IOException ex) {
+          throw new IORuntimeException("Can't delete directry.", ex);
         }
-        return running;
+    
+        return statusString;
       }
 
       throw new ProcessExecException("tsurugi status is unknown.", null);

@@ -24,5 +24,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DbStatus {
 
-    private boolean online;
+    private String status;
 }

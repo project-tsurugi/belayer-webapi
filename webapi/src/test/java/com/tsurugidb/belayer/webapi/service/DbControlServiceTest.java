@@ -43,11 +43,11 @@ public class DbControlServiceTest {
     }
 
     @Test
-    public void test_isOnline() throws Exception {
-        when(dbStatusExec.isOnline(any())).thenReturn(true);
-        var result = dbControlService.isOnline("test");
+    public void test_getStatus() throws Exception {
+        when(dbStatusExec.getStatus(any())).thenReturn("running");
+        var result = dbControlService.getStatus("test");
 
-        assertEquals(true, result);
+        assertEquals("running", result);
     }
 
 }

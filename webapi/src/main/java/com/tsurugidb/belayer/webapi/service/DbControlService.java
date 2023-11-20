@@ -51,12 +51,12 @@ public class DbControlService {
   }
 
   /**
-   * determine Tsurugi DB is running.
+   * get staus of Tsurugi DB.
    * @param jobId Job ID
    */
-  public boolean isOnline(String jobId) {
+  public String getStatus(String jobId) {
 
-    return dbStatusExec.isOnline(jobId);
+    return dbStatusExec.getStatus(jobId);
   }
 
 }

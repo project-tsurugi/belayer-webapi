@@ -48,9 +48,9 @@ public class DbControlApiHandler {
     public Mono<ServerResponse> startDatabase(ServerRequest req) {
         dbControlService.startDatabase("start");
         return ServerResponse.ok().build();
-    }  
+    }
 
-        /**
+    /**
      * Shutdown Tsurugi Database
      *
      * @param req Request
@@ -59,7 +59,7 @@ public class DbControlApiHandler {
     public Mono<ServerResponse> shutdownDatabase(ServerRequest req) {
         dbControlService.shutdownDatabase("shutdown");
         return ServerResponse.ok().build();
-    }  
+    }
 
     /**
      * Show Status of Tsurugi Database
@@ -67,10 +67,10 @@ public class DbControlApiHandler {
      * @param req Request
      * @return Response
      */
-    public Mono<ServerResponse> isOnline(ServerRequest req) {
-        boolean online = dbControlService.isOnline("status");
-        return ServerResponse.ok().body(BodyInserters.fromValue(new DbStatus(online)));
-    }  
+    public Mono<ServerResponse> getStatus(ServerRequest req) {
+        String status = dbControlService.getStatus("status");
+        return ServerResponse.ok().body(BodyInserters.fromValue(new DbStatus(status)));
+    }
 
     /**
      * Obtain list of table names.
@@ -82,10 +82,10 @@ public class DbControlApiHandler {
 
         Mono<TableNames> result = ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .map(auth -> tsubakuroService.listTables((String)auth.getCredentials()))
+                .map(auth -> tsubakuroService.listTables((String) auth.getCredentials()))
                 .map(tableNames -> new TableNames(tableNames));
 
         return ServerResponse.ok().body(
-            BodyInserters.fromProducer(result, TableNames.class));
+                BodyInserters.fromProducer(result, TableNames.class));
     }
 }
