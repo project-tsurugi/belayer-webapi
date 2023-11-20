@@ -20,16 +20,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Random;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.dto.ExecStatus;
-import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 import com.tsurugidb.belayer.webapi.exception.ProcessExecException;
-import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.FileWatcher;
 import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 
@@ -48,7 +47,6 @@ public class DbStatusExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
-  
   public boolean isOnline(String jobId) {
 
     return ExecStatus.STATUS_RUNNNING.equals(getStatus(jobId));
@@ -57,16 +55,22 @@ public class DbStatusExec {
   public String getStatus(String jobId) {
 
     FileWatcher watcher = null;
-
+    Path filePath = null;
     try {
-      Path tmpDir = Files.createTempDirectory(Constants.TEMP_DIR_PREFIX_MONITOR + jobId + "_");
-      Path filePath = tmpDir.resolve(String.format("monitoring-%s.log", jobId));
-      Path stdOutput = tmpDir.resolve(String.format("stdout-%s.log", jobId));
+      Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-db-status");
+      if (!Files.exists(tmpDirPath)) {
+        Files.createDirectory(tmpDirPath);
+      }
+
+      String id = RandomStringUtils.randomAlphanumeric(8);
+      filePath = tmpDirPath.resolve(String.format("monitoring-%s.log", id));
+      Path stdOutput = tmpDirPath.resolve(String.format("stdout-%s.log", id));
 
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> {
         log.debug("file changed:" + status.toString());
         if (status != null && ExecStatus.KIND_DATA.equals(status.getKind())) {
+          log.debug("freeze status" + status.toString());
           status.setFreezed(true);
         }
       });
@@ -80,16 +84,8 @@ public class DbStatusExec {
 
       log.debug("status:" + status);
       if (status != null) {
-        var statusString =  status.getStatus();
-        try {
-          Files.walk(tmpDir)
-              .sorted(Comparator.reverseOrder())
-              .map(Path::toFile)
-              .forEach(File::delete);
-        } catch (IOException ex) {
-          throw new IORuntimeException("Can't delete directry.", ex);
-        }
-    
+        var statusString = status.getStatus();
+        Files.delete(stdOutput);
         return statusString;
       }
 
@@ -100,6 +96,11 @@ public class DbStatusExec {
     } finally {
       if (watcher != null) {
         watcher.close();
+        try {
+          Files.delete(filePath);
+        } catch (Exception ignore) {
+          log.debug("failed to delete file", ignore);
+        }
       }
     }
   }
