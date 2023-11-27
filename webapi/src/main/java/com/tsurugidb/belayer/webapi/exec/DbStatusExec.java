@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Random;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +55,8 @@ public class DbStatusExec {
 
     FileWatcher watcher = null;
     Path filePath = null;
+    Path stdOutput = null;
+    boolean success = false;
     try {
       Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-db-status");
       if (!Files.exists(tmpDirPath)) {
@@ -64,13 +65,11 @@ public class DbStatusExec {
 
       String id = RandomStringUtils.randomAlphanumeric(8);
       filePath = tmpDirPath.resolve(String.format("monitoring-%s.log", id));
-      Path stdOutput = tmpDirPath.resolve(String.format("stdout-%s.log", id));
+      stdOutput = tmpDirPath.resolve(String.format("stdout-%s.log", id));
 
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> {
-        log.debug("file changed:" + status.toString());
         if (status != null && ExecStatus.KIND_DATA.equals(status.getKind())) {
-          log.debug("freeze status" + status.toString());
           status.setFreezed(true);
         }
       });
@@ -82,10 +81,9 @@ public class DbStatusExec {
 
       ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_DATA.equals(s.getKind()));
 
-      log.debug("status:" + status);
       if (status != null) {
         var statusString = status.getStatus();
-        Files.delete(stdOutput);
+        success = true;
         return statusString;
       }
 
@@ -96,10 +94,17 @@ public class DbStatusExec {
     } finally {
       if (watcher != null) {
         watcher.close();
+      }
+      if (success) {
         try {
-          Files.delete(filePath);
+          if (filePath != null) {
+            Files.delete(filePath);
+          }
+          if (stdOutput != null) {
+            Files.delete(stdOutput);
+          }
         } catch (Exception ignore) {
-          log.debug("failed to delete file", ignore);
+          log.warn("failed to delete file", ignore);
         }
       }
     }
