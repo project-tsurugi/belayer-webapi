@@ -64,7 +64,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = "webapi.storage.root=./test_tmp")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = { "webapi.storage.root=./test_tmp",
+        "webapi.backup.progress_percentage_api_return=0",
+        "webapi.backup.progress_percentage_filesize_sum_computed=0" })
 public class BackupRestoreServiceTest {
 
     @Value("${webapi.storage.root}")
@@ -140,6 +142,8 @@ public class BackupRestoreServiceTest {
         expectJob.setOutput(null);
         expectJob.setWorkDir(Path.of(testDir, Constants.TEMP_DIR_PREFIX_BACKUP + jobId));
         expectJob.setZipFilePath("bk1/backup-" + jobId + ".zip");
+        expectJob.setProgress(100);
+        expectJob.setProgressNumerator(4);
 
         when(dbStatusExec.isOnline(jobId)).thenReturn(true);
         for (BackupContext backupCtx : backupFiles) {
@@ -224,6 +228,7 @@ public class BackupRestoreServiceTest {
         expectJob.setEndTime(now);
         expectJob.setErrorMessage(errorMessage);
         expectJob.setWorkDir(Path.of(testDir, Constants.TEMP_DIR_PREFIX_BACKUP + jobId));
+        expectJob.setProgress(100);
 
         Thread.sleep(1 * 1000L);
         var actualJob = actualResult.block();
@@ -255,9 +260,9 @@ public class BackupRestoreServiceTest {
         expectJob.setStatus(JobStatus.COMPLETED);
         expectJob.setStartTime(now);
         expectJob.setEndTime(now);
-        expectJob.setWorkDir(Path.of(testDir,  Constants.TEMP_DIR_PREFIX_BACKUP + jobId));
+        expectJob.setWorkDir(Path.of(testDir, Constants.TEMP_DIR_PREFIX_BACKUP + jobId));
         expectJob.setZipFilePath(dirPath + "/backup-" + jobId + ".zip");
-
+        expectJob.setProgress(100);
 
         when(fileSystemService.createTempDirectory(any())).thenAnswer(new Answer<Path>() {
             @Override
@@ -341,6 +346,7 @@ public class BackupRestoreServiceTest {
         expectJob.setEndTime(now);
         expectJob.setZipFilePath(zipFilePath);
         expectJob.setWorkDir(Path.of(testDir + Constants.TEMP_DIR_PREFIX_RESTORE + jobId));
+        expectJob.setProgress(100);
 
         Thread.sleep(1 * 1000L);
         var actualJob = actualResult.block();
@@ -445,6 +451,7 @@ public class BackupRestoreServiceTest {
         expectJob.setStartTime(now);
         expectJob.setEndTime(now);
         expectJob.setWorkDir(Path.of(Constants.TEMP_DIR_PREFIX_BACKUP + jobId));
+        expectJob.setProgress(100);
 
         Thread.sleep(1 * 1000L);
         var actualJob = actualResult.block();

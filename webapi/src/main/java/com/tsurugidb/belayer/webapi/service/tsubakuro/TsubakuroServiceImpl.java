@@ -16,9 +16,13 @@
 package com.tsurugidb.belayer.webapi.service.tsubakuro;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,6 +57,7 @@ import com.tsurugidb.belayer.webapi.model.LoadStatement;
 import com.tsurugidb.belayer.webapi.service.FileSystemService;
 import com.tsurugidb.belayer.webapi.service.ParquetService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
+import com.tsurugidb.belayer.webapi.util.FileUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
@@ -95,6 +100,18 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
   @Value("${webapi.tsurugi.session_timeout}")
   private int sessionTimeout;
+
+  @Value("${webapi.backup.progress_percentage_api_return}")
+  private int backupProgressPercentageWhenApiRetern;
+
+  @Value("${webapi.backup.progress_percentage_filesize_sum_computed}")
+  private int backupProgressPercentageWhenSumComputed;
+
+  @Value("${webapi.dump.progress_percentage_api_return}")
+  private int dumpProgressPercentageWhenApiRetern;
+
+  @Value("${webapi.dump.progress_percentage_filesize_sum_computed}")
+  private int dumpProgressPercentageWhenSumComputed;
 
   public BackupJob createBackupTransaction(BackupJob job) {
     boolean green = false;
@@ -172,7 +189,8 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
     StopWatch stopWatch = new StopWatch();
     stopWatch.start();
-    var files = backupTran.getBackupFilePaths();
+    var files = backupTran.getBackupFilePaths(job, backupProgressPercentageWhenApiRetern,
+        backupProgressPercentageWhenSumComputed);
     stopWatch.stop();
     log.debug("{}:{}ms", "backup.getFiles()", stopWatch.getTotalTimeMillis());
 
@@ -365,15 +383,43 @@ public class TsubakuroServiceImpl implements TsubakuroService {
         Objects.requireNonNull(emptyParam);
         results = tx.executeDump(prep, emptyParam, outDir).await();
 
+        // save progress(API return)
+        job.setProgress(dumpProgressPercentageWhenApiRetern);
+
         int count = 0;
+
+        var list = new ArrayList<Path>();
+        long fileSizeSum = 0;
         while (results.nextRow()) {
           if (results.nextColumn()) {
             count++;
             var s = results.fetchCharacterValue();
             var dumpFile = Paths.get(s);
-            sink.next(dumpFile);
+            long fileSize = FileUtil.getFileSize(dumpFile);
+            log.debug("file size:" + fileSize);
+
+            fileSizeSum += fileSize;
+            list.add(dumpFile);
           }
         }
+
+        // save progress(File Sum computed)
+        int rate = dumpProgressPercentageWhenSumComputed;
+
+        log.debug("file size sum:" + fileSizeSum);
+        long denominator = BigDecimal.valueOf(fileSizeSum)
+            .divide(BigDecimal.valueOf(100 - rate).divide(BigDecimal.valueOf(100)), 2, RoundingMode.UP).longValue();
+        long numerator = BigDecimal.valueOf(denominator).multiply(BigDecimal.valueOf(rate))
+            .divide(BigDecimal.valueOf(100), new MathContext(0, RoundingMode.DOWN)).longValue();
+        log.debug("num/dnm={}/{}", numerator, denominator);
+
+        job.setProgressDenominator(denominator);
+        job.addProgressNumerator(numerator);
+
+        for (var filePath : list) {
+          sink.next(filePath);
+        }
+
         stopWatch.stop();
         log.debug("{}:{}ms", "dump.getFiles()", stopWatch.getTotalTimeMillis());
 
@@ -441,6 +487,9 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
       Path downloadPath = fileSystemService.convertToDownloadPath(job.getUid(),
           loadFileInfo.getOriginalFilePath().toString());
+
+      // set progress
+      job.addProgressNumerator(FileUtil.getFileSize(dumpFilePath));
 
       Session session = job.getTsurugiTransaction().getSession();
       log.debug("expand session timeout for {} minutes", this.sessionTimeout);

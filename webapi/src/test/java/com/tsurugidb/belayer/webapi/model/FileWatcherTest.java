@@ -29,7 +29,7 @@ public class FileWatcherTest {
         var json = "{\"timestamp\":1690440399, \"kind\":\"progress\", \"progress\":\"0.20\", \"message\":\"msg1\", \"code\":\"code1\", \"arguments\":[\"arg1\"]}";
         ExecStatus status = target.parseLine(json);
 
-        assertEquals("[2023-07-27T06:46:39]progress:20.00%", status.toStatusString());
+        assertEquals("[2023-07-27T06:46:39]progress:20%", status.toStatusString());
     }
 
 }

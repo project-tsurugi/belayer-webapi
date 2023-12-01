@@ -16,6 +16,7 @@
 package com.tsurugidb.belayer.webapi.dto;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
@@ -47,7 +48,7 @@ public class ExecStatus {
     private String kind;
     private String status;
     private String format;
-    private BigDecimal progress;
+    private BigDecimal progress = new BigDecimal(0, new MathContext(2, RoundingMode.HALF_UP));
     private String message;
     private String code;
     private String[] arguments;
@@ -79,12 +80,8 @@ public class ExecStatus {
     }
 
     private String toPercentage(BigDecimal progress) {
-        if (progress == null) {
-            return "?";
-        }
 
-        progress.setScale(2, RoundingMode.HALF_UP);
-        return new DecimalFormat("##0.00%").format(progress);
+        return new DecimalFormat("##0%").format(progress);
     }
 
 }

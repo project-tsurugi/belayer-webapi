@@ -16,6 +16,9 @@
 package com.tsurugidb.belayer.webapi.service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +50,7 @@ import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.JobManager;
 import com.tsurugidb.belayer.webapi.model.ZipFileUtil;
+import com.tsurugidb.belayer.webapi.util.FileUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
@@ -72,6 +77,9 @@ public class DumpLoadService {
     @Autowired
     ParquetService parquetService;
 
+    @Value("${webapi.load.progress_percentage_filesize_sum_computed}")
+    private int loadProgressPercentageWhenSumComputed;
+
     /**
      * Execute dump.
      *
@@ -92,6 +100,11 @@ public class DumpLoadService {
                 .flatMapMany(tsubakuroService::dumpTable)
                 .parallel()
                 .runOn(Schedulers.fromExecutor(threadPoolTaskExecutor))
+                .map(filePath -> {
+                    // set progress
+                    job.addProgressNumerator(FileUtil.getFileSize(filePath));
+                    return filePath;
+                })
                 // convert format to CSV if specified
                 .map(filePath -> this.convertParquetToCsvIfNecessary(filePath, param.getFormat(), param.getUid(),
                         param.getDirPath() + "/" + param.getJobId()))
@@ -243,12 +256,9 @@ public class DumpLoadService {
                 .map(tsubakuroService::createLoadTransaction)
                 .map(j -> this.createTempDir(job))
                 .map(j -> this.expandZipIfNecessary(job))
-                .flatMapMany(this::getDumpFileAbsolutePath)
+                .flatMapMany(this::getLoadTargetFileAbsolutePath)
                 .parallel()
                 .runOn(Schedulers.fromExecutor(threadPoolTaskExecutor))
-                // convert to parquet when CSV format files is submitted.
-                .map(filePath -> this.convertCsvToParquetIfNecessary(filePath, job.getUid(),
-                        job.getFormat(), job.getTempDir()))
                 .flatMap(loadFileInfo -> tsubakuroService.loadFile(job, loadFileInfo))
                 .collectSortedList(Comparator.naturalOrder())
                 .flatMap(result -> setLoadResult(param.getUid(), param.getJobId(), job.getFiles()))
@@ -321,7 +331,7 @@ public class DumpLoadService {
         }
     }
 
-    private Flux<Path> getDumpFileAbsolutePath(LoadJob job) {
+    private Flux<LoadFileInfo> getLoadTargetFileAbsolutePath(LoadJob job) {
         log.debug("job:{}", job);
         var list = new ArrayList<Path>();
         for (String filePath : job.getFiles()) {
@@ -340,7 +350,32 @@ public class DumpLoadService {
             throw new IllegalArgumentException("no files to load.");
         }
 
-        return Flux.fromIterable(list);
+        // calcurate filesize sum
+        long fileSizeSum = 0;
+        var parquetPathList = new ArrayList<LoadFileInfo>();
+        for (var path : list) {
+            LoadFileInfo info = convertCsvToParquetIfNecessary(path, job.getUid(), job.getFormat(),job.getTempDir());
+            var parquetPath= info.getFilePath();
+            parquetPathList.add(info);
+            long fileSize = FileUtil.getFileSize(parquetPath);
+            log.debug("file size:" + fileSize);
+
+            fileSizeSum += fileSize;
+        }
+        // save progress
+        int rate = loadProgressPercentageWhenSumComputed;
+
+        log.debug("file size sum:" + fileSizeSum);
+        long denominator = BigDecimal.valueOf(fileSizeSum)
+            .divide(BigDecimal.valueOf(100 - rate).divide(BigDecimal.valueOf(100)), 2, RoundingMode.UP).longValue();
+        long numerator = BigDecimal.valueOf(denominator).multiply(BigDecimal.valueOf(rate))
+            .divide(BigDecimal.valueOf(100), new MathContext(0, RoundingMode.DOWN)).longValue();
+        log.debug("num/dnm={}/{}", numerator, denominator);
+
+        job.setProgressDenominator(denominator);
+        job.addProgressNumerator(numerator);
+
+        return Flux.fromIterable(parquetPathList);
     }
 
     private LoadFileInfo convertCsvToParquetIfNecessary(Path inFilePath, String uid, String format, Path tmpDir) {
@@ -481,7 +516,7 @@ public class DumpLoadService {
      * Return list of jobs.
      *
      * @param type backup or restore
-     * @param uid User ID
+     * @param uid  User ID
      * @return List of Jobs
      */
     public Flux<Job> getJobList(String type, String uid) {

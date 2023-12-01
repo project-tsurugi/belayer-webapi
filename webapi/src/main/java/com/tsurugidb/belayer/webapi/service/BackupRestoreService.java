@@ -45,6 +45,7 @@ import com.tsurugidb.belayer.webapi.exec.OfflineBackupExec;
 import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.JobManager;
 import com.tsurugidb.belayer.webapi.model.ZipFileUtil;
+import com.tsurugidb.belayer.webapi.util.FileUtil;
 import com.tsurugidb.tsubakuro.common.Session;
 
 import lombok.extern.slf4j.Slf4j;
@@ -126,7 +127,13 @@ public class BackupRestoreService {
         .parallel()
         .runOn(Schedulers.fromExecutor(threadPoolTaskExecutor))
         .map(ctx -> {
-          String downloadPath = fileSystemService.copyTo(ctx.getTargetFilePath(), job.getWorkDir());
+          var targetPath = ctx.getTargetFilePath();
+          String downloadPath = fileSystemService.copyTo(targetPath, job.getWorkDir());
+          // calculate progress
+          var fileSize = FileUtil.getFileSize(targetPath);
+          log.debug("file size(completed):{}", fileSize);
+          job.addProgressNumerator(fileSize);
+
           Session session = ctx.getSession();
           try {
             log.debug("expand session timeout for {} minutes", this.sessionTimeout);
@@ -191,7 +198,7 @@ public class BackupRestoreService {
         .flatMap(result -> setBackupResult(param.getUid(), param.getJobId(), result))
         .flatMap(this::registerCompletedResult)
         .map(j -> {
-          fileSystemService.deleteDirectoryWithContent(((BackupJob)j).getWorkDir());
+          fileSystemService.deleteDirectoryWithContent(((BackupJob) j).getWorkDir());
           return j;
         })
         .onErrorResume(ex -> registerFailedResult(job, ex))
@@ -257,7 +264,7 @@ public class BackupRestoreService {
         .map(dbRestoreExec::startRestore)
         .flatMap(this::registerCompletedResult)
         .map(j -> {
-          fileSystemService.deleteDirectoryWithContent(((RestoreJob)job).getWorkDir());
+          fileSystemService.deleteDirectoryWithContent(((RestoreJob) job).getWorkDir());
           return j;
         })
         .onErrorResume(ex -> registerFailedResult(job, ex))
@@ -314,7 +321,7 @@ public class BackupRestoreService {
    * Return list of jobs.
    *
    * @param type backup or restore
-   * @param uid User ID
+   * @param uid  User ID
    * @return List of Jobs
    */
   public Flux<Job> getJobList(String type, String uid) {
@@ -373,7 +380,7 @@ public class BackupRestoreService {
   private Mono<Job> registerFailedResult(Job job, Throwable th) {
     log.error("error occured. jobId:" + job.getJobId(), th);
     if (Job.TYPE_BACKUP.equals(job.getType())) {
-      var zipFileName = ((BackupJob)job).getDestDir() + String.format("/backup-%s.zip", job.getJobId());
+      var zipFileName = ((BackupJob) job).getDestDir() + String.format("/backup-%s.zip", job.getJobId());
       new File(zipFileName).delete();
     }
     jobManager.updateJobStatus(job, JobStatus.FAILED, th);

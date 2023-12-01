@@ -16,11 +16,15 @@
 package com.tsurugidb.belayer.webapi.dto;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.tsurugidb.belayer.webapi.util.FileUtil;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.datastore.Backup;
 import com.tsurugidb.tsubakuro.datastore.DatastoreClient;
@@ -43,14 +47,40 @@ public class BackupTransaction implements AutoCloseable {
     /**
      * return Path of files to backup.
      * 
+     * @param job                               Backup Job
+     * @param progressPercentageWhenApiRetern   progress percentage(0~100)
+     * @param progressPercentageWhenSumComputed progress percentage(0~100)
      * @return Path of files and current session.
      */
-    public List<BackupContext> getBackupFilePaths() {
+    public List<BackupContext> getBackupFilePaths(BackupJob job, int progressPercentageWhenApiRetern,
+            int progressPercentageWhenSumComputed) {
         Objects.requireNonNull(backup);
         var list = new ArrayList<BackupContext>();
-        for (Path path : backup.getFiles()) {
+        var files = backup.getFiles();
+
+        // save progress
+        job.setProgress(Integer.valueOf(progressPercentageWhenApiRetern));
+
+        // calcuate filesize sum
+
+        long fileSizeSum = 0;
+        for (Path path : files) {
+            var fileSize = FileUtil.getFileSize(path);
+            log.debug("file size:" + fileSize);
+            fileSizeSum += fileSize;
             list.add(new BackupContext(path, session));
         }
+
+        // save progress
+        int  rate = progressPercentageWhenSumComputed;
+
+        log.debug("file size sum:" + fileSizeSum);
+        long denominator = BigDecimal.valueOf(fileSizeSum).divide(BigDecimal.valueOf(100-rate).divide(BigDecimal.valueOf(100)), 2, RoundingMode.UP).longValue();
+        long numerator = BigDecimal.valueOf(denominator).multiply(BigDecimal.valueOf(rate)).divide(BigDecimal.valueOf(100), new MathContext(0, RoundingMode.DOWN)).longValue();
+        log.debug("num/dnm={}/{}", numerator, denominator);
+
+        job.setProgressDenominator(denominator);
+        job.addProgressNumerator(numerator);
 
         return list;
     }

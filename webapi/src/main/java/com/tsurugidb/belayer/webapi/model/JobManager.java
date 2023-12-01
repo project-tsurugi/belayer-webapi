@@ -114,6 +114,8 @@ public class JobManager implements DisposableBean {
       // skip update when job has already canceled.
       if (target.getStatus() != JobStatus.CANCELED) {
         target.setStatus(jobStatus);
+        target.setProgress(Job.PROGRESS_COMPLETED);
+
         if (th != null) {
           target.setErrorMessage(th.getMessage());
         }
@@ -154,6 +156,7 @@ public class JobManager implements DisposableBean {
       // cancel job if alived.
       log.debug("cancel job:" + job);
       job.setStatus(JobStatus.CANCELED);
+      job.setProgress(Job.PROGRESS_COMPLETED);
       job.setEndTime(systemTime.now());
       job.cancelJob();
       job.close();
