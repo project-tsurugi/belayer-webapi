@@ -43,4 +43,6 @@ public class Constants {
 
     public static String TEMP_DIR_PREFIX_MONITOR = "belayer-climonitor-";
 
+    public static String FILE_PREFIX_MULTIPLE_DOWNLOAD_ZIP = "belayer_download_";
+
 }

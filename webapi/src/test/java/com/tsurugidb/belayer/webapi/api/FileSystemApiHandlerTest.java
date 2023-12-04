@@ -25,6 +25,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -36,10 +40,12 @@ import java.util.zip.ZipInputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -53,6 +59,8 @@ import org.springframework.web.util.UriBuilder;
 import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
+import com.tsurugidb.belayer.webapi.dto.DownloadZip;
+import com.tsurugidb.belayer.webapi.model.SystemTime;
 
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = { "webapi.storage.root=./test_tmp",
@@ -73,8 +81,12 @@ public class FileSystemApiHandlerTest {
 
   private static final String TEST_USER = "test_user";
 
+  @MockBean
+  SystemTime systemTime;
+
   @BeforeEach
   public void setUp() throws IOException {
+
     client = WebTestClient
         .bindToRouterFunction(routerFunction)
         .apply(springSecurity())
@@ -222,36 +234,321 @@ public class FileSystemApiHandlerTest {
 
   @Test
   @WithMockUser(username = TEST_USER)
-  public void testDownloadFile_parquet_file() throws IOException {
-    String testParquetFile = "./src/test/files/parquet/test.parquet";
+  public void testDownloadZipFile_parquet_file() throws IOException {
+    String testParquetFile1 = "./src/test/files/parquet/test.parquet";
+    String testParquetFile2 = "./src/test/files/parquet/test2.parquet";
 
     String destDir = "dir_for_test";
     String fileName = "test.parquet";
-    String filePath = destDir + "/" + fileName;
+    String fileName2 = "test2.parquet";
 
     Path dir = Path.of(storageRootDir, TEST_USER, destDir);
-    Files.createDirectories(dir);
-    Files.copy(Path.of(testParquetFile), Path.of(dir.toString(), fileName));
 
-    Function<UriBuilder, URI> uri = (builder -> builder.path("/api/download/{path}").queryParam("csv", "true")
-        .build(filePath));
+    try {
+      Files.createDirectories(dir);
+      Files.copy(Path.of(testParquetFile1), Path.of(dir.toString(), fileName));
+      Files.copy(Path.of(testParquetFile2), Path.of(dir.toString(), fileName2));
+    } catch (Exception ex) {
+      System.out.println(ex.toString());
+    }
+    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+        // .queryParam("csv", "true")
+        .build());
 
-    client.get().uri(uri)
+    var param = new DownloadZip();
+    param.setPathList(
+      new String[] {
+        destDir + "/" + fileName,
+        destDir + "/" + fileName2,
+      }
+    );
+
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
+    var formattedString = DateTimeFormatter
+      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+
+    client.post().uri(uri)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
-        .expectHeader().contentType("text/csv")
-        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"test.csv\""))
+        .expectHeader().contentType("application/zip")
+        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
         .expectBody(byte[].class)
         .consumeWith(body -> {
-          try {
-            var contents = body.getResponseBodyContent();
-            String csv = new String(contents, "UTF-8");
-            String[] lines = csv.split("\n");
-            assertEquals(502, lines.length);
-          } catch (Exception ex) {
-            throw new RuntimeException("ex", ex);
+          var bytes = body.getResponseBodyContent();
+          try (var in = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry = in.getNextEntry();
+            assertEquals(fileName, entry.getName());
+            entry = in.getNextEntry();
+            assertEquals(fileName2, entry.getName());
+          } catch (Exception e) {
+            throw new RuntimeException("ex", e);
           }
         });
+  }
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void testDownloadZipFile_to_csv_file() throws IOException {
+    String testParquetFile1 = "./src/test/files/parquet/test.parquet";
+    String testParquetFile2 = "./src/test/files/parquet/test2.parquet";
+
+    String destDir = "dir_for_test";
+    String fileName = "test.parquet";
+    String fileName2 = "test2.parquet";
+
+    String fileName_conv = "test.csv";
+    String fileName2_conv = "test2.csv";
+
+    Path dir = Path.of(storageRootDir, TEST_USER, destDir);
+
+    try {
+      Files.createDirectories(dir);
+      Files.copy(Path.of(testParquetFile1), Path.of(dir.toString(), fileName));
+      Files.copy(Path.of(testParquetFile2), Path.of(dir.toString(), fileName2));
+    } catch (Exception ex) {
+      System.out.println(ex.toString());
+    }
+    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+        .queryParam("csv", "true")
+        .build());
+
+    var param = new DownloadZip();
+    param.setPathList(
+      new String[] {
+        destDir + "/" + fileName,
+        destDir + "/" + fileName2,
+      }
+    );
+
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
+    var formattedString = DateTimeFormatter
+      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+
+    client.post().uri(uri)
+        .bodyValue(param)
+        .exchange()
+        .expectStatus().isOk()
+        .expectHeader().contentType("application/zip")
+        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
+        .expectBody(byte[].class)
+        .consumeWith(body -> {
+          var bytes = body.getResponseBodyContent();
+          try (var in = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry = in.getNextEntry();
+            assertEquals(fileName_conv, entry.getName());
+            entry = in.getNextEntry();
+            assertEquals(fileName2_conv, entry.getName());
+          } catch (Exception e) {
+            throw new RuntimeException("ex", e);
+          }
+        });
+  }
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void testDownloadZipFile_csv_parquet_file() throws IOException {
+    String testParquetFile1 = "./src/test/files/parquet/test.parquet";
+    String testCsvFile2 = "./src/test/files/parquet/type.csv";
+
+    String destDir = "dir_for_test";
+    String fileName = "test.parquet";
+    String fileName2 = "type.csv";
+
+    Path dir = Path.of(storageRootDir, TEST_USER, destDir);
+
+    try {
+      Files.createDirectories(dir);
+      Files.copy(Path.of(testParquetFile1), Path.of(dir.toString(), fileName));
+      Files.copy(Path.of(testCsvFile2), Path.of(dir.toString(), fileName2));
+    } catch (Exception ex) {
+      System.out.println(ex.toString());
+    }
+    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+        // .queryParam("csv", "true")
+        .build());
+
+    var param = new DownloadZip();
+    param.setPathList(
+      new String[] {
+        destDir + "/" + fileName,
+        destDir + "/" + fileName2,
+      }
+    );
+
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
+    var formattedString = DateTimeFormatter
+      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+
+    client.post().uri(uri)
+        .bodyValue(param)
+        .exchange()
+        .expectStatus().isOk()
+        .expectHeader().contentType("application/zip")
+        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
+        .expectBody(byte[].class)
+        .consumeWith(body -> {
+          var bytes = body.getResponseBodyContent();
+          try (var in = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry = in.getNextEntry();
+            assertEquals(fileName, entry.getName());
+            entry = in.getNextEntry();
+            assertEquals(fileName2, entry.getName());
+          } catch (Exception e) {
+            throw new RuntimeException("ex", e);
+          }
+        });
+  }
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void testDownloadZipFile_csv_parquet_conv_file() throws IOException {
+    String testParquetFile1 = "./src/test/files/parquet/test.parquet";
+    String testCsvFile2 = "./src/test/files/parquet/type.csv";
+
+    String destDir = "dir_for_test";
+    String fileName = "test.parquet";
+    String fileName2 = "type.csv";
+
+    String fileName_comv = "test.csv";
+
+    Path dir = Path.of(storageRootDir, TEST_USER, destDir);
+
+    try {
+      Files.createDirectories(dir);
+      Files.copy(Path.of(testParquetFile1), Path.of(dir.toString(), fileName));
+      Files.copy(Path.of(testCsvFile2), Path.of(dir.toString(), fileName2));
+    } catch (Exception ex) {
+      System.out.println(ex.toString());
+    }
+    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+        .queryParam("csv", "true")
+        .build());
+
+    var param = new DownloadZip();
+    param.setPathList(
+      new String[] {
+        destDir + "/" + fileName,
+        destDir + "/" + fileName2,
+      }
+    );
+
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
+    var formattedString = DateTimeFormatter
+      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+
+    client.post().uri(uri)
+        .bodyValue(param)
+        .exchange()
+        .expectStatus().isOk()
+        .expectHeader().contentType("application/zip")
+        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
+        .expectBody(byte[].class)
+        .consumeWith(body -> {
+          var bytes = body.getResponseBodyContent();
+          try (var in = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            ZipEntry entry = in.getNextEntry();
+            assertEquals(fileName_comv, entry.getName());
+            entry = in.getNextEntry();
+            assertEquals(fileName2, entry.getName());
+          } catch (Exception e) {
+            throw new RuntimeException("ex", e);
+          }
+        });
+  }
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void testDownloadZipFile_invalid_path() throws IOException {
+
+    String destDir = "dir_for_test";
+    String destDir2 = "dir_for_test2";
+    String fileName = "test.parquet";
+    String fileName2 = "test2.parquet";
+
+    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+        .build());
+
+    var param = new DownloadZip();
+    param.setPathList(
+      new String[] {
+        destDir + "/" + fileName,
+        destDir2 + "/" + fileName2,
+      }
+    );
+
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
+    client.post().uri(uri)
+        .bodyValue(param)
+        .exchange()
+        .expectStatus().isBadRequest();
+  }
+
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void testDownloadZipFile_empty_path() throws IOException {
+
+    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+        .build());
+
+    var param = new DownloadZip();
+    param.setPathList(
+      new String[] {}
+    );
+
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
+    client.post().uri(uri)
+        .bodyValue(param)
+        .exchange()
+        .expectStatus().isBadRequest();
+  }
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void testDownloadZipFile_invalid_file() throws IOException {
+
+    String destDir = "dir_for_test";
+    String fileName = "test.parquet";
+    String fileName2 = "test2.parquet";
+
+    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+        .build());
+
+    var param = new DownloadZip();
+    param.setPathList(
+      new String[] {
+        destDir + "/" + fileName,
+        destDir + "/" + fileName2,
+      }
+    );
+
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
+    client.post().uri(uri)
+        .bodyValue(param)
+        .exchange()
+        .expectStatus().isBadRequest();
   }
 
   @Test
