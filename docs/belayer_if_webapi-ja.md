@@ -273,7 +273,7 @@
     * １つのディレクトリに指定したパスのリストに対応するファイル群をフラットに配置したZipを返す。
     * Zipのファイル名は「belayer_download_yyyyMMddHHmmssSSS.zip」とする。yyyyMMddHHmmssSSSはサーバが処理した時点のUTC時刻（年月日時分秒+ミリ秒)
 * リクエスト
-    * メソッド:GET
+    * メソッド:POST
     * パス: /api/downloadzip
     * パラメータ:
         * csv(クエリパラメータ): trueを指定し、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換したファイルをZipに格納し、ダウンロードする。
