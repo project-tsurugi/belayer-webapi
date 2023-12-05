@@ -11,6 +11,10 @@ def versionString = file('../VERSION').text.trim()
 version = versionString
 def tsubarkuro_version = '1.0.1'
 
+def resolvedTsubakuroVersion = project.hasProperty('com.tsurugidb.tsubakuro.version')
+	? project.getProperty('com.tsurugidb.tsubakuro.version')
+	: tsubarkuro_version
+
 ext {
 	isReleaseVersion = !version.endsWith("SNAPSHOT")
 }
@@ -77,10 +81,10 @@ dependencies {
 	implementation 'org.apache.hadoop:hadoop-common:3.3.4'
 	implementation 'org.apache.hadoop:hadoop-client:3.3.4'
 	implementation 'org.apache.commons:commons-csv:1.9.0'
-	implementation "com.tsurugidb.tsubakuro:tsubakuro-session:${tsubarkuro_version}"
-	implementation "com.tsurugidb.tsubakuro:tsubakuro-connector:${tsubarkuro_version}"
-	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-http:${tsubarkuro_version}"
-	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-mock:${tsubarkuro_version}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-session:${resolvedTsubakuroVersion}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-connector:${resolvedTsubakuroVersion}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-http:${resolvedTsubakuroVersion}"
+	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-mock:${resolvedTsubakuroVersion}"
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
