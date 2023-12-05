@@ -62,6 +62,7 @@ import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
+import com.tsurugidb.belayer.webapi.dto.DownloadZip;
 import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
@@ -92,6 +93,9 @@ public class Router {
 
     /** API Path for Download API */
     public static final String DOWNLOAD_API = "/api/download";
+
+    /** API Path for DownloadZip API */
+    public static final String DOWNLOADZIP_API = "/api/downloadzip";
 
     /** API Path for List API */
     public static final String LIST_FILES_API = "/api/dirlist";
@@ -180,6 +184,9 @@ public class Router {
             .build())
         .and(route()
             .GET(ApiPath.DOWNLOAD_API + "/{filepath}", fileSystemApiHandler::downloadFile, downloadApiDoc())
+            .build())
+        .and(route()
+            .POST(ApiPath.DOWNLOADZIP_API, fileSystemApiHandler::downloadzipFile, downloadZipApiDoc())
             .build())
         .and(route()
             .GET(ApiPath.LIST_FILES_API + "/{dirpath}", fileSystemApiHandler::listFiles, fileListApiDoc())
@@ -394,6 +401,25 @@ public class Router {
   }
 
   /**
+   * API Doc for DownloadZip API.
+   */
+  private Consumer<Builder> downloadZipApiDoc() {
+    return ops -> ops.tag("fs")
+        .operationId("downloadzip")
+        .summary("Downloads multiple file paths.")
+        .method("POST")
+        .requestBody(requestBodyBuilder().content(
+            contentBuilder()
+                .mediaType("application/json")
+                .schema(schemaBuilder().type("object").implementation(DownloadZip.class))))
+        .response(responseBuilder().responseCode("200").description("Upload Succeeded.")
+            .content(contentBuilder().mediaType("application/octed-stream")))
+        .response(responseBuilder().responseCode("404").description("Specified file is not found."))
+        .response(responseBuilder().responseCode("400").description("Invalid directory or file path."));
+
+  }
+
+  /**
    * API Doc for Download API.
    */
   private Consumer<Builder> downloadApiDoc() {
@@ -409,7 +435,6 @@ public class Router {
         .response(responseBuilder().responseCode("400").description("Invalid directory or file path."));
 
   }
-
   /**
    * API Doc for List Files API.
    */

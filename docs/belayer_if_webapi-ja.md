@@ -6,6 +6,7 @@
   - [トークンリフレッシュAPI](#トークンリフレッシュapi)
   - [ファイルアップロードAPI](#ファイルアップロードapi)
   - [ファイルダウンロードAPI](#ファイルダウンロードapi)
+  - [ファイル一括ダウンロードAPI](#ファイル一括ダウンロードapi)
   - [ファイル削除API](#ファイル削除api)
   - [ファイル複数削除API](#ファイル複数削除api)
   - [ディレクトリ削除API](#ディレクトリ削除api)
@@ -249,7 +250,54 @@
     * 正常
         * ステータスコード:200
         * Content-Type: application/octet-stream もしくは ファイルに合わせたMIME Type。
+        * Content-Disposition: attachment; filename="<対象のファイル名>"
         * ボディ: MIMEエンコードしたファイルコンテンツ
+    * 異常(該当ファイルなし)
+        * 条件
+            * 指定したファイルが存在しない場合
+        * ステータスコード: 404
+        * Content-Type: application/json
+        * ボディ: ```{"errorMessage": "File not found. path:{path_to_file}"}```
+    * 異常(ディレクトリ指定不正)
+        * 条件
+            * 指定したディレクトリ指定が不正な場合
+        * ステータスコード: 400
+        * Content-Type: application/json
+        * ボディ:```{"errorMessage": "Invalid file path. path:{path_to_file}"}```
+    * 異常(ファイル読み込みエラー)
+        * 条件
+            * 何らかの理由でファイル読み込みに失敗した場合
+        * ステータスコード: 500
+        * ボディ: ```{"errorMessage": "Unexpected Error occurred."}```
+
+## ファイル一括ダウンロードAPI
+
+* 概要: 複数のパスを指定し、Zipファイルの形式でダウンロードする。
+    * １つのディレクトリに指定したパスのリストに対応するファイル群をフラットに配置したZipを返す。
+    * Zipのファイル名は「belayer_download_yyyyMMddHHmmssSSS.zip」とする。yyyyMMddHHmmssSSSはサーバが処理した時点のUTC時刻（年月日時分秒+ミリ秒)
+* リクエスト
+    * メソッド:POST
+    * パス: /api/downloadzip
+    * パラメータ:
+        * csv(クエリパラメータ): trueを指定し、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換したファイルをZipに格納し、ダウンロードする。
+    * ボディ:
+        * pathList: ダウンロード対象のパスのリスト
+
+            ```
+            {
+               pathList: [
+                 "dir1/FOO_TBL0.parquet",
+                 "dir1/FOO_TBL1.parquet",
+               ]
+            }
+            ```
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Disposition: attachment; filename="<belayer_download_yyyyMMddHHmmssSSS>.zip"
+        * Content-Type: application/zip
+        * ボディ: MIMEエンコードしたファイルコンテンツ
+        * ボディ: 対象ファイル群をZipに格納したファイルコンテンツ
     * 異常(該当ファイルなし)
         * 条件
             * 指定したファイルが存在しない場合

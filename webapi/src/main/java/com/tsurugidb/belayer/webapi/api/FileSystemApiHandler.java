@@ -21,6 +21,11 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,11 +54,13 @@ import com.tsurugidb.belayer.webapi.api.helper.UploadHelper;
 import com.tsurugidb.belayer.webapi.api.helper.UploadHelper.UploadParameter;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
+import com.tsurugidb.belayer.webapi.dto.DownloadZip;
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 import com.tsurugidb.belayer.webapi.exception.InternalServerErrorException;
 import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.ZipFileUtil;
+import com.tsurugidb.belayer.webapi.model.SystemTime;
 import com.tsurugidb.belayer.webapi.service.FileSystemService;
 import com.tsurugidb.belayer.webapi.service.ParquetService;
 
@@ -85,6 +92,9 @@ public class FileSystemApiHandler {
 
   @Autowired
   private ParquetService parquetService;
+
+  @Autowired
+  private SystemTime systemTime;
 
   @PostConstruct
   public void validateProperties() {
@@ -286,6 +296,86 @@ public class FileSystemApiHandler {
         .header("Content-Disposition", "attachment; filename=" + filePath)
         .body(BodyInserters.fromResource(resource));
 
+  }
+
+  /**
+   * DownloadZip API Handler
+   *
+   * curl -X POST -H "Content-Type: application/json" -d '{"pathList":
+   * ["dir1/FOO_TBL0.parquet", "dir1/FOO_TBL1.parquet"}' localhost:8000/api/downloadzip
+   * -H "Authorization: Beaer $ACCESS_TOKEN"* *
+   *
+   * @param req Request
+   * @return Response
+
+   */
+  public Mono<ServerResponse> downloadzipFile(ServerRequest req) {
+
+    boolean convertToCsv = Boolean.valueOf(req.queryParam("csv").orElse("false"));
+
+    return ReactiveSecurityContextHolder.getContext()
+      .map(SecurityContext::getAuthentication)
+      .flatMap(auth -> downloadParams(auth, req))
+      .map(param -> getMultipleFileResource(param.getUid(), param.getPathList(), convertToCsv))
+      .flatMap(resource -> createBinaryRespose(resource, resource.getFilename()));
+  }
+
+  private Resource getMultipleFileResource(String uid, String[] filePathList, boolean convertToCsv) {
+
+    if (filePathList.length < 1) {
+      throw new BadRequestException("One or more filePaths must be specified.", null);
+    }
+
+    // get parent dir
+    String parentDir = Arrays.stream(filePathList)
+        .map(Paths::get)
+        .map(Path::getParent)
+        .map(Path::toString)
+        .distinct()
+        .reduce((dir1, dir2) -> dir1.equals(dir2) ? dir1 : "")
+        .orElse("");
+
+    if (parentDir == null || parentDir.toString().isEmpty()) {
+      throw new BadRequestException("Only files with the same parent directory can be included.", null);
+    }
+
+    Path dirPath = Path.of(storageRootDir, uid, parentDir).toAbsolutePath().normalize();
+    String fileName = Constants.FILE_PREFIX_MULTIPLE_DOWNLOAD_ZIP + createTimeStamp() + Constants.EXT_ZIP;
+
+    Path tempDir = fileSystemService.createTempDirectory(Constants.TEMP_DIR_PREFIX_DOWNLOAD);
+    String zipFilePath = tempDir.toString() + "/" + fileName;
+
+    String zipFileName = Arrays.stream(filePathList)
+    .map(filepath -> getFileResource(uid, filepath, filepath.endsWith(Constants.EXT_PARQUET) ? convertToCsv : false))
+    .map(file -> getFilePath(file))
+    .collect(ZipFileUtil.collectAsZipFile(dirPath, zipFilePath, zipCompressLevel));
+
+    return new FileSystemResource(zipFileName);
+  }
+
+  private String createTimeStamp() {
+      var now = systemTime.now();
+      return  DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
+        .format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+  }
+
+  private String getFilePath(Resource resource) {
+    try {
+      return resource.getURI().getPath();
+    } catch (Exception ex) {
+      throw new BadRequestException("Failed to get File or Directory resource", null);
+    }
+  }
+
+  private Mono<DownloadZip> downloadParams(Authentication auth, ServerRequest req) {
+
+    return req.bodyToMono(DownloadZip.class)
+        .switchIfEmpty(Mono.just(new DownloadZip()))
+        // fill params
+        .map(param -> {
+          param.setUid(auth.getName());
+          return param;
+        });
   }
 
   /**
