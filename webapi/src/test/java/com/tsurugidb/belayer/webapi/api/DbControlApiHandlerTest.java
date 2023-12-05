@@ -15,6 +15,10 @@
  */
 package com.tsurugidb.belayer.webapi.api;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,7 +35,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import com.tsurugidb.belayer.webapi.dto.DbStatus;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
+import com.tsurugidb.belayer.webapi.service.DbControlService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 
 @ActiveProfiles("ut")
@@ -46,6 +53,9 @@ public class DbControlApiHandlerTest {
   @Autowired
   TsubakuroService tsubakuroService;
 
+  @MockBean
+  DbControlService dbControlService;
+
 
   private static final String TEST_USER = "test_user";
 
@@ -56,6 +66,43 @@ public class DbControlApiHandlerTest {
         .apply(SecurityMockServerConfigurers.springSecurity())
         .configureClient()
         .build();
+  }
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void startDatabase() {
+
+    doNothing().when(dbControlService).startDatabase(anyString());
+    client.post()
+        .uri("/api/db/start")
+        .exchange()
+        .expectStatus().isOk();
+  }
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void shutdown() {
+
+    doNothing().when(dbControlService).shutdownDatabase(anyString());
+    client.get()
+        .uri("/api/db/status")
+        .exchange()
+        .expectStatus().isOk();
+  }
+
+
+  @Test
+  @WithMockUser(username = TEST_USER)
+  public void isOnline() {
+
+    when(dbControlService.getStatus(anyString())).thenReturn("running");
+    var expect = new DbStatus("running");
+    client.get()
+        .uri("/api/db/status")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(DbStatus.class)
+        .isEqualTo(expect);
   }
 
   @Test

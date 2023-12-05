@@ -21,13 +21,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.dto.ExecStatus;
 import com.tsurugidb.belayer.webapi.exception.ProcessExecException;
+import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.FileWatcher;
 import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 
@@ -35,40 +35,29 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class DbStatusExec {
+public class DbStartExec {
 
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
-  @Value("${webapi.cli.cmd.status}")
+  @Value("${webapi.cli.cmd.start}")
   String cmdString;
 
   @Autowired
   private MonitoringManager monitoringManager;
 
-  public boolean isOnline(String jobId) {
-
-    return ExecStatus.STATUS_RUNNNING.equals(getStatus(jobId));
-  }
-
-  public String getStatus(String jobId) {
+  public void startDatabse(String jobId) {
 
     FileWatcher watcher = null;
-    Path filePath = null;
-    Path stdOutput = null;
-    boolean success = false;
-    try {
-      Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-db-status");
-      if (!Files.exists(tmpDirPath)) {
-        Files.createDirectory(tmpDirPath);
-      }
 
-      String id = RandomStringUtils.randomAlphanumeric(8);
-      filePath = tmpDirPath.resolve(String.format("monitoring-%s.log", id));
-      stdOutput = tmpDirPath.resolve(String.format("stdout-%s.log", id));
+    try {
+      Path tmpDir = Files.createTempDirectory(Constants.TEMP_DIR_PREFIX_MONITOR + jobId + "_");
+      Path filePath = tmpDir.resolve(String.format("monitoring-%s.log", jobId));
+      Path stdOutput = tmpDir.resolve(String.format("stdout-%s.log", jobId));
 
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> {
+        log.debug("file changed:" + status.toString());
         if (status != null && ExecStatus.KIND_DATA.equals(status.getKind())) {
           status.setFreezed(true);
         }
@@ -81,31 +70,12 @@ public class DbStatusExec {
 
       ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_DATA.equals(s.getKind()));
 
-      if (status != null) {
-        var statusString = status.getStatus();
-        success = true;
-        return statusString;
-      }
-
-      throw new ProcessExecException("tsurugi status is unknown.", null);
-
+      log.debug("status:" + status);
     } catch (IOException | InterruptedException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {
       if (watcher != null) {
         watcher.close();
-      }
-      if (success) {
-        try {
-          if (filePath != null) {
-            Files.delete(filePath);
-          }
-          if (stdOutput != null) {
-            Files.delete(stdOutput);
-          }
-        } catch (Exception ignore) {
-          log.warn("failed to delete file", ignore);
-        }
       }
     }
   }

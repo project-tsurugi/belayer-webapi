@@ -98,7 +98,6 @@ public class FileSystemApiHandler {
    *
    * @param request Request
    * @return Response
-   * @throws IOException
    */
   public Mono<ServerResponse> uploadFiles(final ServerRequest request) {
 
@@ -187,7 +186,7 @@ public class FileSystemApiHandler {
   /**
    * Download API Handler
    *
-   * curl -v localhost:8000/api/download/<path_to_file> -H "Authorization: Beaer
+   * curl -v localhost:8000/api/download/path_to_file -H "Authorization: Beaer
    * $ACCESS_TOKEN"
    * NOTE: "/" in path should be replaced by "%2F".
    *
@@ -292,7 +291,7 @@ public class FileSystemApiHandler {
   /**
    * List Files API Handler
    *
-   * curl -v localhost:8000/api/dirlist/<path_to_file> -H "Authorization: Beaer
+   * curl -v localhost:8000/api/dirlist/path_to_dir -H "Authorization: Beaer
    * $ACCESS_TOKEN"
    * NOTE: "/" in path should be replaced by "%2F".
    *
@@ -375,7 +374,7 @@ public class FileSystemApiHandler {
   /**
    * Delete File API Handler
    *
-   * curl -v localhost:8000/api/delete/file/<path_to_file> -H "Authorization:
+   * curl -v localhost:8000/api/delete/file/ -d '{path="path_to_file"}' -H "Authorization:
    * Beaer
    * $ACCESS_TOKEN"
    * NOTE: "/" in path should be replaced by "%2F".
@@ -427,10 +426,7 @@ public class FileSystemApiHandler {
   /**
    * Delete Directory API Handler
    *
-   * curl -v localhost:8000/api/delete/dir/<path_to_dir> -H "Authorization:
-   * Beaer
-   * $ACCESS_TOKEN"
-   * NOTE: "/" in path should be replaced by "%2F".
+   * curl -v -X POST localhost:8000/api/delete/dir -d '{path="path_to_dir"}' -H "Authorization: Beaer $ACCESS_TOKEN"
    *
    * @param req Request
    * @return Response

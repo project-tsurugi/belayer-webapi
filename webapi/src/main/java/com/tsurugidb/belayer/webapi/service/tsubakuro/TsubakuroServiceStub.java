@@ -17,7 +17,6 @@ package com.tsurugidb.belayer.webapi.service.tsubakuro;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
