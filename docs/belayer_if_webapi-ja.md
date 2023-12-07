@@ -245,6 +245,7 @@
         * path_to_file(PATHパラメータ): ダウンロードするファイルパス。STORAGE_DIR/[uid]からの相対パス。
            * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
         * csv(クエリパラメータ): trueを指定し、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換してダウンロードする。
+            * 変換後のCSVのファイル名は「<変換元ファイルのベース名>_yyyyMMddHHmmssSSS.csv」とする。
     * ボディ:なし
 * レスポンス
     * 正常
@@ -280,6 +281,7 @@
     * パス: /api/downloadzip
     * パラメータ:
         * csv(クエリパラメータ): trueを指定し、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換したファイルをZipに格納し、ダウンロードする。
+            * 変換後のCSVのファイル名は「<変換元ファイルのベース名>_yyyyMMddHHmmssSSS.csv」とする。
     * ボディ:
         * pathList: ダウンロード対象のパスのリスト
 

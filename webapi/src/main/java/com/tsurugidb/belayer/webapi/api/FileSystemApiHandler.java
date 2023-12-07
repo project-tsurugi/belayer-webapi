@@ -207,15 +207,16 @@ public class FileSystemApiHandler {
 
     String filePath = req.pathVariable("filepath");
     boolean convertToCsv = Boolean.valueOf(req.queryParam("csv").orElse("false"));
+    String filenameSuffix = createTimeStamp();
 
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
         .map(Authentication::getName)
-        .map(uid -> getFileResource(uid, filePath, convertToCsv))
+        .map(uid -> getFileResource(uid, filePath, convertToCsv, filenameSuffix))
         .flatMap(resource -> createBinaryRespose(resource, resource.getFilename()));
   }
 
-  private Resource getFileResource(String uid, String filePath, boolean convertToCsv) {
+  private Resource getFileResource(String uid, String filePath, boolean convertToCsv, String suffix) {
 
     Path path = Path.of(storageRootDir, uid, filePath).toAbsolutePath().normalize();
 
@@ -252,7 +253,7 @@ public class FileSystemApiHandler {
       return resource;
     }
 
-    return convertToParquetToCsv(path);
+    return convertToParquetToCsv(path, suffix);
   }
 
   private Resource createZipResource(String uid, Path dirPath) {
@@ -271,17 +272,22 @@ public class FileSystemApiHandler {
     return new FileSystemResource(zipFileName);
   }
 
-  private Resource convertToParquetToCsv(Path parquetPath) {
+  private Resource convertToParquetToCsv(Path parquetPath, String filenameSuffix) {
 
     String parquetFilePath = parquetPath.toString();
+    String currentDir = parquetPath.getParent().toString();
+    String fileName = parquetPath.getFileName().toString();
 
-    if (!parquetFilePath.endsWith(Constants.EXT_PARQUET)) {
+    int extensionIndex = fileName.lastIndexOf(Constants.EXT_PARQUET);
+    if (extensionIndex == -1) {
       String msg = "Target is not a parquet file.";
       String reason = msg + " path:" + parquetFilePath;
       throw new BadRequestException(msg, reason);
     }
 
-    String csvFilePath = parquetFilePath.replaceAll(Constants.EXT_PARQUET + '$', Constants.EXT_CSV);
+    String baseName = fileName.substring(0, extensionIndex);
+    String csvFilePath = Paths.get(currentDir, baseName + "_" + filenameSuffix + Constants.EXT_CSV).toString();
+
     log.debug("paquet:{}, csv:{}", parquetFilePath, csvFilePath);
     parquetService.convertParquetToCsv(parquetFilePath, csvFilePath);
 
@@ -339,14 +345,16 @@ public class FileSystemApiHandler {
       throw new BadRequestException("Only files with the same parent directory can be included.", null);
     }
 
+    String filenameSuffix = createTimeStamp();
+
     Path dirPath = Path.of(storageRootDir, uid, parentDir).toAbsolutePath().normalize();
-    String fileName = Constants.FILE_PREFIX_MULTIPLE_DOWNLOAD_ZIP + createTimeStamp() + Constants.EXT_ZIP;
+    String fileName = Constants.FILE_PREFIX_MULTIPLE_DOWNLOAD_ZIP + filenameSuffix + Constants.EXT_ZIP;
 
     Path tempDir = fileSystemService.createTempDirectory(Constants.TEMP_DIR_PREFIX_DOWNLOAD);
     String zipFilePath = tempDir.toString() + "/" + fileName;
 
     String zipFileName = Arrays.stream(filePathList)
-    .map(filepath -> getFileResource(uid, filepath, filepath.endsWith(Constants.EXT_PARQUET) ? convertToCsv : false))
+    .map(filepath -> getFileResource(uid, filepath, filepath.endsWith(Constants.EXT_PARQUET) ? convertToCsv : false, filenameSuffix))
     .map(file -> getFilePath(file))
     .collect(ZipFileUtil.collectAsZipFile(dirPath, zipFilePath, zipCompressLevel));
 
