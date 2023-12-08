@@ -87,6 +87,10 @@ public class FileSystemApiHandlerTest {
   @BeforeEach
   public void setUp() throws IOException {
 
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
     client = WebTestClient
         .bindToRouterFunction(routerFunction)
         .apply(springSecurity())
@@ -195,6 +199,10 @@ public class FileSystemApiHandlerTest {
     Files.createDirectories(dir);
     Files.write(Path.of(dir.toString(), fileName), contents.getBytes(StandardCharsets.US_ASCII));
 
+    var strDateTime = "2022-06-30T12:12:34.567Z";
+    var now = Instant.parse(strDateTime);
+    Mockito.when(systemTime.now()).thenReturn(now);
+
     client.get().uri("/api/download/{path}", destDir)
         .exchange()
         .expectStatus().isOk()
@@ -300,9 +308,6 @@ public class FileSystemApiHandlerTest {
     String fileName = "test.parquet";
     String fileName2 = "test2.parquet";
 
-    String fileName_conv = "test.csv";
-    String fileName2_conv = "test2.csv";
-
     Path dir = Path.of(storageRootDir, TEST_USER, destDir);
 
     try {
@@ -330,6 +335,9 @@ public class FileSystemApiHandlerTest {
 
     var formattedString = DateTimeFormatter
       .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+
+    String fileName_conv = "test_" + formattedString + ".csv";
+    String fileName2_conv = "test2_" + formattedString + ".csv";
 
     client.post().uri(uri)
         .bodyValue(param)
@@ -371,7 +379,6 @@ public class FileSystemApiHandlerTest {
       System.out.println(ex.toString());
     }
     Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
-        // .queryParam("csv", "true")
         .build());
 
     var param = new DownloadZip();
@@ -417,9 +424,7 @@ public class FileSystemApiHandlerTest {
 
     String destDir = "dir_for_test";
     String fileName = "test.parquet";
-    String fileName2 = "type.csv";
-
-    String fileName_comv = "test.csv";
+    String fileName2 = "test.csv";
 
     Path dir = Path.of(storageRootDir, TEST_USER, destDir);
 
@@ -448,6 +453,8 @@ public class FileSystemApiHandlerTest {
 
     var formattedString = DateTimeFormatter
       .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+
+    String fileName_comv = "test_" + formattedString + ".csv";
 
     client.post().uri(uri)
         .bodyValue(param)
