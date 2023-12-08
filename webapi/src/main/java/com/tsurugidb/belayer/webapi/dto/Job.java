@@ -16,6 +16,8 @@
 package com.tsurugidb.belayer.webapi.dto;
 
 import java.io.Closeable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 
 import javax.validation.constraints.NotNull;
@@ -42,6 +44,8 @@ import reactor.core.Disposable;
 @Data
 @Slf4j
 public abstract class Job implements Closeable {
+
+  public static final Integer PROGRESS_COMPLETED = Integer.valueOf(100);
 
   public static final String TYPE_BACKUP = "backup";
   public static final String TYPE_RESTORE = "restore";
@@ -70,6 +74,15 @@ public abstract class Job implements Closeable {
 
   private String errorMessage;
 
+  @JsonIgnore
+  private long progressNumerator;
+
+  @JsonIgnore
+  private long progressDenominator;
+
+  /** progress percentage (0-100) */
+  private Integer progress;
+
   @Override
   public void close() {
     log.debug("Job is closed. class:{} job:{}", getClass(), jobId);
@@ -85,6 +98,34 @@ public abstract class Job implements Closeable {
   public boolean canCancel() {
 
     return status == JobStatus.RUNNING;
+  }
+
+  public synchronized void setProgress(Integer actualProgress) {
+    progress = actualProgress;
+    log.debug(getType() + " progress:" + this.getProgress());
+  }
+
+  public synchronized Integer getProgress() {
+    if (this.progress != null) {
+      return this.progress;
+    }
+
+    if (progressDenominator == 0) {
+      return 0;
+    }
+
+    var v = BigDecimal.valueOf(progressNumerator * 100);
+    return v.divide(BigDecimal.valueOf(progressDenominator), 2, RoundingMode.HALF_UP).intValue();
+  }
+
+  public synchronized void addProgressNumerator(long additionalProgressValue) {
+    this.progress = null;
+    this.progressNumerator += additionalProgressValue;
+    log.debug(getType() + " progress:" + this.getProgress());
+  }
+
+  public synchronized void setProgressDenominator(long progressDenominator) {
+    this.progressDenominator = progressDenominator;
   }
 
   public static enum JobStatus {

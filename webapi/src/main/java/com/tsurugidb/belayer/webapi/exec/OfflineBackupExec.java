@@ -17,6 +17,9 @@ package com.tsurugidb.belayer.webapi.exec;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -47,7 +50,7 @@ public class OfflineBackupExec {
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
-  @Value("${webapi.cli.cmd.backupoffline:oltp backup create %s --conf %s -v}")
+  @Value("${webapi.cli.cmd.backupoffline}")
   String cmdString;
 
   @Autowired
@@ -63,7 +66,14 @@ public class OfflineBackupExec {
       Path stdOutput = tmpDir.resolve(String.format("stdout-%s.log", job.getJobId()));
 
       watcher = new FileWatcher(filePath);
-      watcher.setCallback(status -> job.setOutput(status.toStatusString()));
+      watcher.setCallback(status -> {
+        BigDecimal progress = status.getProgress();
+        synchronized (job) {
+          job.setProgress(
+              progress.multiply(BigDecimal.valueOf(100), new MathContext(0, RoundingMode.HALF_UP)).intValue());
+          job.setOutput(status.toStatusString());
+        }
+      });
       monitoringManager.addFileWatcher(watcher);
 
       String dirPath = job.getWorkDir().toString();
@@ -92,7 +102,7 @@ public class OfflineBackupExec {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {
       stopWatch.stop();
-      log.debug("{}:{}ms","exec backup offline", stopWatch.getTotalTimeMillis());
+      log.debug("{}:{}ms", "exec backup offline", stopWatch.getTotalTimeMillis());
     }
   }
 

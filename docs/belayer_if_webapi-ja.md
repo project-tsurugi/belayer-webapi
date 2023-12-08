@@ -587,6 +587,7 @@
             * jobId: バックアップを識別するジョブID
             * uid: バックアップ処理を実行したユーザID
             * status: "RUNNING","COMPLETED","FAILED","CANCELED"のいずれか
+            * progress: ジョブ進捗率%(0～100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -601,6 +602,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "FAILED",
+                        "progress": 100,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "errorMessage": "[errorMessage]"
@@ -613,6 +615,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "CANCELED",
+                        "progress": 100,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "errorMessage": "[errorMessage]"
@@ -625,6 +628,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "COMPLETED",
+                        "progress": 100,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "errorMessage": null,
@@ -637,6 +641,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "RUNNING",
+                        "progress": 50,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": null,
                         "errorMessage": null,
@@ -652,6 +657,7 @@
             * jobId: リストアを識別するジョブID
             * uid: リストア処理を実行したユーザID
             * status: "RUNNING","COMPLETED","FAILED","CANCELED"のいずれか
+            * progress: ジョブ進捗率%(0～100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -665,6 +671,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "FAILED",
+                        "progress": 100,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "errorMessage": "[errorMessage]"
@@ -676,6 +683,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "CANCELED",
+                        "progress": 100,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "errorMessage": "[errorMessage]"
@@ -687,6 +695,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "COMPLETED",
+                        "progress": 100,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "errorMessage": null,
@@ -698,6 +707,7 @@
                         "jobId": "[jobId]",
                         "uid": "[uid]",
                         "status": "RUNNING",
+                        "progress": 50,
                         "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                         "endTime": null,
                         "errorMessage": null,
@@ -731,6 +741,7 @@
             * jobId: バックアップを識別するジョブID
             * uid: バックアップ処理を実行したユーザID
             * status: "RUNNING"
+            * progress: ジョブ進捗率%(0～100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -743,6 +754,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "RUNNING",
+                "progress": 50,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": null,
                 "errorMessage": null,
@@ -756,6 +768,7 @@
             * jobId: バックアップを識別するジョブID
             * uid: バックアップ処理を実行したユーザID
             * status: "COMPLETED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -768,6 +781,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "COMPLETED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": null,
@@ -781,6 +795,7 @@
             * jobId: バックアップを識別するジョブID
             * uid: バックアップ処理を実行したユーザID
             * status: "FAILED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -793,6 +808,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "FAILED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": "[errorMessage]"
@@ -806,6 +822,7 @@
             * jobId: バックアップを識別するジョブID
             * uid: バックアップ処理を実行したユーザID
             * status: "CANCELED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -818,6 +835,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "CANCELED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": "[errorMessage]"
@@ -831,6 +849,7 @@
             * jobId: リストアを識別するジョブID
             * uid: リストア処理を実行したユーザID
             * status: "RUNNING"
+            * progress: ジョブ進捗率%(0～100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -842,6 +861,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "RUNNING",
+                "progress": 50,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": null,
                 "errorMessage": null,
@@ -854,6 +874,7 @@
             * jobId: リストアを識別するジョブID
             * uid: リストア処理を実行したユーザID
             * status: "COMPLETED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -865,6 +886,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "COMPLETED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": null,
@@ -877,6 +899,7 @@
             * jobId: リストアを識別するジョブID
             * uid: リストア処理を実行したユーザID
             * status: "FAILED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -888,6 +911,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "FAILED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": "[errorMessage]"
@@ -900,6 +924,7 @@
             * jobId: リストアを識別するジョブID
             * uid: リストア処理を実行したユーザID
             * status: "CANCELED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -911,6 +936,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "CANCELED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": "[errorMessage]"
@@ -948,6 +974,7 @@
             * jobId: 指定したジョブID
             * uid: キャンセルを実行したユーザID
             * status: "CANCELED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -960,6 +987,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "CANCELED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": null,
@@ -973,6 +1001,7 @@
             * jobId: 指定したジョブID
             * uid: キャンセルを実行したユーザID
             * status: "CANCELED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -984,6 +1013,7 @@
                 "jobId": "[jobId]",
                 "uid": "[uid]",
                 "status": "CANCELED",
+                "progress": 100,
                 "startTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "endTime": "yyyy-MM-dd'T'HH:mm:ss.SSS+00:00",
                 "errorMessage": null,
@@ -1042,6 +1072,7 @@
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * status: "COMPLETED","FAILED","CANCELED"のいずれか
+            * progress: ジョブ進捗率%(0～100)
             * files: 生成したファイルのダウンロードパス
 
             ```
@@ -1053,6 +1084,7 @@
               "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
               "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
               "status": "COMPLETED",
+              "progress": 100,
               "files": [
                  "dir1/FOO_TBL0.parquet",
                  "dir1/FOO_TBL1.parquet",
@@ -1190,6 +1222,7 @@
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * status: "RUNNING","COMPLETED","FAILED","CANCELED"のいずれか
+            * progress: ジョブ進捗率%(0～100)
 
                 ```
                 {
@@ -1202,6 +1235,7 @@
                       "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                       "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                       "status": "CANCELED",
+                      "progress": 100,
                     },
                     {
                       "jobId": "[jobId]",
@@ -1211,6 +1245,7 @@
                       "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                       "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                       "status": "COMPLETED",
+                      "progress": 100,
                     },
                     {
                       "jobId": "[jobId]",
@@ -1220,6 +1255,7 @@
                       "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                       "endTime": null,
                       "status": "RUNNING",
+                      "progress": 50,
                     },
                   ]
                 }
@@ -1245,6 +1281,7 @@
             * jobId: 指定したジョブID
             * uid: ユーザID
             * status: "RUNNING"
+            * progress: ジョブ進捗率%(0～100)
             * startTime: 実行指示日時
             * endTime: null
             * errorMessage: null
@@ -1260,6 +1297,7 @@
                   "jobId": "[jobId]",
                   "uid": "[uid]",
                   "status": "RUNNING",
+                  "progress": 50,
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": null,
                   "errorMessage": null,
@@ -1275,6 +1313,7 @@
             * jobId: 指定したジョブID
             * uid: ユーザID
             * status: "COMPLETED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: null
@@ -1290,6 +1329,7 @@
                   "jobId": "[jobId]",
                   "uid": "[uid]",
                   "status": "COMPLETED",
+                  "progress": 100,
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "errorMessage": null,
@@ -1308,6 +1348,7 @@
             * jobId: 指定したジョブID
             * uid: ユーザID
             * status: "FAILED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: エラーメッセージ
@@ -1323,6 +1364,7 @@
                   "jobId": "[jobId]",
                   "uid": "[uid]",
                   "status": "FAILED",
+                  "progress": 100,
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "errorMessage": "[message]",
@@ -1337,6 +1379,7 @@
             * jobId: 指定したジョブID
             * uid: ユーザID
             * status: "CANCELED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: null
@@ -1352,6 +1395,7 @@
                   "jobId": "[jobId]",
                   "uid": "[uid]",
                   "status": "CANCELED",
+                  "progress": 100,
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "errorMessage": null,
@@ -1389,6 +1433,7 @@
             * jobId: 指定したジョブID
             * uid: ユーザID
             * status: "CANCELED"
+            * progress: ジョブ進捗率%(100)
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * errorMessage: null
@@ -1404,6 +1449,7 @@
                   "jobId": "[jobId]",
                   "uid": "[uid]",
                   "status": "CANCELED",
+                  "progress": 100,
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "errorMessage": null,
@@ -1450,6 +1496,7 @@
             * startTime: 実行指示日時
             * endTime: 常にnull
             * status: "AVAILABLE"
+            * progress: ジョブ進捗率%(0)
 
                 ```
                 {
@@ -1458,6 +1505,7 @@
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": null,
                   "status": "AVAILABLE"
+                  "progress": 0,
                 }
                 ```
 
@@ -1483,6 +1531,7 @@
             * startTime: 実行指示日時
             * endTime: 処理完了日時
             * status: "COMMITTED","ROLLBACK_COMPLETED"
+            * progress: ジョブ進捗率%(0)
 
                 ```
                 {
@@ -1491,6 +1540,7 @@
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "status": "COMMITTED"
+                  "progress": 0,
                 }
                 ```
 
@@ -1550,8 +1600,10 @@
                   "startTime": "YYYY-MM-DD HH:MM:SS.SSS+00:00",
                   "endTime": null,
                   "status": "AVAILABLE"
+                  "progress": 0,
                 }
                 ```
+            * progress: ジョブ進捗率%(0)
 
     * 異常（該当なし）
         * 条件

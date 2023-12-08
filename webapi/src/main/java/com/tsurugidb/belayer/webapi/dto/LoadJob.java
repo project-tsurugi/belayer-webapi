@@ -17,6 +17,8 @@ package com.tsurugidb.belayer.webapi.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -33,8 +35,11 @@ public class LoadJob extends TransactionalJob {
 
   private String table;
   private String format;
+  @JsonIgnore
   private boolean transactionNeeded = true;
   private List<String> files;
+  @JsonIgnore
   private List<String> filesFromZip;
+  @JsonIgnore
   private List<ColumnMapping> mappings;
 }

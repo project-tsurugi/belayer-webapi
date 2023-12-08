@@ -42,12 +42,16 @@ import com.tsurugidb.belayer.webapi.dto.LoadRequestParam;
 import com.tsurugidb.belayer.webapi.dto.TransactionalJob;
 import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.model.SystemTime;
+import com.tsurugidb.belayer.webapi.util.FileUtil;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = {
+        "webapi.dump.progress_percentage_api_return=0",
+        "webapi.dump.progress_percentage_filesize_sum_computed=0",
+        "webapi.load.progress_percentage_filesize_sum_computed=0" })
 public class DumpLoadServiceTest {
 
     @Autowired
@@ -87,9 +91,12 @@ public class DumpLoadServiceTest {
         expectJob.setEndTime(now);
         expectJob.setFormat(DumpLoadRequestParam.FORMAT_PARQUET);
         expectJob.setFiles(Arrays.asList(new String[] { "dump1/file1.txt" }));
+        Path path = Path.of("./src/test/files/parquet/test.parquet");
+        expectJob.setProgressNumerator(FileUtil.getFileSize(path));
+        expectJob.setProgress(100);
 
         var pathList = new ArrayList<Path>();
-        pathList.add(Path.of("./src/test/files/backup_restore/file1.txt"));
+        pathList.add(path);
         when(tsubakuroService.createDumpTransaction(any())).thenReturn(expectJob);
         when(tsubakuroService.dumpTable(any())).thenReturn(Flux.fromIterable(pathList));
 
@@ -137,9 +144,12 @@ public class DumpLoadServiceTest {
         expectJob.setFormat(DumpLoadRequestParam.FORMAT_CSV);
         expectJob.setFiles(Arrays.asList(new String[] { "dump1/file1.txt" }));
         expectJob.setOutputTempDir(true);
+        Path path = Path.of("./src/test/files/parquet/test.parquet");
+        expectJob.setProgressNumerator(FileUtil.getFileSize(path));
+        expectJob.setProgress(100);
 
         var pathList = new ArrayList<Path>();
-        pathList.add(Path.of("./src/test/files/backup_restore/file1.txt"));
+        pathList.add(path);
         when(tsubakuroService.createDumpTransaction(any())).thenReturn(expectJob);
         when(tsubakuroService.dumpTable(any())).thenReturn(Flux.fromIterable(pathList));
 
@@ -189,6 +199,7 @@ public class DumpLoadServiceTest {
         expectJob.setEndTime(now);
         expectJob.setErrorMessage(errorMessage);
         expectJob.setFormat(DumpLoadRequestParam.FORMAT_PARQUET);
+        expectJob.setProgress(100);
 
         var pathList = new ArrayList<Path>();
         pathList.add(Path.of("./src/test/files/backup_restore/file1.txt"));
@@ -235,6 +246,10 @@ public class DumpLoadServiceTest {
         expectJob.setFormat(DumpLoadRequestParam.FORMAT_PARQUET);
         expectJob.setFiles(Arrays.asList(new String[] { filePath }));
         expectJob.setMappings(Arrays.asList(new ColumnMapping[] {}));
+        expectJob.setProgress(100);
+        Path path = Path.of("./src/test/files/parquet/test.parquet");
+        expectJob.setProgressNumerator(0);
+        expectJob.setProgressDenominator(FileUtil.getFileSize(path));
 
         var pathList = new ArrayList<String>();
         pathList.add(filePath);
@@ -243,7 +258,7 @@ public class DumpLoadServiceTest {
         when(tsubakuroService.commitTx(any())).thenReturn(expectJob);
 
         when(fileSystemService.convertToDownloadPath(anyString(), anyString())).thenReturn(Path.of("/file1.txt"));
-        when(fileSystemService.convertToAbsolutePath(anyString(), anyString())).thenReturn(Path.of("/opt/file1.txt"));
+        when(fileSystemService.convertToAbsolutePath(anyString(), anyString())).thenReturn(path);
 
         var param = new LoadRequestParam();
         param.setJobId(jobId);
@@ -256,7 +271,6 @@ public class DumpLoadServiceTest {
 
         Thread.sleep(1 * 1000L);
         var actualJob = actualResult.block();
-
         assertEquals(expectJob, actualJob);
 
         var fromJobManager = dumpLoadService.getJob(Job.TYPE_LOAD, uid, jobId);
@@ -285,6 +299,10 @@ public class DumpLoadServiceTest {
         expectJob.setFormat(DumpLoadRequestParam.FORMAT_DETECT_BY_EXTENSION);
         expectJob.setFiles(Arrays.asList(new String[] { filePath }));
         expectJob.setMappings(Arrays.asList(new ColumnMapping[] {}));
+        expectJob.setProgress(100);
+        Path path = Path.of("./src/test/files/parquet/test.parquet");
+        expectJob.setProgressNumerator(0);
+        expectJob.setProgressDenominator(FileUtil.getFileSize(path));
 
         var pathList = new ArrayList<String>();
         pathList.add(filePath);
@@ -293,7 +311,7 @@ public class DumpLoadServiceTest {
         when(tsubakuroService.commitTx(any())).thenReturn(expectJob);
 
         when(fileSystemService.convertToDownloadPath(anyString(), anyString())).thenReturn(Path.of("/file1.csv"));
-        when(fileSystemService.convertToAbsolutePath(anyString(), anyString())).thenReturn(Path.of("/opt/file1.csv"));
+        when(fileSystemService.convertToAbsolutePath(anyString(), anyString())).thenReturn(path);
         when(fileSystemService.createTempDirectory(any())).thenCallRealMethod();
 
         var param = new LoadRequestParam();
@@ -340,6 +358,7 @@ public class DumpLoadServiceTest {
         expectJob.setFiles(Arrays.asList(new String[] { filePath }));
         expectJob.setErrorMessage(errorMessage);
         expectJob.setMappings(Arrays.asList(new ColumnMapping[] {}));
+        expectJob.setProgress(100);
 
         var pathList = new ArrayList<String>();
         pathList.add(filePath);
@@ -411,6 +430,7 @@ public class DumpLoadServiceTest {
         expectJob.setStartTime(now);
         expectJob.setEndTime(now);
         expectJob.setFormat(DumpLoadRequestParam.FORMAT_PARQUET);
+        expectJob.setProgress(100);
 
         // this flux is never finished.
         var testFlux = Flux.defer(() -> Flux.just(Path.of("file1.txt")));

@@ -17,6 +17,9 @@ package com.tsurugidb.belayer.webapi.exec;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -66,7 +69,13 @@ public class DbRestoreExec {
       Path stdOutput = tmpDir.resolve(String.format("stdout-%s.log", job.getJobId()));
 
       watcher = new FileWatcher(filePath);
-      watcher.setCallback(status -> job.setOutput(status.toStatusString()));
+      watcher.setCallback(status -> {
+        BigDecimal progress = status.getProgress();
+        synchronized (job) {
+          job.setProgress(progress.multiply(BigDecimal.valueOf(100), new MathContext(0, RoundingMode.HALF_UP)).intValue());
+          job.setOutput(status.toStatusString());
+        }
+      });
       monitoringManager.addFileWatcher(watcher);
 
       String dirPath = job.getWorkDir().toAbsolutePath().toString();
@@ -94,7 +103,7 @@ public class DbRestoreExec {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {
       stopWatch.stop();
-      log.debug("{}:{}ms","exec restore", stopWatch.getTotalTimeMillis());
+      log.debug("{}:{}ms", "exec restore", stopWatch.getTotalTimeMillis());
     }
   }
 
