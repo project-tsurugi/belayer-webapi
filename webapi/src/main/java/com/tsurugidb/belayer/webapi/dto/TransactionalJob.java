@@ -63,6 +63,13 @@ public class TransactionalJob extends Job {
 
     @Override
     public void close() {
+        if (load != null) {
+            try {
+                load.close();
+            } catch (ServerException | IOException | InterruptedException ignore) {
+                log.warn("failed to close Load.", ignore);
+            }
+        }
         if (tsurugiTransaction != null) {
             tsurugiTransaction.close();
         }
