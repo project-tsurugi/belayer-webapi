@@ -77,6 +77,7 @@ import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.sql.util.Load;
 import com.tsurugidb.tsubakuro.sql.util.LoadBuilder;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -91,6 +92,9 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
   @Autowired
   ParquetService parquetService;
+
+  @Value("${webapi.application.name}")
+  private String applicationName;
 
   @Value("${webapi.tsurugi.url}")
   private String tsurugiUrl;
@@ -125,6 +129,8 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
       session = SessionBuilder.connect(dbEndpointUrl)
           .withCredential(new RememberMeCredential(cred))
+          .withApplicationName(applicationName)
+          .withLabel("backup")
           .create(this.connectTimeout, TimeUnit.SECONDS);
 
       Objects.requireNonNull(session);
@@ -201,7 +207,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
     var credentials = Objects.requireNonNull((String) job.getCredentials(), "credentials is not supplied");
 
     var cred = new RememberMeCredential(credentials);
-    var tx = createTransaction(TransactionType.READ_ONLY, cred, job.getJobId(), Optional.empty(), true, job.getTable());
+    var tx = createTransaction(TransactionType.READ_ONLY, cred, job.getJobId(), "dump", Optional.empty(), true, job.getTable());
     job.setTsurugiTransaction(tx);
 
     return job;
@@ -211,7 +217,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
     var credentials = (String) job.getCredentials();
     Objects.requireNonNull(credentials);
     var cred = new RememberMeCredential(credentials);
-    var tx = createTransaction(TransactionType.LONG, cred, job.getJobId(), Optional.empty(), job.isTransactionNeeded(),
+    var tx = createTransaction(TransactionType.LONG, cred, job.getJobId(), "load", Optional.empty(), job.isTransactionNeeded(),
         job.getTable());
     job.setTsurugiTransaction(tx);
 
@@ -219,7 +225,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
   }
 
   public TsurugiTransaction createSqlClient(@Nonnull Credential credential, String jobId,
-      Optional<Integer> timeoutMin) {
+      Optional<Integer> timeoutMin, String label) {
 
     Session session = null;
     SqlClient client = null;
@@ -229,6 +235,8 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
       session = SessionBuilder.connect(dbEndpointUrl)
           .withCredential(credential)
+          .withApplicationName(applicationName)
+          .withLabel(label)
           .create(this.connectTimeout, TimeUnit.SECONDS);
 
       Integer sessionTimeout = timeoutMin.orElse(Integer.valueOf(this.sessionTimeout));
@@ -271,14 +279,14 @@ public class TsubakuroServiceImpl implements TsubakuroService {
   }
 
   public TsurugiTransaction createTransaction(TransactionType transactionType, @Nonnull Credential credential,
-      String jobId,
+      String jobId, String label,
       Optional<Integer> timeoutMin, boolean needTransaction, String... tables) {
     boolean green = false;
 
     TsurugiTransaction tsurugiTransaction = null;
     Transaction tran = null;
     try {
-      tsurugiTransaction = createSqlClient(credential, jobId, timeoutMin);
+      tsurugiTransaction = createSqlClient(credential, jobId, timeoutMin, label);
       if (!needTransaction) {
         green = true;
         return tsurugiTransaction;
@@ -612,6 +620,8 @@ public class TsubakuroServiceImpl implements TsubakuroService {
       Objects.requireNonNull(credential);
       session = SessionBuilder.connect(dbEndpointUrl)
           .withCredential(new RememberMeCredential(credential))
+          .withApplicationName(applicationName)
+          .withLabel("list_table")
           .create(this.connectTimeout, TimeUnit.SECONDS);
 
       Objects.requireNonNull(session);
