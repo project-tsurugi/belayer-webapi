@@ -131,7 +131,7 @@ public class StatefulApiHandlerTest {
         status.setStartTime(now);
 
         when(jobIdService.createNewJobId()).thenReturn(jobId);
-        when(tsubakuroService.createTransaction(any(), any(), any(), any(), anyBoolean(), any()))
+        when(tsubakuroService.createTransaction(any(), any(), any(), any(), any(), anyBoolean(), any()))
                 .thenCallRealMethod();
 
         client.post().uri(ApiPath.START_TRANSACTION_API)
@@ -176,7 +176,7 @@ public class StatefulApiHandlerTest {
 
         when(tsubakuroService.loadFile(any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
         when(uploadHelper.saveFile(anyString(), any(), any())).thenReturn(Mono.just(jobId + "/" + fileName));
-        when(fileSystemService.convertToAbsolutePath(any(), any())).thenCallRealMethod();
+        when(fileSystemService.convertToAbsolutePath(any(), any())).thenReturn(Path.of("./test_tmp/TESTJOBID"));
         when(fileSystemService.convertToDownloadPath(any(), any())).thenReturn(Path.of("TESTJOBID/test-file.parquet"));
         doNothing().when(fileSystemService).deleteFile(anyString(), anyString());
 

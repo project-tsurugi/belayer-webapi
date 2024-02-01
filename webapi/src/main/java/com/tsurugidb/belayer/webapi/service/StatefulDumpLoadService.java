@@ -69,7 +69,7 @@ public class StatefulDumpLoadService {
             var credentials = param.getCredentials();
             Objects.requireNonNull(credentials);
             var cred = new RememberMeCredential(credentials);
-            var tran = tsubakuroService.createTransaction(type, cred, param.getUid(), Optional.of(param.getTimeoutMin()), true, param.getTables());
+            var tran = tsubakuroService.createTransaction(type, cred, param.getUid(), "stream_api", Optional.of(param.getTimeoutMin()), true, param.getTables());
 
             job.setTsurugiTransaction(tran);
         }

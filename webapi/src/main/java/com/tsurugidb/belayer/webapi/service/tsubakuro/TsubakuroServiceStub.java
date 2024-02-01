@@ -111,7 +111,7 @@ public class TsubakuroServiceStub implements TsubakuroService {
         String credentials = (String) job.getCredentials();
         Objects.requireNonNull(credentials);
         var cred = new RememberMeCredential(credentials);
-        var tx = createTransaction(TransactionType.READ_ONLY, cred, job.getJobId(), Optional.empty(), true, job.getTable());
+        var tx = createTransaction(TransactionType.READ_ONLY, cred, job.getJobId(), "dump", Optional.empty(), true, job.getTable());
         job.setTsurugiTransaction(tx);
 
         return job;
@@ -121,13 +121,13 @@ public class TsubakuroServiceStub implements TsubakuroService {
         String credentials = (String) job.getCredentials();
         Objects.requireNonNull(credentials);
         var cred = new RememberMeCredential(credentials);
-        var tx = createTransaction(TransactionType.LONG, cred, job.getJobId(), Optional.empty(), job.isTransactionNeeded(), job.getTable());
+        var tx = createTransaction(TransactionType.LONG, cred, job.getJobId(), "load", Optional.empty(), job.isTransactionNeeded(), job.getTable());
         job.setTsurugiTransaction(tx);
 
         return job;
     }
 
-    public TsurugiTransaction createTransaction(TransactionType transactionType, @Nonnull Credential credential, String jobId,
+    public TsurugiTransaction createTransaction(TransactionType transactionType, @Nonnull Credential credential, String jobId, String label,
             Optional<Integer> timeoutMin, boolean needTransaction, String... tables) {
         log.debug("called: createTransaction()");
         return TsurugiTransaction.builder()

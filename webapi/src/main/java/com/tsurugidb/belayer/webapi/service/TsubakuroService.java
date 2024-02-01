@@ -44,7 +44,7 @@ public interface TsubakuroService {
 
     LoadJob createLoadTransaction(LoadJob job);
 
-    TsurugiTransaction createTransaction(TransactionType transactionType, @Nonnull Credential credential, String jobId, Optional<Integer> timeoutMin, boolean needTransaction, String... tables );
+    TsurugiTransaction createTransaction(TransactionType transactionType, @Nonnull Credential credential, String jobId, String label, Optional<Integer> timeoutMin, boolean needTransaction, String... tables );
 
     /**
      * dump all rows in specified table.
