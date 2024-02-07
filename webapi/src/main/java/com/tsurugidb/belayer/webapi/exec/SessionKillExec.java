@@ -35,30 +35,25 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class DbStatusExec {
+public class SessionKillExec {
 
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
-  @Value("${webapi.cli.cmd.db-status}")
+  @Value("${webapi.cli.cmd.session-kill}")
   String cmdString;
 
   @Autowired
   private MonitoringManager monitoringManager;
 
-  public boolean isOnline(String jobId) {
-
-    return ExecStatus.STATUS_RUNNNING.equals(getStatus(jobId));
-  }
-
-  public String getStatus(String jobId) {
+  public boolean killSession(String sessionId) {
 
     FileWatcher watcher = null;
     Path filePath = null;
     Path stdOutput = null;
     boolean success = false;
     try {
-      Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-db-status");
+      Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-session-status");
       if (!Files.exists(tmpDirPath)) {
         Files.createDirectory(tmpDirPath);
       }
@@ -69,25 +64,24 @@ public class DbStatusExec {
 
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> {
-        if (status != null && ExecStatus.KIND_DATA.equals(status.getKind())) {
+        if (status != null && ExecStatus.KIND_FINISH.equals(status.getKind())) {
           status.setFreezed(true);
         }
       });
       monitoringManager.addFileWatcher(watcher);
 
-      var proc = runProcess(filePath.toString(), stdOutput.toString());
+      var proc = runProcess(sessionId, filePath.toString(), stdOutput.toString());
 
       proc.waitFor();
 
-      ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_DATA.equals(s.getKind()));
+      ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_FINISH.equals(s.getKind()));
 
       if (status != null) {
-        var statusString = status.getStatus();
-        success = true;
-        return statusString;
+        success = ExecStatus.STATUS_SUCCESS.equals(status.getStatus());
+        return success;
       }
 
-      throw new ProcessExecException("tsurugi status is unknown.", null);
+      throw new ProcessExecException("session status is unknown.", null);
 
     } catch (IOException | InterruptedException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
@@ -110,8 +104,8 @@ public class DbStatusExec {
     }
   }
 
-  public Process runProcess(String monitoringFile, String outFile) {
-    String argsLine = String.format(cmdString, monitoringFile, conf);
+  public Process runProcess(String sessionId, String monitoringFile, String outFile) {
+    String argsLine = String.format(cmdString, sessionId, monitoringFile, conf);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

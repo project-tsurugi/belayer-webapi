@@ -26,6 +26,8 @@
   - [トランザクション確認API](#トランザクション確認api)
   - [ストリームデータダンプAPI](#ストリームデータダンプapi)
   - [ストリームデータロードAPI](#ストリームデータロードapi)
+  - [セッションステータス確認API](#セッションステータス確認api)
+  - [セッション停止API](#セッション停止api)
   - [DB起動API](#db起動api)
   - [DB停止API](#db停止api)
   - [DBステータス確認API](#dbステータス確認api)
@@ -1767,6 +1769,44 @@
         * ステータスコード:400
         * Content-Type: application/json
         * ボディ:```{"errorMessage":"Invalid mapping definition. [target|source] column:xxx}"}```
+
+## セッションステータス確認API
+
+* 概要: セッションの稼働状態を取得する。
+* リクエスト
+    * メソッド:GET
+    * パス: /api/session/status/{session_id}
+    * パラメータ
+        * session_id(PATHパラメータ): セッションID
+    * ボディ:なし
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * status: 稼働状態
+                * running: 正常に稼働している状態
+                * not_found: 該当セッションが見つからない場合
+                ```
+                {"status": "running"}
+                ```
+
+## セッション停止API
+
+* 概要: 指定したセッションをkillする。
+* リクエスト
+    * メソッド:POST
+    * パス: /api/session/kill/{session_id}
+    * パラメータ
+        * session_id(PATHパラメータ): セッションID
+    * ボディ:なし
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * ボディ: なし
+    * 異常(kill失敗)
+        * ステータスコード:500
+        * ボディ: ```{"errorMessage": "failed to kill session."}```
 
 ## DB起動API
 
