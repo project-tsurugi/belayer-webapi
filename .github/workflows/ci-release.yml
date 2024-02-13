@@ -20,13 +20,13 @@ jobs:
 
     steps:
       - name: Setup_Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create_Archives
         run: |
@@ -37,7 +37,7 @@ jobs:
           sh create_archives.sh
 
       - name: Upload_Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: belayer-webapi-dists
           path: distribution/dist/*
@@ -63,7 +63,7 @@ jobs:
           rm -fr work
 
       - name: Download_Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: belayer-webapi-dists
           path: work
@@ -74,7 +74,7 @@ jobs:
             _DELETE_OPTION=--cleanup-tag
           fi
           if [[ "${BELAYER_VERSION}" =~ ".*-BETA" || "${BELAYER_VERSION}" =~ ".*-SNAPSHOT" || "${BELAYER_VERSION}" == "SNAPSHOT" ]]; then
-            _PRERELEASE_OPTION=--prerelease 
+            _PRERELEASE_OPTION=--prerelease
           fi
           set -x
           gh release delete ${BELAYER_VERSION} -y ${_DELETE_OPTION} --repo project-tsurugi/belayer-webapi || true
