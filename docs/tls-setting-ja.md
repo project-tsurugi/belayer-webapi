@@ -74,7 +74,7 @@ CAの鍵ファイルは秘匿すべき情報のため、厳密に管理する必
 * server-cert.p12
     * サーバ証明書用の鍵とサーバ証明書のペアをPKCS#12形式でパッケージングしたファイル
     * 上記のスクリプトではパスワードなしでパッケージングしている
-な
+
 TLSを有効化するためには、Webサーバにサーバ証明書とその鍵を設定する必要がある。
 サーバ証明書とその鍵を一体化して扱うケースのためにPKCS#12形式のファイルを作成しているが、一体化させて使用するケースがなければ使用する必要はない。
 
@@ -94,7 +94,7 @@ TLSを有効化するためには、Webサーバにサーバ証明書とその�
 
 前段で作成したサーバ証明書と鍵のセットである`server-cert.p12`を`/opt/cert/`に配置する。
 belayerをインストールしたディレクトリのbinに存在する起動スクリプトを以下のように書き換え、TLSを有効する。
-Javaの起動パラメータでSpringの関連プロパティの値を指定する。
+Javaの起動パラメータでSpringFrameworkの関連プロパティの値を指定する。
 ここで、TLSのプロトコルやサーバ証明書用のPKCS12形式のファイルのパスを指定する。
 
 * /usr/libb/tsurugi-webapp-<version>/bin/start_server.sh
@@ -164,11 +164,11 @@ sudo ln -s /etc/nginx/sites-available/belayer-proxy /etc/nginx/sites-enabled/bel
 sudo systemctl restart nginx
 ```
 
-これで、nginxがポート443でhttpsリクエストをLISTENするようになる。
+これにより、nginxがポート443でhttpsリクエストをLISTENするようになる。
 
 ## ステップ2: WebAPIサーバにTLSでアクセスする
 
-WebAPIにhttpsでアクセスし、アクセス可能なことを確認する。
+WebAPIにhttpsでアクセスし、アクセス可能であることを確認する。
 
 ここでは、独自CAから発行したサーバ証明書を組み込んだサーバにアクセスするため、
 `curl`のオプションでCA証明書のファイルパスを指定する。
