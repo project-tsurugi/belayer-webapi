@@ -100,11 +100,11 @@ Javaの起動パラメータでSpringFrameworkの関連プロパティの値を�
 * /usr/libb/tsurugi-webapp-<version>/bin/start_server.sh
 
 ```sh
-#BELAYER_JAVA_OPTS="${BELAYER_JAVA_OPTS}"
+#BELAYER_APP_OPTS=
 # ↑ コメントアウト ↓ この行を追記する
-BELAYER_JAVA_OPTS="--server.port=443 --server.ssl.enabled=true --server.ssl.protocol=TLSv1.2 --server.ssl.key-store-type=PKCS12 --server.ssl.key-store=file:/opt/cert/server-cert.p12 --server.ssl.key-store-password="
+BELAYER_APP_OPTS="--server.port=443 --server.ssl.enabled=true --server.ssl.protocol=TLSv1.2 --server.ssl.key-store-type=PKCS12 --server.ssl.key-store=file:/opt/cert/server-cert.p12 --server.ssl.key-store-password="
 
-$_JAVA_PATH -jar ${JAR} ${BELAYER_JAVA_OPTS} 
+$_JAVA_PATH ${JAVA_OPTS} -jar ${JAR} ${BELAYER_APP_OPTS}
 ```
 
 このスクリプトで起動するとBelayer WebAPIサーバがポート443でhttpsをLISTENする状態になる。
