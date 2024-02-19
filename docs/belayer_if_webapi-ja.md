@@ -1647,7 +1647,7 @@
                   "downloadPathList": [
                       "dir1/RRMkrjvK/FOO_TBL0.parquet",
                       "dir1/RRMkrjvK/FOO_TBL1.parquet",
-                  },
+                  ],
                   "format": "parquet"
                 }
                 ```
@@ -1739,7 +1739,7 @@
                   "dumpFiles": [
                       "RRMkrjvK/FOO_TBL0.parquet",
                       "RRMkrjvK/FOO_TBL1.parquet",
-                  },
+                  ],
                   "format": "parquet"
                 }
                 ```
