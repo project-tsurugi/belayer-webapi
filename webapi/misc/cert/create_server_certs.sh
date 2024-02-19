@@ -4,6 +4,16 @@
 ##
 ## install cfssl like 'apt-get install golang-cfssl'
 
+cd $(dirname $0)
+
+set +e
+which cfssl >/dev/null 2>&1
+if [ "$?" -ne "0" ];then
+  printf "%s\n" "cfssl is not available. install cfssl."
+  exit 1
+fi
+set -e
+
 CA_FILE=./my-ca.pem
 CA_KEY=./my-ca-key.pem
 
@@ -23,7 +33,8 @@ cat <<EOF > server.json
     "CN": "api.example-tls.tk",
     "hosts": [
         "localhost",
-        "127.0.0.1"
+        "127.0.0.1",
+        "api.example-tls.tk"
     ],
     "key": {
         "algo": "ecdsa",
