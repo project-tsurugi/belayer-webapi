@@ -292,7 +292,7 @@ public class Router {
                 opt -> opt.operationId("session").build())
             .build())
         .and(route()
-            .POST(ApiPath.KILL_SESSION_API + "/{session_id}",
+            .POST(ApiPath.KILL_SESSION_API,
                 sessionControlApiHandler::killSession,
                 opt -> opt.operationId("session").build())
             .build())

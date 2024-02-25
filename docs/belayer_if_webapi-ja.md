@@ -1787,15 +1787,10 @@
         * ボディ: 処理成功の場合
             * status: 稼働状態
                 * available: 正常に稼働している状態
-                ```
-                {"session_id": "<session_id>", "status": "available"}
-                ```
-    * 異常（セッションが存在しない）
-        * 条件
-            * カラム指定のフォーマットが正しくない。
-        * ステータスコード:404
-        * Content-Type: application/json
-        * ボディ:```{"errorMessage":"session :<session_id> is not found."}```
+                * unavailable: 稼働していない状態
+            ```
+            {"session_id": "<session_id>", "status": "available"}
+            ```
 
 ## セッション変数設定API
 
@@ -1810,7 +1805,7 @@
         * varName: 変数名
         * varValue: 変数の値
         ```
-        {"varName":"<variable_name>", "varValue" : "<valieable_value>"}```
+        {"varName":"<variable_name>", "varValue" : "<valieable_value>"}
         ```
 * レスポンス
     * 正常
@@ -1834,16 +1829,20 @@
 * 概要: 指定したセッションをkillする。
 * リクエスト
     * メソッド:POST
-    * パス: /api/session/kill/{session_id}
-    * パラメータ
-        * session_id(PATHパラメータ): セッションID
-    * ボディ:なし
+    * パス: /api/session/kill
+    * パラメータ: なし
+    * Content-Type: application/json
+    * ボディ:
+        * session_id: セッションID
+        ```
+        {"session_id":"<session_id>"}
+        ```
 * レスポンス
     * 正常
         * ステータスコード:200
         * ボディ: なし
     * 異常(kill失敗)
-        * ステータスコード:500
+        * ステータスコード:400
         * ボディ: ```{"errorMessage": "failed to kill session."}```
 
 ## DB起動API

@@ -45,12 +45,9 @@ public class SessionControlApiHandler {
     public Mono<ServerResponse> getStatus(ServerRequest req) {
         String sessionId = req.pathVariable("session_id");
         boolean available = sessionControlService.isAvailable(sessionId);
-        if (available) {
-            return ServerResponse.ok().body(BodyInserters.fromValue(new SessionStatus(sessionId, "available", null)));
-        }
 
-        var msg = "session :" + sessionId + " is not found.";
-        throw new NotFoundException(msg, msg, null);
+        String status = available ? "available" : "unavailable";
+        return ServerResponse.ok().body(BodyInserters.fromValue(new SessionStatus(sessionId, status, null)));
     }
 
     /**
@@ -73,7 +70,8 @@ public class SessionControlApiHandler {
                         return ServerResponse.ok()
                                 .body(BodyInserters.fromValue(new SessionStatus(sessionId, null, param.getVarName())));
                     }
-                    var msg = "unable to set variable to session :" + sessionId + ". (name:" + param.getVarName() + ", value:" + param.getVarValue() + ")";
+                    var msg = "unable to set variable to session :" + sessionId + ". (name:" + param.getVarName()
+                            + ", value:" + param.getVarValue() + ")";
                     throw new BadRequestException(msg, msg, null);
                 });
 
@@ -87,14 +85,15 @@ public class SessionControlApiHandler {
      */
     public Mono<ServerResponse> killSession(ServerRequest req) {
 
-        String sessionId = req.pathVariable("session_id");
-        boolean success = sessionControlService.killSession(sessionId);
-        if (success) {
-            return ServerResponse.ok().build();
-        }
-        return ServerResponse.status(500)
-                .bodyValue(new ErrorResult("failed to kill session."));
-
+        return req.bodyToMono(SessionStatus.class)
+                .flatMap(param -> {
+                    boolean success = sessionControlService.killSession(param.getSessionId());
+                    if (success) {
+                        return ServerResponse.ok().build();
+                    }
+                    return ServerResponse.status(400)
+                            .bodyValue(new ErrorResult("failed to kill session."));
+                });
     }
 
 }
