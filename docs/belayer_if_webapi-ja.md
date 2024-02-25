@@ -1797,15 +1797,16 @@
 * 概要: セッションに変数を設定する。
 * リクエスト
     * メソッド:POST
-    * パス: /api/session/set/{session_id}
+    * パス: /api/session/set
     * パラメータ
         * session_id(PATHパラメータ): セッションID
     * Content-Type: application/json
     * ボディ:
-        * varName: 変数名
-        * varValue: 変数の値
+        * session_id: セッションID
+        * var_name: 変数名
+        * var_value: 変数の値
         ```
-        {"varName":"<variable_name>", "varValue" : "<valieable_value>"}
+        {"session_id": "<session_id>", "var_name":"<variable_name>", "var_value" : "<valieable_value>"}
         ```
 * レスポンス
     * 正常
@@ -1815,8 +1816,11 @@
             * sessionId: セッションID 
             * varName: セッション変数名
             ```
-            {"sessionId": "<session_id>", "varName": "<variable_name>"}
+            {"session_id": "<session_id>", "var_name": "<variable_name>"}
             ```
+    * 異常(パラメータ不正：セッションIDなし)
+        * ステータスコード:400
+        * ボディ: ```{"errorMessage": "invalid parameters."}```
     * 異常（セッション変数設定失敗）
         * 条件
             * 何らかの理由によりセッションに変数が設定できなかった場合。（セッションが利用不能の場合を含む）
@@ -1844,6 +1848,9 @@
     * 異常(kill失敗)
         * ステータスコード:400
         * ボディ: ```{"errorMessage": "failed to kill session."}```
+    * 異常(パラメータ不正：セッションIDなし)
+        * ステータスコード:400
+        * ボディ: ```{"errorMessage": "sessionId is not specified."}```
 
 ## DB起動API
 

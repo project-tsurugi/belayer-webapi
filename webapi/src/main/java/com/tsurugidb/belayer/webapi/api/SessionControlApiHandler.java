@@ -17,6 +17,7 @@ package com.tsurugidb.belayer.webapi.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -56,20 +57,21 @@ public class SessionControlApiHandler {
      * @return Response
      */
     public Mono<ServerResponse> setVariable(ServerRequest req) {
-        String sessionId = req.pathVariable("session_id");
 
         return req.bodyToMono(SessionVariable.class)
-                .map(param -> {
-                    param.setSessionId(sessionId);
-                    return param;
-                })
                 .flatMap(param -> {
+                    if (!StringUtils.hasLength(param.getSessionId()) || !StringUtils.hasLength(param.getVarName()) || !StringUtils.hasLength(param.getVarValue())) {
+                        var msg = "invalid parameters.";
+                        throw new BadRequestException(msg, msg);
+                    }
                     var result = sessionControlService.setVariable(param);
                     if (result) {
                         return ServerResponse.ok()
-                                .body(BodyInserters.fromValue(new SessionStatus(sessionId, null, param.getVarName())));
+                                .body(BodyInserters
+                                        .fromValue(new SessionStatus(param.getSessionId(), null, param.getVarName())));
                     }
-                    var msg = "unable to set variable to session :" + sessionId + ". (name:" + param.getVarName()
+                    var msg = "unable to set variable to session :" + param.getSessionId() + ". (name:"
+                            + param.getVarName()
                             + ", value:" + param.getVarValue() + ")";
                     throw new BadRequestException(msg, msg, null);
                 });
@@ -86,6 +88,11 @@ public class SessionControlApiHandler {
 
         return req.bodyToMono(SessionStatus.class)
                 .flatMap(param -> {
+                    if (!StringUtils.hasLength(param.getSessionId())) {
+                        var msg = "sessionId is not specified.";
+                        throw new BadRequestException(msg, msg);
+                    }
+
                     boolean success = sessionControlService.killSession(param.getSessionId());
                     if (success) {
                         return ServerResponse.ok().build();

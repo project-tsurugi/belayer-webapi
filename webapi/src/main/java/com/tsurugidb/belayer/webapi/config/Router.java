@@ -287,7 +287,7 @@ public class Router {
                 opt -> opt.operationId("session").build())
             .build())
         .and(route()
-            .POST(ApiPath.SET_SESSION_VAR_API + "/{session_id}",
+            .POST(ApiPath.SET_SESSION_VAR_API,
                 sessionControlApiHandler::setVariable,
                 opt -> opt.operationId("session").build())
             .build())

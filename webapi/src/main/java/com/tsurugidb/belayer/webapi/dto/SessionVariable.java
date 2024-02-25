@@ -15,6 +15,12 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,9 +28,16 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SessionVariable {
 
+    @JsonInclude(Include.NON_NULL)
     private String sessionId;
+
+    @JsonInclude(Include.NON_NULL)
     private String varName;
+
+    @JsonInclude(Include.NON_NULL)
     private String varValue;
 }
