@@ -37,19 +37,21 @@ public class SessionControlService {
    * kill Tsurugi Session.
    *
    * @param sessionId Session ID
+   * @return kill suceeded
    */
   public boolean killSession(String sessionId) {
     return sessionKillExec.killSession(sessionId);
   }
 
   /**
-   * get staus of Tsurugi Session.
+   * determine Tsurugi Session.
    *
    * @param sessionId Session ID
+   * @return true if availavle.
    */
-  public String getStatus(String sessionId) {
+  public boolean isAvailable(String sessionId) {
 
-    return sessionStatusExec.getStatus(sessionId);
+    return sessionStatusExec.existsSession(sessionId);
   }
 
 }

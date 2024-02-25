@@ -23,6 +23,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.ErrorResult;
 import com.tsurugidb.belayer.webapi.dto.SessionStatus;
+import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.service.SessionControlService;
 
 import reactor.core.publisher.Mono;
@@ -41,8 +42,13 @@ public class SessionControlApiHandler {
      */
     public Mono<ServerResponse> getStatus(ServerRequest req) {
         String sessionId = req.pathVariable("session_id");
-        String status = sessionControlService.getStatus(sessionId);
-        return ServerResponse.ok().body(BodyInserters.fromValue(new SessionStatus(sessionId, status)));
+        boolean available = sessionControlService.isAvailable(sessionId);
+        if (available) {
+            return ServerResponse.ok().body(BodyInserters.fromValue(new SessionStatus(sessionId, "available")));
+        }
+
+        var msg = "session :" + sessionId + " is not found.";
+        throw new NotFoundException(msg, msg, null);
     }
 
     /**

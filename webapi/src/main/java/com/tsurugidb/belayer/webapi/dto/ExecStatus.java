@@ -23,11 +23,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ExecStatus {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
@@ -54,6 +58,13 @@ public class ExecStatus {
     private String[] arguments;
 
     private String level;
+    private String sessionId;
+    private String label;
+    private String application;
+    private String user;
+    private String startAt;
+    private String connectionType;
+    private String connectionInfo;
 
     private boolean freezed = false;
 

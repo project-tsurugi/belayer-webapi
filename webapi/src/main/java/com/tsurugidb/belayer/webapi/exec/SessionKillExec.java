@@ -51,7 +51,6 @@ public class SessionKillExec {
     FileWatcher watcher = null;
     Path filePath = null;
     Path stdOutput = null;
-    boolean success = false;
     try {
       Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-session-status");
       if (!Files.exists(tmpDirPath)) {
@@ -77,8 +76,7 @@ public class SessionKillExec {
       ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_FINISH.equals(s.getKind()));
 
       if (status != null) {
-        success = ExecStatus.STATUS_SUCCESS.equals(status.getStatus());
-        return success;
+        return ExecStatus.STATUS_SUCCESS.equals(status.getStatus());
       }
 
       throw new ProcessExecException("session status is unknown.", null);
@@ -89,17 +87,15 @@ public class SessionKillExec {
       if (watcher != null) {
         watcher.close();
       }
-      if (success) {
-        try {
-          if (filePath != null) {
-            Files.delete(filePath);
-          }
-          if (stdOutput != null) {
-            Files.delete(stdOutput);
-          }
-        } catch (Exception ignore) {
-          log.warn("failed to delete file", ignore);
+      try {
+        if (filePath != null) {
+          Files.delete(filePath);
         }
+        if (stdOutput != null) {
+          Files.delete(stdOutput);
+        }
+      } catch (Exception ignore) {
+        log.warn("failed to delete file", ignore);
       }
     }
   }

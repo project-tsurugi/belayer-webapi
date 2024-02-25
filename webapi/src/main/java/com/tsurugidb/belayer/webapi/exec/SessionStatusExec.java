@@ -46,17 +46,11 @@ public class SessionStatusExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
-  public boolean isOnline(String jobId) {
-
-    return ExecStatus.STATUS_RUNNNING.equals(getStatus(jobId));
-  }
-
-  public String getStatus(String sessionId) {
+  public boolean existsSession(String sessionId) {
 
     FileWatcher watcher = null;
     Path filePath = null;
     Path stdOutput = null;
-    boolean success = false;
     try {
       Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-session-status");
       if (!Files.exists(tmpDirPath)) {
@@ -70,8 +64,8 @@ public class SessionStatusExec {
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> {
         if (status != null && (ExecStatus.KIND_DATA.equals(status.getKind()))) {
-          status.setStatus(ExecStatus.STATUS_SUCCESS);
-          status.setFreezed(true);
+            status.setStatus(ExecStatus.STATUS_SUCCESS);
+            status.setFreezed(true);
         }
         if (status != null && ExecStatus.KIND_FINISH.equals(status.getKind())) {
           if (!status.isFreezed()) {
@@ -86,12 +80,12 @@ public class SessionStatusExec {
 
       proc.waitFor();
 
-      ExecStatus status = watcher.waitForExecStatus();
+      ExecStatus status = watcher.waitForExecStatus(s -> s != null
+          && (ExecStatus.KIND_DATA.equals(s.getKind()) || ExecStatus.KIND_FINISH.equals(s.getKind())));
 
+      log.debug("status:" + status);
       if (status != null) {
-        var statusString = status.getStatus();
-        success = true;
-        return statusString;
+        return ExecStatus.STATUS_SUCCESS.equals(status.getStatus());
       }
 
       throw new ProcessExecException("session status is unknown.", null);
@@ -102,19 +96,19 @@ public class SessionStatusExec {
       if (watcher != null) {
         watcher.close();
       }
-      if (success) {
-        try {
-          if (filePath != null) {
-            Files.delete(filePath);
-          }
-          if (stdOutput != null) {
-            Files.delete(stdOutput);
-          }
-        } catch (Exception ignore) {
-          log.warn("failed to delete file", ignore);
+
+      try {
+        if (filePath != null) {
+          Files.delete(filePath);
         }
+        if (stdOutput != null) {
+          Files.delete(stdOutput);
+        }
+      } catch (Exception ignore) {
+        log.warn("failed to delete file", ignore);
       }
     }
+
   }
 
   public Process runProcess(String sessionId, String monitoringFile, String outFile) {
