@@ -83,8 +83,17 @@ public class SessionStatusExec {
       ExecStatus status = watcher.waitForExecStatus(s -> s != null
           && (ExecStatus.KIND_DATA.equals(s.getKind()) || ExecStatus.KIND_FINISH.equals(s.getKind())));
 
-      log.debug("status:" + status);
       if (status != null) {
+        try {
+          if (filePath != null) {
+            Files.delete(filePath);
+          }
+          if (stdOutput != null) {
+            Files.delete(stdOutput);
+          }
+        } catch (Exception ignore) {
+          log.warn("failed to delete file", ignore);
+        }
         return ExecStatus.STATUS_SUCCESS.equals(status.getStatus());
       }
 
@@ -96,19 +105,7 @@ public class SessionStatusExec {
       if (watcher != null) {
         watcher.close();
       }
-
-      try {
-        if (filePath != null) {
-          Files.delete(filePath);
-        }
-        if (stdOutput != null) {
-          Files.delete(stdOutput);
-        }
-      } catch (Exception ignore) {
-        log.warn("failed to delete file", ignore);
-      }
     }
-
   }
 
   public Process runProcess(String sessionId, String monitoringFile, String outFile) {
