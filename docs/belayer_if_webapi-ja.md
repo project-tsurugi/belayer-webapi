@@ -27,6 +27,7 @@
   - [ストリームデータダンプAPI](#ストリームデータダンプapi)
   - [ストリームデータロードAPI](#ストリームデータロードapi)
   - [セッションステータス確認API](#セッションステータス確認api)
+  - [セッション変数設定API](#セッション変数設定api)
   - [セッション停止API](#セッション停止api)
   - [DB起動API](#db起動api)
   - [DB停止API](#db停止api)
@@ -1785,11 +1786,48 @@
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * status: 稼働状態
-                * running: 正常に稼働している状態
-                * not_found: 該当セッションが見つからない場合
+                * available: 正常に稼働している状態
                 ```
-                {"status": "running"}
+                {"session_id": "<session_id>", "status": "available"}
                 ```
+    * 異常（セッションが存在しない）
+        * 条件
+            * カラム指定のフォーマットが正しくない。
+        * ステータスコード:404
+        * Content-Type: application/json
+        * ボディ:```{"errorMessage":"session :<session_id> is not found."}```
+
+## セッション変数設定API
+
+* 概要: セッションに変数を設定する。
+* リクエスト
+    * メソッド:POST
+    * パス: /api/session/set/{session_id}
+    * パラメータ
+        * session_id(PATHパラメータ): セッションID
+    * Content-Type: application/json
+    * ボディ:
+        * varName: 変数名
+        * varValue: 変数の値
+        ```
+        {"varName":"<variable_name>", "varValue" : "<valieable_value>"}```
+        ```
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * sessionId: セッションID 
+            * varName: セッション変数名
+            ```
+            {"sessionId": "<session_id>", "varName": "<variable_name>"}
+            ```
+    * 異常（セッション変数設定失敗）
+        * 条件
+            * 何らかの理由によりセッションに変数が設定できなかった場合。（セッションが利用不能の場合を含む）
+        * ステータスコード:400
+        * Content-Type: application/json
+        * ボディ:```{"errorMessage":""unable to set variable to session :<sessionId>. (name:<variable_name>, value:<variable_value>)"}```
 
 ## セッション停止API
 

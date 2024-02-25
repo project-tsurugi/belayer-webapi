@@ -18,7 +18,9 @@ package com.tsurugidb.belayer.webapi.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.tsurugidb.belayer.webapi.dto.SessionVariable;
 import com.tsurugidb.belayer.webapi.exec.SessionKillExec;
+import com.tsurugidb.belayer.webapi.exec.SessionSetVariableExec;
 import com.tsurugidb.belayer.webapi.exec.SessionStatusExec;
 
 /**
@@ -31,20 +33,23 @@ public class SessionControlService {
   SessionStatusExec sessionStatusExec;
 
   @Autowired
+  SessionSetVariableExec sessionSetVariableExec;
+
+  @Autowired
   SessionKillExec sessionKillExec;
 
   /**
    * kill Tsurugi Session.
    *
    * @param sessionId Session ID
-   * @return kill suceeded
+   * @return kill succeeded
    */
   public boolean killSession(String sessionId) {
     return sessionKillExec.killSession(sessionId);
   }
 
   /**
-   * determine Tsurugi Session.
+   * determine Tsurugi Session is available.
    *
    * @param sessionId Session ID
    * @return true if availavle.
@@ -52,6 +57,17 @@ public class SessionControlService {
   public boolean isAvailable(String sessionId) {
 
     return sessionStatusExec.existsSession(sessionId);
+  }
+
+  /**
+   * set variable to Tsurugi Session.
+   *
+   * @param sessionId Session ID
+   * @return true if succeeded.
+   */
+  public boolean setVariable(SessionVariable param) {
+
+    return sessionSetVariableExec.setVariable(param.getSessionId(), param.getVarName(), param.getVarValue());
   }
 
 }

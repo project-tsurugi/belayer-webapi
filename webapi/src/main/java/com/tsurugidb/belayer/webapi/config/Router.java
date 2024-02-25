@@ -158,6 +158,9 @@ public class Router {
     /** API Path for Show Session Status API */
     public static final String SHOW_SESSION_STATUS_API = "/api/session/status";
 
+    /** API Path for Set Var to Session API */
+    public static final String SET_SESSION_VAR_API = "/api/session/set";
+
     /** API Path for Kill Session API */
     public static final String KILL_SESSION_API = "/api/session/kill";
 
@@ -281,6 +284,11 @@ public class Router {
         .and(route()
             .GET(ApiPath.SHOW_SESSION_STATUS_API + "/{session_id}",
                 sessionControlApiHandler::getStatus,
+                opt -> opt.operationId("session").build())
+            .build())
+        .and(route()
+            .POST(ApiPath.SET_SESSION_VAR_API + "/{session_id}",
+                sessionControlApiHandler::setVariable,
                 opt -> opt.operationId("session").build())
             .build())
         .and(route()

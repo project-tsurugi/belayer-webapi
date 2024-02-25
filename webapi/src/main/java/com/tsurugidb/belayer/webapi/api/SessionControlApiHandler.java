@@ -23,6 +23,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.ErrorResult;
 import com.tsurugidb.belayer.webapi.dto.SessionStatus;
+import com.tsurugidb.belayer.webapi.dto.SessionVariable;
+import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.service.SessionControlService;
 
@@ -44,11 +46,37 @@ public class SessionControlApiHandler {
         String sessionId = req.pathVariable("session_id");
         boolean available = sessionControlService.isAvailable(sessionId);
         if (available) {
-            return ServerResponse.ok().body(BodyInserters.fromValue(new SessionStatus(sessionId, "available")));
+            return ServerResponse.ok().body(BodyInserters.fromValue(new SessionStatus(sessionId, "available", null)));
         }
 
         var msg = "session :" + sessionId + " is not found.";
         throw new NotFoundException(msg, msg, null);
+    }
+
+    /**
+     * Set variable to Tsurugi Session
+     *
+     * @param req Request
+     * @return Response
+     */
+    public Mono<ServerResponse> setVariable(ServerRequest req) {
+        String sessionId = req.pathVariable("session_id");
+
+        return req.bodyToMono(SessionVariable.class)
+                .map(param -> {
+                    param.setSessionId(sessionId);
+                    return param;
+                })
+                .flatMap(param -> {
+                    var result = sessionControlService.setVariable(param);
+                    if (result) {
+                        return ServerResponse.ok()
+                                .body(BodyInserters.fromValue(new SessionStatus(sessionId, null, param.getVarName())));
+                    }
+                    var msg = "unable to set variable to session :" + sessionId + ". (name:" + param.getVarName() + ", value:" + param.getVarValue() + ")";
+                    throw new BadRequestException(msg, msg, null);
+                });
+
     }
 
     /**
