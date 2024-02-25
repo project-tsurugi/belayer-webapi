@@ -25,7 +25,6 @@ import com.tsurugidb.belayer.webapi.dto.ErrorResult;
 import com.tsurugidb.belayer.webapi.dto.SessionStatus;
 import com.tsurugidb.belayer.webapi.dto.SessionVariable;
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
-import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.service.SessionControlService;
 
 import reactor.core.publisher.Mono;
