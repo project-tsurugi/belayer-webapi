@@ -26,6 +26,9 @@
   - [トランザクション確認API](#トランザクション確認api)
   - [ストリームデータダンプAPI](#ストリームデータダンプapi)
   - [ストリームデータロードAPI](#ストリームデータロードapi)
+  - [セッションステータス確認API](#セッションステータス確認api)
+  - [セッション変数設定API](#セッション変数設定api)
+  - [セッション停止API](#セッション停止api)
   - [DB起動API](#db起動api)
   - [DB停止API](#db停止api)
   - [DBステータス確認API](#dbステータス確認api)
@@ -1768,6 +1771,87 @@
         * ステータスコード:400
         * Content-Type: application/json
         * ボディ:```{"errorMessage":"Invalid mapping definition. [target|source] column:xxx}"}```
+
+## セッションステータス確認API
+
+* 概要: セッションの稼働状態を取得する。
+* リクエスト
+    * メソッド:GET
+    * パス: /api/session/status/{session_id}
+    * パラメータ
+        * session_id(PATHパラメータ): セッションID
+    * ボディ:なし
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * status: 稼働状態
+                * available: 正常に稼働している状態
+                * unavailable: 稼働していない状態
+            ```
+            {"session_id": "<session_id>", "status": "available"}
+            ```
+
+## セッション変数設定API
+
+* 概要: セッションに変数を設定する。
+* リクエスト
+    * メソッド:POST
+    * パス: /api/session/set
+    * パラメータ
+        * session_id(PATHパラメータ): セッションID
+    * Content-Type: application/json
+    * ボディ:
+        * session_id: セッションID
+        * var_name: 変数名
+        * var_value: 変数の値
+        ```
+        {"session_id": "<session_id>", "var_name":"<variable_name>", "var_value" : "<valieable_value>"}
+        ```
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * sessionId: セッションID 
+            * varName: セッション変数名
+            ```
+            {"session_id": "<session_id>", "var_name": "<variable_name>"}
+            ```
+    * 異常(パラメータ不正：セッションIDなし)
+        * ステータスコード:400
+        * ボディ: ```{"errorMessage": "invalid parameters."}```
+    * 異常（セッション変数設定失敗）
+        * 条件
+            * 何らかの理由によりセッションに変数が設定できなかった場合。（セッションが利用不能の場合を含む）
+        * ステータスコード:400
+        * Content-Type: application/json
+        * ボディ:```{"errorMessage":""unable to set variable to session :<sessionId>. (name:<variable_name>, value:<variable_value>)"}```
+
+## セッション停止API
+
+* 概要: 指定したセッションをkillする。
+* リクエスト
+    * メソッド:POST
+    * パス: /api/session/kill
+    * パラメータ: なし
+    * Content-Type: application/json
+    * ボディ:
+        * session_id: セッションID
+        ```
+        {"session_id":"<session_id>"}
+        ```
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * ボディ: なし
+    * 異常(kill失敗)
+        * ステータスコード:400
+        * ボディ: ```{"errorMessage": "failed to kill session."}```
+    * 異常(パラメータ不正：セッションIDなし)
+        * ステータスコード:400
+        * ボディ: ```{"errorMessage": "sessionId is not specified."}```
 
 ## DB起動API
 

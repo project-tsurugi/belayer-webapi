@@ -56,6 +56,7 @@ import com.tsurugidb.belayer.webapi.api.DbControlApiHandler;
 import com.tsurugidb.belayer.webapi.api.DumpLoadApiHandler;
 import com.tsurugidb.belayer.webapi.api.FileSystemApiHandler;
 import com.tsurugidb.belayer.webapi.api.HelloHandler;
+import com.tsurugidb.belayer.webapi.api.SessionControlApiHandler;
 import com.tsurugidb.belayer.webapi.api.StatefulApiHandler;
 import com.tsurugidb.belayer.webapi.dto.AuthRequest;
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
@@ -154,6 +155,15 @@ public class Router {
     /** API Path for Stream Load API */
     public static final String STREAM_LOAD_API = "/api/transaction/load";
 
+    /** API Path for Show Session Status API */
+    public static final String SHOW_SESSION_STATUS_API = "/api/session/status";
+
+    /** API Path for Set Var to Session API */
+    public static final String SET_SESSION_VAR_API = "/api/session/set";
+
+    /** API Path for Kill Session API */
+    public static final String KILL_SESSION_API = "/api/session/kill";
+
     /** API Path for Start DB API */
     public static final String START_DB_API = "/api/db/start";
 
@@ -175,6 +185,7 @@ public class Router {
   public RouterFunction<ServerResponse> routerFunction(AuthHandler authHandler,
       FileSystemApiHandler fileSystemApiHandler, BackupRestoreApiHandler backupRestoreApiHandler,
       DumpLoadApiHandler dumpLoadApiHandler, StatefulApiHandler statefulApiHandler,
+      SessionControlApiHandler sessionControlApiHandler,
       DbControlApiHandler dbControlHandler, HelloHandler helloHandler) {
 
     RouterFunction<ServerResponse> route = route().POST(ApiPath.AUTH_API, authHandler::auth, authApiDoc()).build()
@@ -269,6 +280,21 @@ public class Router {
             .POST(ApiPath.STREAM_LOAD_API + "/{transactionid}/{table_name}",
                 statefulApiHandler::loadDumpFiles,
                 opt -> opt.operationId("stateful").build())
+            .build())
+        .and(route()
+            .GET(ApiPath.SHOW_SESSION_STATUS_API + "/{session_id}",
+                sessionControlApiHandler::getStatus,
+                opt -> opt.operationId("session").build())
+            .build())
+        .and(route()
+            .POST(ApiPath.SET_SESSION_VAR_API,
+                sessionControlApiHandler::setVariable,
+                opt -> opt.operationId("session").build())
+            .build())
+        .and(route()
+            .POST(ApiPath.KILL_SESSION_API,
+                sessionControlApiHandler::killSession,
+                opt -> opt.operationId("session").build())
             .build())
         .and(route()
             .POST(ApiPath.START_DB_API,
@@ -435,6 +461,7 @@ public class Router {
         .response(responseBuilder().responseCode("400").description("Invalid directory or file path."));
 
   }
+
   /**
    * API Doc for List Files API.
    */

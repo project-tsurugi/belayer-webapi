@@ -96,7 +96,6 @@ public class FileWatcher {
                                 this.execStatus = parseLine(line);
                                 lineCounter.incrementAndGet();
                                 if (callback != null) {
-                                    log.debug("call callback");
                                     callback.accept(execStatus);
                                 }
                             }
