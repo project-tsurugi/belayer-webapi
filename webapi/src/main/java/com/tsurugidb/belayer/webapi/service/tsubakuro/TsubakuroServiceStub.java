@@ -240,14 +240,12 @@ public class TsubakuroServiceStub implements TsubakuroService {
         }
 
         @Override
-        public <R> FutureResponse<R> send(int serviceId, @Nonnull byte[] payload, @Nonnull ResponseProcessor<R> processor,
-                boolean background) throws IOException {
+        public <R> FutureResponse<R> send(int serviceId, @Nonnull byte[] payload, @Nonnull ResponseProcessor<R> processor) throws IOException {
             return null;
         }
 
         @Override
-        public <R> FutureResponse<R> send(int serviceId, @Nonnull ByteBuffer payload, @Nonnull ResponseProcessor<R> processor,
-                boolean background) throws IOException {
+        public <R> FutureResponse<R> send(int serviceId, @Nonnull ByteBuffer payload, @Nonnull ResponseProcessor<R> processor) throws IOException {
             return null;
         }
 
@@ -281,6 +279,16 @@ public class TsubakuroServiceStub implements TsubakuroService {
 
         @Override
         public void remove(@Nonnull ServerResource resource) {
+        }
+
+        @Deprecated public <R> FutureResponse<R> send(int serviceId, @Nonnull byte[] payload, @Nonnull ResponseProcessor<R> processor,
+                boolean background) throws IOException {
+            return null;
+        }
+
+        @Deprecated public <R> FutureResponse<R> send(int serviceId, @Nonnull ByteBuffer payload, @Nonnull ResponseProcessor<R> processor,
+                boolean background) throws IOException {
+            return null;
         }
 
     }
