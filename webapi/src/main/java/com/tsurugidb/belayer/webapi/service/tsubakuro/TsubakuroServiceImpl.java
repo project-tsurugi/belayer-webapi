@@ -77,7 +77,6 @@ import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.sql.util.Load;
 import com.tsurugidb.tsubakuro.sql.util.LoadBuilder;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -293,6 +292,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
       }
 
       var optsBuilder = TransactionOption.newBuilder().setType(transactionType);
+      optsBuilder.setLabel(label);
       if (transactionType == TransactionType.LONG) {
         if (tables == null) {
           String message = "Write target tables are not specified.";
