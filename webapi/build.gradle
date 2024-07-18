@@ -9,7 +9,7 @@ plugins {
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
 version = versionString
-def tsubarkuro_version = '1.3.0'
+def tsubarkuro_version = '1.4.0'
 
 def resolvedTsubakuroVersion = project.hasProperty('com.tsurugidb.tsubakuro.version')
 	? project.getProperty('com.tsurugidb.tsubakuro.version')
