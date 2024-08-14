@@ -47,6 +47,7 @@ import com.tsurugidb.belayer.webapi.model.JobManager;
 import com.tsurugidb.belayer.webapi.model.ZipFileUtil;
 import com.tsurugidb.belayer.webapi.util.FileUtil;
 import com.tsurugidb.tsubakuro.common.Session;
+import com.tsurugidb.tsubakuro.exception.ServerException;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
@@ -137,9 +138,12 @@ public class BackupRestoreService {
           Session session = ctx.getSession();
           try {
             log.debug("expand session timeout for {} minutes", this.sessionTimeout);
-            session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES);
+            session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES).await();
           } catch (IOException ex) {
             String msg = "I/O Error while update session expiration time.";
+            throw new InternalServerErrorException(msg, ex);
+          } catch ( ServerException | InterruptedException ex) {
+            String msg = "Unexpected error occurred while update session expiration time.";
             throw new InternalServerErrorException(msg, ex);
           }
           return downloadPath;
