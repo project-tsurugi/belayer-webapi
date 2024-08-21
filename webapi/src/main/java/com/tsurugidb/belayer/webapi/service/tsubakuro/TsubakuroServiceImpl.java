@@ -136,7 +136,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
       client = DatastoreClient.attach(session);
       backup = client.beginBackup().await();
       log.debug("expand session timeout for {} minutes", this.sessionTimeout);
-      session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES);
+      session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES).await();
 
       var tran = BackupTransaction.builder()
           .jobId(job.getJobId())
@@ -240,7 +240,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
       Integer sessionTimeout = timeoutMin.orElse(Integer.valueOf(this.sessionTimeout));
       log.debug("expand session timeout for {} minutes", sessionTimeout);
-      session.updateExpirationTime(sessionTimeout.intValue(), TimeUnit.MINUTES);
+      session.updateExpirationTime(sessionTimeout.intValue(), TimeUnit.MINUTES).await();
       client = SqlClient.attach(session);
 
       var tranObject = TsurugiTransaction.builder()
@@ -437,7 +437,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
         Session session = job.getTsurugiTransaction().getSession();
         log.debug("expand session timeout for {} minutes", this.sessionTimeout);
-        session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES);
+        session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES).await();
 
         sink.complete();
       } catch (IOException | ServerException ex) {
@@ -501,7 +501,7 @@ public class TsubakuroServiceImpl implements TsubakuroService {
 
       Session session = job.getTsurugiTransaction().getSession();
       log.debug("expand session timeout for {} minutes", this.sessionTimeout);
-      session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES);
+      session.updateExpirationTime(this.sessionTimeout, TimeUnit.MINUTES).await();
 
       return Mono.just(downloadPath.toString());
 

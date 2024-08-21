@@ -256,7 +256,27 @@ public class TsubakuroServiceStub implements TsubakuroService {
 
         @Override
         public FutureResponse<Void> updateExpirationTime(long time, @Nonnull TimeUnit unit) throws IOException {
-            return null;
+            return new FutureResponse<Void>() {
+
+                @Override
+                public boolean isDone() {
+                    return true;
+                }
+
+                @Override
+                public Void get() throws IOException, ServerException, InterruptedException {
+                    return null;
+                }
+
+                @Override
+                public Void get(long timeout, TimeUnit unit) {
+                    return null;
+                }
+
+                @Override
+                public void close() throws IOException, ServerException, InterruptedException {
+                }
+            };
         }
 
         @Override
