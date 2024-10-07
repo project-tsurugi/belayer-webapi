@@ -3,6 +3,7 @@ Description=Tsurugi WebApp
 
 [Service]
 Type=simple
+Environment=TSURUGI_HOME=/usr/lib/tsurugi
 ExecStart=/usr/lib/tsurugi-webapp-#VERSION#/bin/start_server.sh
 Restart=no
 

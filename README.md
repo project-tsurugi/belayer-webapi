@@ -141,8 +141,8 @@ Belayer Web API Server is installed under `/usr/lib`.
 $ ls /usr/lib/tsurugi-webapp-*
 tsurugi-webapp-x-x-x
 ```
-
-Execute `/usr/lib/tsurugi-webapp-x-x-x/bin/start_server.sh` to start belayer server.
+Specify TsurugiDB installed path as `TSURUGI_HOME` environment variable, 
+then execute `/usr/lib/tsurugi-webapp-x-x-x/bin/start_server.sh` to start belayer server.
 
 #### Install to another directory.
 
@@ -156,7 +156,26 @@ $ ls $HOME/tsurugi-webapp/*
 tsurugi-webapp-x-x-x
 ```
 
-Execute `<your_prefix>/bin/start_server.sh` to start belayer server.
+Specify TsurugiDB installed path as `TSURUGI_HOME` environment variable, 
+then execute `<your_prefix>/bin/start_server.sh` to start belayer server.
 
+#### Execute belayer server as Systemd service
 
+Copy service definition file to `/etc/systemd/system`.
 
+```sh
+sudo cp tsurugi-webapp.service /etc/systemd/system
+sudo systemctl enable tsurugi-webapp.service
+```
+
+**Note: If you have changed the directory to be installed belayer, you have to apply your setting to the `TSURUGI_HOME` path and the `ExecStart` path in `tsurugi-webapp.service`.**
+
+tsurugi-webapp.service
+
+```text
+[Service]
+Type=simple
+Environment=TSURUGI_HOME=/usr/lib/tsurugi
+ExecStart=/usr/lib/tsurugi-webapp-#VERSION#/bin/start_server.sh
+Restart=no
+```
