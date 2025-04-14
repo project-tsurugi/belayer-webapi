@@ -16,9 +16,11 @@
 package com.tsurugidb.belayer.webapi.security;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Authentication that use access token.
@@ -74,9 +76,11 @@ public class UserTokenAuthentication extends AbstractAuthenticationToken {
    * @param token               token
    * @param tokenExpirationTime token expiration time
    * @param authenticated       true if user is authenticated.
+   * @param authorities         authorities that the user holds.
    */
-  public UserTokenAuthentication(String userId, String token, Optional<Instant> tokenExpirationTime, boolean authenticated) {
-    super(null);
+  public UserTokenAuthentication(String userId, String token, Optional<Instant> tokenExpirationTime, boolean authenticated, List<SimpleGrantedAuthority> authorities) {
+
+    super(authorities);
     this.userId = userId;
     this.token = token;
     this.tokenExpirationTime = tokenExpirationTime;

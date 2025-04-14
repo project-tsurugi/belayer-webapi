@@ -71,6 +71,8 @@
             * refreshExpirationTime: リフレッシュトークンの有効期限日時
             * accessToken: アクセストークン
             * accessExpirationTime: アクセストークンの有効期限日時
+            * roles: ユーザが保持するロールの羅列
+            * authorities: ユーザが保持する機能権限の羅列
             * errorMessage: 常にnull
 
             ```
@@ -80,6 +82,8 @@
               "refreshExpirationTime":"2022-12-09T10:05:40Z",
               "accessToken":"[ACCESS_TOKEN_VALUE]",
               "accessExpirationTime":"2022-12-09T10:05:40Z",
+              "roles": ["ROLE_ADMIN", "ROLE_USER"],
+              "authorities" ["P_FILE_CTL", "P_BACKUP", "P_RESTORE"],
               "errorMessage":null
             }
             ```

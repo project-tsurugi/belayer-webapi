@@ -39,7 +39,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
+import com.tsurugidb.belayer.webapi.config.RouterPath;
 import com.tsurugidb.belayer.webapi.dto.ColumnMapping;
 import com.tsurugidb.belayer.webapi.dto.DumpJob;
 import com.tsurugidb.belayer.webapi.dto.DumpRequestParam;
@@ -108,7 +108,7 @@ public class DumpLoadApiHandlerTest {
     when(jobIdService.createNewJobId()).thenReturn(jobId);
     when(dumpLoadService.startDump(any())).thenReturn(Mono.just(exp));
 
-    String url = ApiPath.DUMP_START_API + "/{table}";
+    String url = RouterPath.DUMP_START_API.getPath();
     String dirPath = "path/to/savedir";
     var reqBody = new DumpRequestParam();
     reqBody.setDirPath(dirPath);
@@ -141,7 +141,7 @@ public class DumpLoadApiHandlerTest {
     when(jobIdService.createNewJobId()).thenReturn(jobId);
     when(dumpLoadService.startLoad(any())).thenReturn(Mono.just(exp));
 
-    String url = ApiPath.LOAD_START_API + "/{table}";
+    String url = "/api/load/{table}";
     client.post().uri(url, table)
     .body(BodyInserters.fromValue(reqBody))
     .exchange()
@@ -166,7 +166,7 @@ public class DumpLoadApiHandlerTest {
     when(jobIdService.createNewJobId()).thenReturn(jobId);
     when(dumpLoadService.startLoad(any())).thenReturn(Mono.just(exp));
 
-    String url = ApiPath.LOAD_START_API + "/{table}";
+    String url = RouterPath.LOAD_START_API.getPath();
     client.post().uri(url, table)
         .accept(MediaType.APPLICATION_JSON)
         // no body
@@ -187,7 +187,7 @@ public class DumpLoadApiHandlerTest {
     reqBody.setMappings(List.of(new ColumnMapping("@a", "abc")));
 
 
-    String url = ApiPath.LOAD_START_API + "/{table}";
+    String url = RouterPath.LOAD_START_API.getPath();
     client.post().uri(url, table)
         .accept(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(reqBody))
@@ -206,7 +206,7 @@ public class DumpLoadApiHandlerTest {
     reqBody.setMappings(List.of(new ColumnMapping("abc", "@abc")));
 
 
-    String url = ApiPath.LOAD_START_API + "/{table}";
+    String url = RouterPath.LOAD_START_API.getPath();
     client.post().uri(url, table)
         .accept(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(reqBody))
@@ -225,9 +225,9 @@ public class DumpLoadApiHandlerTest {
     when(dumpLoadService.getJob(anyString(), anyString(), anyString()))
         .thenReturn(Mono.just(expectJobStatus));
 
-    String url = ApiPath.DUMP_LOAD_STATUS_API + "/dump/{jobid}";
+    String url = RouterPath.DUMP_LOAD_STATUS_API.getPath();
 
-    client.get().uri(url, jobId)
+    client.get().uri(url, "dump", jobId)
         .exchange()
         .expectStatus().isOk()
         .expectBody(DumpJob.class)
@@ -244,9 +244,9 @@ public class DumpLoadApiHandlerTest {
 
     when(dumpLoadService.getJobList(anyString(), anyString())).thenReturn(Flux.fromIterable(jobList));
 
-    String url = ApiPath.LIST_DUMP_LOAD_STATUS_API + "/load";
+    String url = RouterPath.LIST_DUMP_LOAD_STATUS_API.getPath();
 
-    client.get().uri(url)
+    client.get().uri(url, "load")
         .exchange()
         .expectStatus().isOk()
         .expectBody(JobList.class)
@@ -264,9 +264,9 @@ public class DumpLoadApiHandlerTest {
     when(dumpLoadService.cancelJob(anyString(), anyString(), anyString()))
         .thenReturn(Mono.just(expectedReturn));
 
-    String url = ApiPath.CANCEL_DUMP_LOAD_API + "/load/{jobId}";
+    String url = RouterPath.CANCEL_DUMP_LOAD_API.getPath();
 
-    client.post().uri(url, jobId)
+    client.post().uri(url, "load", jobId)
         .exchange()
         .expectStatus().isOk()
         .expectBody(LoadJob.class)

@@ -17,21 +17,28 @@ package com.tsurugidb.belayer.webapi.service;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.exception.UnauthenticatedException;
+import com.tsurugidb.belayer.webapi.security.SecurityConfig;
 import com.tsurugidb.belayer.webapi.security.UserTokenAuthentication;
 import com.tsurugidb.tsubakuro.auth.Ticket;
 import com.tsurugidb.tsubakuro.auth.TicketProvider;
@@ -57,6 +64,9 @@ public class AuthService {
 
   @Autowired
   TicketProvider ticketProvider;
+
+  @Autowired
+  SecurityConfig securityConfig;
 
   @Value("${webapi.auth.at.expiration.min}")
   private int accessKeyExpirationMin;
@@ -87,10 +97,10 @@ public class AuthService {
       } else {
         msg = "Authentication Failed. Try Again.";
       }
-      return new AuthResult(userId, null, null, null, null, msg);
+      return new AuthResult(userId, null, null, null, null, null, null, msg);
     } catch (InterruptedException | IOException e) {
       String msg = "Authentication Failed. Try Again.";
-      return new AuthResult(userId, null, null, null, null, msg);
+      return new AuthResult(userId, null, null, null, null, null, null, msg);
     }
   }
 
@@ -110,10 +120,20 @@ public class AuthService {
       Optional<String> at = ticket.getToken(TokenKind.ACCESS);
       var atExpirationTime = ticket.getAccessExpirationTime();
 
+      Authentication auth = this.verifyToken(at.orElse(null));
+      var roleSet = auth.getAuthorities().stream().map(item -> item.toString()).collect(Collectors.toSet());
+      Set<String> authzSet = new HashSet<>();
+      for (String role : roleSet) {
+          var authz = securityConfig.getAuthzByRole(role);
+          if (authz != null) {
+            authzSet.addAll(authz);
+          }
+      }
+
       return new AuthResult(userId, refreshToken, rtExpirationTime.orElse(null), at.orElse(null),
-          atExpirationTime.orElse(null), null);
+          atExpirationTime.orElse(null), roleSet, authzSet, null);
     } catch (IllegalArgumentException ex) {
-      return new AuthResult(userId, null, null, null, null, "invalid token is specified.");
+      return new AuthResult(userId, null, null, null, null, null, null, "invalid token is specified.");
     } catch (CoreServiceException e) {
       String msg = null;
       CoreServiceCode code = e.getDiagnosticCode();
@@ -124,10 +144,10 @@ public class AuthService {
       } else {
         msg = code.getCodeNumber() + ":Authentication Failed.";
       }
-      return new AuthResult(userId, null, null, null, null, msg);
+      return new AuthResult(userId, null, null, null, null, null, null, msg);
     } catch (InterruptedException | IOException e) {
       String msg = "Authentication Failed. Try Again.";
-      return new AuthResult(userId, null, null, null, null, msg);
+      return new AuthResult(userId, null, null, null, null, null, null, msg);
     }
   }
 
@@ -146,7 +166,6 @@ public class AuthService {
   }
 
   private Authentication verifyToken(String token) {
-    log.debug("token:{}", token);
 
     Objects.requireNonNull(token);
 
@@ -158,7 +177,21 @@ public class AuthService {
     }
     var accessExpirationTime = ticket.getAccessExpirationTime();
 
-    return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true);
+    List<String> roles = securityConfig.getRolesByUserId(ticket.getUserId());
+    List<SimpleGrantedAuthority> authorities;
+    if (roles == null) {
+      authorities = new ArrayList<>();
+    } else {
+      authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+    } 
+    authorities.add(new SimpleGrantedAuthority(securityConfig.getDefaultRole()));
+    
+    log.debug("roles:{}", authorities);
+    for (SimpleGrantedAuthority authority : authorities) {
+      log.debug("role:{}, authz:{}", authority.getAuthority(), securityConfig.getAuthzByRole(authority.getAuthority()));
+    }
+    
+    return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true, authorities);
   }
 
 }

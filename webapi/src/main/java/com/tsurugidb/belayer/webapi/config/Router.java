@@ -73,6 +73,8 @@ import com.tsurugidb.belayer.webapi.dto.LoadRequestParam;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import reactor.core.publisher.Mono;
 
+import static com.tsurugidb.belayer.webapi.config.RouterPath.*;
+
 @Configuration
 public class Router {
 
@@ -81,102 +83,6 @@ public class Router {
 
   @Value("${belayer.adminpage.path}")
   String adminPagePath;
-
-  public static class ApiPath {
-    /** API Path for Auth API */
-    public static final String AUTH_API = "/api/auth";
-
-    /** API Path for Token refresh API */
-    public static final String AUTH_REFRESH_API = "/api/refresh";
-
-    /** API Path for Upload API */
-    public static final String UPLOAD_API = "/api/upload";
-
-    /** API Path for Download API */
-    public static final String DOWNLOAD_API = "/api/download";
-
-    /** API Path for DownloadZip API */
-    public static final String DOWNLOADZIP_API = "/api/downloadzip";
-
-    /** API Path for List API */
-    public static final String LIST_FILES_API = "/api/dirlist";
-
-    /** API Path for Delete File API */
-    public static final String DELETE_FILE_API = "/api/delete/file";
-
-    /** API Path for Delete File API */
-    public static final String DELETE_FILES_API = "/api/delete/files";
-
-    /** API Path for Delete Directory API */
-    public static final String DELETE_DIR_API = "/api/delete/dir";
-
-    /** API Path for Backup API */
-    public static final String BACKUP_START_API = "/api/backup";
-
-    /** API Path for Restore API */
-    public static final String RESTORE_START_API = "/api/restore";
-
-    /** API Path for Show Backup Status API */
-    public static final String BACKUP_STATUS_API = "/api/br/status";
-
-    /** API Path for List Backup Status API */
-    public static final String LIST_BACKUP_STATUS_API = "/api/br/list";
-
-    /** API Path for Cancel Backup/Restore API */
-    public static final String CANCEL_BACKUP_RESTORE_API = "/api/br/cancel";
-
-    /** API Path for Dump API */
-    public static final String DUMP_START_API = "/api/dump";
-
-    /** API Path for Load API */
-    public static final String LOAD_START_API = "/api/load";
-
-    /** API Path for Show Dump/Load Status API */
-    public static final String DUMP_LOAD_STATUS_API = "/api/dumpload/status";
-
-    /** API Path for List Dump/Load Status API */
-    public static final String LIST_DUMP_LOAD_STATUS_API = "/api/dumpload/list";
-
-    /** API Path for Cancel Dump/Load API */
-    public static final String CANCEL_DUMP_LOAD_API = "/api/dumpload/cancel";
-
-    /** API Path for Start Transaction API */
-    public static final String START_TRANSACTION_API = "/api/transaction/begin";
-
-    /** API Path for Finish Transaction API */
-    public static final String FINISH_TRANSACTION_API = "/api/transaction";
-
-    /** API Path for Show Transaction Status API */
-    public static final String SHOW_TRANSACTION_STATUS_API = "/api/transaction/status";
-
-    /** API Path for Stream Dump API */
-    public static final String STREAM_DUMP_API = "/api/transaction/dump";
-
-    /** API Path for Stream Load API */
-    public static final String STREAM_LOAD_API = "/api/transaction/load";
-
-    /** API Path for Show Session Status API */
-    public static final String SHOW_SESSION_STATUS_API = "/api/session/status";
-
-    /** API Path for Set Var to Session API */
-    public static final String SET_SESSION_VAR_API = "/api/session/set";
-
-    /** API Path for Kill Session API */
-    public static final String KILL_SESSION_API = "/api/session/kill";
-
-    /** API Path for Start DB API */
-    public static final String START_DB_API = "/api/db/start";
-
-    /** API Path for Shutdown DB API */
-    public static final String SHUTDOWN_DB_API = "/api/db/shutdown";
-
-    /** API Path for Show DB Status API */
-    public static final String SHOW_DB_STATUS_API = "/api/db/status";
-
-    /** API Path for List table names API */
-    public static final String LIST_TABLE_NAMES_API = "/api/db/tablenames";
-
-  }
 
   /**
    * Routing definitions for APIs.
@@ -188,131 +94,131 @@ public class Router {
       SessionControlApiHandler sessionControlApiHandler,
       DbControlApiHandler dbControlHandler, HelloHandler helloHandler) {
 
-    RouterFunction<ServerResponse> route = route().POST(ApiPath.AUTH_API, authHandler::auth, authApiDoc()).build()
-        .and(route().POST(ApiPath.AUTH_REFRESH_API, authHandler::refresh, authRefreshApiDoc()).build())
-        .and(route().GET("/api/hello", helloHandler::hello, opt -> opt.operationId("hello").build()).build())
-        .and(route().POST(ApiPath.UPLOAD_API, fileSystemApiHandler::uploadFiles, uploadApiDoc())
+    RouterFunction<ServerResponse> route = route().POST(AUTH_API.getPath(), authHandler::auth, authApiDoc()).build()
+        .and(route().POST(AUTH_REFRESH_API.getPath(), authHandler::refresh, authRefreshApiDoc()).build())
+        .and(route().GET(HEALTH_API.getPath(), helloHandler::hello, opt -> opt.operationId("hello").build()).build())
+        .and(route().POST(UPLOAD_API.getPath(), fileSystemApiHandler::uploadFiles, uploadApiDoc())
             .build())
         .and(route()
-            .GET(ApiPath.DOWNLOAD_API + "/{filepath}", fileSystemApiHandler::downloadFile, downloadApiDoc())
+            .GET(DOWNLOAD_API.getPath(), fileSystemApiHandler::downloadFile, downloadApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DOWNLOADZIP_API, fileSystemApiHandler::downloadzipFile, downloadZipApiDoc())
+            .POST(DOWNLOADZIP_API.getPath(), fileSystemApiHandler::downloadzipFile, downloadZipApiDoc())
             .build())
         .and(route()
-            .GET(ApiPath.LIST_FILES_API + "/{dirpath}", fileSystemApiHandler::listFiles, fileListApiDoc())
+            .GET(LIST_FILES_API.getPath(), fileSystemApiHandler::listFiles, fileListApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_FILE_API, fileSystemApiHandler::deleteFile,
+            .POST(DELETE_FILE_API.getPath(), fileSystemApiHandler::deleteFile,
                 deleteFileApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_FILES_API, fileSystemApiHandler::deleteFiles, deleteFilesApiDoc())
+            .POST(DELETE_FILES_API.getPath(), fileSystemApiHandler::deleteFiles, deleteFilesApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DELETE_DIR_API, fileSystemApiHandler::deleteDir, deleteDirApiDoc())
+            .POST(DELETE_DIR_API.getPath(), fileSystemApiHandler::deleteDir, deleteDirApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.BACKUP_START_API, backupRestoreApiHandler::requestBackup,
+            .POST(BACKUP_START_API.getPath(), backupRestoreApiHandler::requestBackup,
                 backupStartApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.RESTORE_START_API, backupRestoreApiHandler::requestRestore,
+            .POST(RESTORE_START_API.getPath(), backupRestoreApiHandler::requestRestore,
                 restoreStartApiDoc())
             .build())
         .and(route()
-            .GET(ApiPath.BACKUP_STATUS_API + "/{type}/{jobid}",
+            .GET(BACKUP_STATUS_API.getPath(),
                 backupRestoreApiHandler::showBackupJobDetail,
                 showDetailApiDoc())
             .build())
         .and(route()
-            .GET(ApiPath.LIST_BACKUP_STATUS_API + "/{type}", backupRestoreApiHandler::listBackupJob,
+            .GET(LIST_BACKUP_STATUS_API.getPath(), backupRestoreApiHandler::listBackupJob,
                 listJobApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.CANCEL_BACKUP_RESTORE_API + "/{type}/{jobid}",
+            .POST(CANCEL_BACKUP_RESTORE_API.getPath(),
                 backupRestoreApiHandler::cancelJob,
                 cancelBackupRestoreApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.DUMP_START_API + "/{table}", dumpLoadApiHandler::requestDump,
+            .POST(DUMP_START_API.getPath(), dumpLoadApiHandler::requestDump,
                 dumpStartApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.LOAD_START_API + "/{table}", dumpLoadApiHandler::requestLoad,
+            .POST(LOAD_START_API.getPath(), dumpLoadApiHandler::requestLoad,
                 loadStartApiDoc())
             .build())
         .and(route()
-            .GET(ApiPath.DUMP_LOAD_STATUS_API + "/{type}/{jobid}",
+            .GET(DUMP_LOAD_STATUS_API.getPath(),
                 dumpLoadApiHandler::showJobDetail,
                 showDetailApiDoc())
             .build())
         .and(route()
-            .GET(ApiPath.LIST_DUMP_LOAD_STATUS_API + "/{type}", dumpLoadApiHandler::listJobs,
+            .GET(LIST_DUMP_LOAD_STATUS_API.getPath(), dumpLoadApiHandler::listJobs,
                 listJobApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.CANCEL_DUMP_LOAD_API + "/{type}/{jobid}",
+            .POST(CANCEL_DUMP_LOAD_API.getPath(),
                 dumpLoadApiHandler::cancelJob,
                 cancelDumpLoadApiDoc())
             .build())
         .and(route()
-            .POST(ApiPath.START_TRANSACTION_API,
+            .POST(START_TRANSACTION_API.getPath(),
                 statefulApiHandler::startTransaction,
                 opt -> opt.operationId("stateful").build())
             .build())
         .and(route()
-            .POST(ApiPath.FINISH_TRANSACTION_API + "/{type}/{transactionid}",
+            .POST(FINISH_TRANSACTION_API.getPath(),
                 statefulApiHandler::finishTransaction,
                 opt -> opt.operationId("stateful").build())
             .build())
         .and(route()
-            .GET(ApiPath.SHOW_TRANSACTION_STATUS_API + "/{transactionid}",
+            .GET(SHOW_TRANSACTION_STATUS_API.getPath(),
                 statefulApiHandler::showTransactionStatus,
                 opt -> opt.operationId("stateful").build())
             .build())
         .and(route()
-            .POST(ApiPath.STREAM_DUMP_API + "/{transactionid}/{table_name}",
+            .POST(STREAM_DUMP_API.getPath(),
                 statefulApiHandler::getDump,
                 opt -> opt.operationId("stateful").build())
             .build())
         .and(route()
-            .POST(ApiPath.STREAM_LOAD_API + "/{transactionid}/{table_name}",
+            .POST(STREAM_LOAD_API.getPath(),
                 statefulApiHandler::loadDumpFiles,
                 opt -> opt.operationId("stateful").build())
             .build())
         .and(route()
-            .GET(ApiPath.SHOW_SESSION_STATUS_API + "/{session_id}",
+            .GET(SHOW_SESSION_STATUS_API.getPath(),
                 sessionControlApiHandler::getStatus,
                 opt -> opt.operationId("session").build())
             .build())
         .and(route()
-            .POST(ApiPath.SET_SESSION_VAR_API,
+            .POST(SET_SESSION_VAR_API.getPath(),
                 sessionControlApiHandler::setVariable,
                 opt -> opt.operationId("session").build())
             .build())
         .and(route()
-            .POST(ApiPath.KILL_SESSION_API,
+            .POST(KILL_SESSION_API.getPath(),
                 sessionControlApiHandler::killSession,
                 opt -> opt.operationId("session").build())
             .build())
         .and(route()
-            .POST(ApiPath.START_DB_API,
+            .POST(START_DB_API.getPath(),
                 dbControlHandler::startDatabase,
                 opt -> opt.operationId("db").build())
             .build())
         .and(route()
-            .POST(ApiPath.SHUTDOWN_DB_API,
+            .POST(SHUTDOWN_DB_API.getPath(),
                 dbControlHandler::shutdownDatabase,
                 opt -> opt.operationId("db").build())
             .build())
         .and(route()
-            .GET(ApiPath.SHOW_DB_STATUS_API,
+            .GET(SHOW_DB_STATUS_API.getPath(),
                 dbControlHandler::getStatus,
                 opt -> opt.operationId("db").build())
             .build())
         .and(route()
-            .GET(ApiPath.LIST_TABLE_NAMES_API,
+            .GET(LIST_TABLE_NAMES_API.getPath(),
                 dbControlHandler::getTableNames,
                 opt -> opt.operationId("db").build())
             .build());

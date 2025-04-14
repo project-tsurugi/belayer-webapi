@@ -16,6 +16,8 @@
 package com.tsurugidb.belayer.webapi.dto;
 
 import java.time.Instant;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +36,10 @@ public class AuthResult {
     private String accessToken;
 
     private Instant accessExpirationTime;
+
+    private Set<String> roles;
+
+    private Set<String> authorities;
 
     private String errorMessage;
 }
