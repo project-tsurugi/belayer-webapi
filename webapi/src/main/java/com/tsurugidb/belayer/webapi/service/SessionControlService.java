@@ -62,7 +62,7 @@ public class SessionControlService {
   /**
    * set variable to Tsurugi Session.
    *
-   * @param sessionId Session ID
+   * @param param Session variables
    * @return true if succeeded.
    */
   public boolean setVariable(SessionVariable param) {
