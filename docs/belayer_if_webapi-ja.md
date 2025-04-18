@@ -1981,7 +1981,7 @@
         * ステータスコード:200
     * 異常(JSONフォーマットエラー)
         * ステータスコード:400
-        * ボディ: ```{"errorMessage": "bad request format."}```
+        * ボディ: ```{"errorMessage": "Bad request format."}```
 
 # ファイルフォーマット
 

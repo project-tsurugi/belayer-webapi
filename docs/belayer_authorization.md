@@ -40,6 +40,7 @@ classDiagram
 |P_DB_STOP|DBの停止が可能|
 |P_DB_STATUS|DBの起動状態の取得が可能|
 |P_TABLE_LIST|DBのテーブル一覧の取得が可能|
+|P_ROLE_EDIT|ロールとユーザのマッピング情報の参照・更新が可能|
 
 
 #### 実行権限とAPIの対応
@@ -77,18 +78,21 @@ classDiagram
 |P_DB_STOP|DB停止API| |
 |P_DB_STATUS|DBステータス確認API| |
 |P_TABLE_LIST|テーブル名一覧取得API| |
+|P_ROLE_EDIT|ロール・ユーザマッピング取得API| |
+|P_ROLE_EDIT|ロール・ユーザマッピング更新API| |
 
 ### 実行権限を持つロールの定義例
 
 * 実行権限毎に、その実行権限をもつロールを指定する（複数指定可能）
-* ロールが指定されていない実行権限はデフォルトのロールと紐づけられる
-    * すべての認証済みユーザはデフォルトのロールを持つ
+    * すべての実行権限は何かしらのロールに紐づけられなければならない。
+        * 特定のロールが割り当てられていない実行権限は、<u>誰も実行できない機能</u>と扱われる。
+    * **ロールが実行権限があった場合、Belayerサーバの起動時にWARNログを出力する。**
 * このマッピングはBelayer内部に設定ファイルとしてもつ
-* 以下の例では、次のように実行権限とロールの関係を指定している
+    * src/main/resources/config/permission.properties
 
     ```text
     permission.defaultRole=ROLE_USER
-    permission.config.P_FILE_LIST=ROLE_ADMIN,USER
+    permission.config.P_FILE_LIST=ROLE_ADMIN,ROLE_USER
     permission.config.P_UPLOAD=ROLE_ADMIN,ROLE_RESTORE,ROLE_LOAD
     permission.config.P_DOWNLOAD=ROLE_ADMIN,ROLE_DUMP,ROLE_BACKUP
     permission.config.P_FILE_DIR_DELETE=ROLE_ADMIN,ROLE_BACKUP,ROLE_RESTORE,ROLE_DUMP,ROLE_LOAD
@@ -102,30 +106,36 @@ classDiagram
     permission.config.P_DB_STOP=ROLE_ADMIN,ROLE_RESTORE
     permission.config.P_DB_STATUS=ROLE_ADMIN,ROLE_USER
     permission.config.P_TABLE_LIST=ROLE_ADMIN,ROLE_DUMP,ROLE_LOAD
+    permission.config.P_ROLE_EDIT=ROLE_ADMIN
     ```
 
     * ROLE_ADMINロールはすべての機能を実行可能
     * P_BACKUP実行権限はROLE_BACKUPロールを持つユーザに付与される
     * P_LOAD実行権限はROLE_EDITロールを持つユーザに付与される
     * P_STREAM_API実行権限はROLE_STREAM_APIロールを持つユーザに付与される
-    * **ここに表記していない実行権限があった場合、Belayerサーバの起動時にWARNログを出力する。**
-        * 特定のロールが割り当てられていない実行権限は、<u>誰も実行できない機能</u>と扱われる。
 
 ### ロールを持つユーザの指定例
 
 * 指定したロールを持つユーザIDを正規表現で指定することが可能
-* このマッピングはWebAPIサーバ起動時の環境変数で指定することが可能
+* マッピングのデフォルト値はWebAPIサーバ起動時の環境変数で指定することが可能
+    * export ELAYER_DEFAULT_ROLE_USER_MAPPING='{"ROLE_ADMIN": ["tsurugi"]}'
+* ロール・ユーザマッピング取得APIとロール・ユーザマッピング更新APIを使用して、ユーザ・ロールマッピング情報を編集することが可能
+    * 更新した情報は${BELAYER_STORAGE_ROOT}/belayer_role_users.jsonに保存される。
 
-    ```text
-    {
-      'ROLE_ADMIN':{'admin','admin_.*', 'tsurugi'},
-      'ROLE_STREAM_API':{'stream_.*'},
-      'ROLE_BACKUP': {'backup_.*'},
-      'ROLE_LOAD':{'foo', 'bar'}
-    }
     ```
-
-    * この表現はSpringFrameworkにおいて`Map<String>, Set<String>>`をEL式で表記する方法である
+    $ TOKEN=`curl -s -d uid=tsurugi -d pw=password localhost:8000/api/auth | jq -r ".accessToken"`
+    $ curl -s -H "Authorization:Bearer $TOKEN" "localhost:8000/api/show/roleuser"  | jq "."
+    {
+      "ROLE_ADMIN": ["admin","admin_.*", "tsurugi"],
+      "ROLE_STREAM_API": ["stream_.*"],
+      "ROLE_BACKUP": ["backup_.*"],
+      "ROLE_LOAD": ["foo", "bar"]
+    }
+    $ curl -s -H "Authorization:Bearer $TOKEN" "localhost:8000/api/show/roleuser"  | jq "." > role.json
+    $ vi role.json
+    <edit>
+    $ curl -v -H "Authorization:Bearer $TOKEN" "localhost:8000/api/update/roleuser" -d @role.json
+    ```
 
 ## 【Appendix】 Belayer Web管理画面(Enterprise版)での導線制御の方法
 
