@@ -1,6 +1,6 @@
 package com.tsurugidb.belayer.webapi.config;
 
-import static com.tsurugidb.belayer.webapi.config.FunctionAuthority.*;
+import static com.tsurugidb.belayer.webapi.config.FunctionPermission.*;
 
 public enum RouterPath {
 
@@ -11,19 +11,19 @@ public enum RouterPath {
     AUTH_REFRESH_API("/api/refresh",
             "/api/refresh", P_NONE),
     UPLOAD_API("/api/upload",
-            "/api/upload", P_FILE_CTL),
+            "/api/upload", P_UPLOAD),
     DOWNLOAD_API("/api/download/{filepath}",
-            "/api/download/*", P_FILE_CTL),
+            "/api/download/*", P_DOWNLOAD),
     DOWNLOADZIP_API("/api/downloadzip",
-            "/api/downloadzip", P_FILE_CTL),
+            "/api/downloadzip", P_DOWNLOAD),
     LIST_FILES_API("/api/dirlist/{dirpath}",
-            "/api/dirlist/*", P_FILE_CTL),
+            "/api/dirlist/*", P_FILE_LIST),
     DELETE_FILE_API("/api/delete/file",
-            "/api/delete/file", P_FILE_CTL),
+            "/api/delete/file", P_FILE_DIR_DELETE),
     DELETE_FILES_API("/api/delete/files",
-            "/api/delete/files", P_FILE_CTL),
+            "/api/delete/files", P_FILE_DIR_DELETE),
     DELETE_DIR_API("/api/delete/dir",
-            "/api/delete/dir", P_FILE_CTL),
+            "/api/delete/dir", P_FILE_DIR_DELETE),
     BACKUP_START_API("/api/backup",
             "/api/backup", P_BACKUP),
     RESTORE_START_API("/api/restore",
@@ -61,19 +61,19 @@ public enum RouterPath {
     KILL_SESSION_API("/api/session/kill",
             "/api/session/kill", P_SESSION_CTL),
     START_DB_API("/api/db/start",
-            "/api/db/start", P_DB_CTL),
+            "/api/db/start", P_DB_START),
     SHUTDOWN_DB_API("/api/db/shutdown",
-            "/api/db/shutdown", P_DB_CTL),
+            "/api/db/shutdown", P_DB_STOP),
     SHOW_DB_STATUS_API("/api/db/status",
             "/api/db/status", P_DB_STATUS),
     LIST_TABLE_NAMES_API("/api/db/tablenames",
-            "/api/db/tablenames", P_DB_STATUS);
+            "/api/db/tablenames", P_TABLE_LIST);
 
     private final String path;
     private final String pathMatch;
-    private final FunctionAuthority[] authorities;
+    private final FunctionPermission[] authorities;
 
-    private RouterPath(String path, String pathMach, FunctionAuthority... authorities) {
+    private RouterPath(String path, String pathMach, FunctionPermission... authorities) {
         this.path = path;
         this.pathMatch = pathMach;
         this.authorities = authorities;
@@ -88,7 +88,7 @@ public enum RouterPath {
         return pathMatch;
     }
 
-    public FunctionAuthority[] getAuthorities() {
+    public FunctionPermission[] getAuthorities() {
         return authorities;
     }
 

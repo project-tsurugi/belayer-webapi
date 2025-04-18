@@ -15,15 +15,12 @@
  */
 package com.tsurugidb.belayer.webapi.security;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +34,6 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 
-import com.tsurugidb.belayer.webapi.config.FunctionAuthority;
 import com.tsurugidb.belayer.webapi.config.RouterPath;
 
 import lombok.extern.slf4j.Slf4j;
@@ -56,47 +52,8 @@ public class SecurityConfig {
   @Value("${management.endpoints.web.base-path}")
   String managementPath;
 
-  @Value("#{${webapi.authz.authz.role.map}}")
-  Map<String, Set<String>> authRoleMap;
-
-  @Value("#{${webapi.authz.role.user.map}}")
-  Map<String, Set<String>> roleUserMap;
-
-  @Value("${webapi.authz.role.default}")
-  String defaultRole;
-
-  Map<String, Set<String>> userRole = new HashMap<>();
-  Map<String, Set<String>> roleAuthzMap = new HashMap<>();
-
-  @PostConstruct
-  public void setUpUserRole() {
-    for (var entry : roleUserMap.entrySet()) {
-      var userList = entry.getValue();
-      for (String userId : userList) {
-        userRole.computeIfAbsent(userId, k -> new HashSet<>()).add(entry.getKey());
-      }
-    }
-  }
-
-  public List<String> getRolesByUserId(String userId) {
-    List<String> result = new ArrayList<>();
-    for (var entry : userRole.entrySet()) {
-      var userMatch = entry.getKey();
-      // regexp match
-      if (userId.matches(userMatch)) {
-        result.addAll(entry.getValue());
-      }
-    }
-    return result;
-  }
-
-  public Set<String> getAuthzByRole(String role) {
-    return roleAuthzMap.get(role);
-  }
-
-  public String getDefaultRole() {
-    return defaultRole;
-  }
+  @Autowired
+  PermissionConfig permissionConfig;
 
   /**
    * SecurityWebFilterChain for this app.
@@ -130,46 +87,24 @@ public class SecurityConfig {
     // require authorities
     for (RouterPath path : RouterPath.values()) {
       String match = path.getPathMatch();
-      Set<String> roleSet = new HashSet<>();
-      for (var authz : path.getAuthorities()) {
-        Set<String> roles = getRoles(authz);
-        if (roles == null) {
-          continue;
-        }
-        roleSet.addAll(roles);
-
-        // construct pairs of role and authz
-        for (String role : roles) {
-          roleAuthzMap.computeIfAbsent(role, k -> new HashSet<>()).add(authz.name());
-        }
-      }
+      Set<String> roleSet = Stream.of(path.getAuthorities())
+          .flatMap(a -> permissionConfig.getRoles(a).stream())
+          .collect(Collectors.toSet());
 
       if (roleSet.size() == 0) {
-        log.debug("---" + path.getPathMatch() + ":" + List.of(path.getAuthorities()) + ":Permit All");
+        log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:Permit_All");
         spec = spec.pathMatchers(match).permitAll();
       } else {
-        log.debug("---" + path.getPathMatch() + ":" + List.of(path.getAuthorities()) + ":" + roleSet);
+        log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:" + roleSet);
         spec = spec.pathMatchers(match).hasAnyAuthority(roleSet.toArray(new String[0]));
       }
     }
 
     // Apply a auth filter to all /**
     http = spec.pathMatchers("/**")
-        .hasAuthority(defaultRole).and();
+        .hasAuthority(permissionConfig.getDefaultRole()).and();
 
     return http.build();
-  }
-
-  private Set<String> getRoles(FunctionAuthority authority) {
-    if (authority == null) {
-      return null;
-    }
-
-    if (authority == FunctionAuthority.P_NONE) {
-      return null;
-    }
-
-    return authRoleMap.getOrDefault(authority.name(), Set.of(defaultRole));
   }
 
   /**

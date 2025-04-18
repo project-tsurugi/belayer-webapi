@@ -38,7 +38,8 @@ import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.exception.UnauthenticatedException;
-import com.tsurugidb.belayer.webapi.security.SecurityConfig;
+import com.tsurugidb.belayer.webapi.security.PermissionConfig;
+import com.tsurugidb.belayer.webapi.security.RoleConfig;
 import com.tsurugidb.belayer.webapi.security.UserTokenAuthentication;
 import com.tsurugidb.tsubakuro.auth.Ticket;
 import com.tsurugidb.tsubakuro.auth.TicketProvider;
@@ -66,7 +67,10 @@ public class AuthService {
   TicketProvider ticketProvider;
 
   @Autowired
-  SecurityConfig securityConfig;
+  PermissionConfig permissionConfig;
+
+  @Autowired
+  RoleConfig roleConfig;
 
   @Value("${webapi.auth.at.expiration.min}")
   private int accessKeyExpirationMin;
@@ -124,10 +128,10 @@ public class AuthService {
       var roleSet = auth.getAuthorities().stream().map(item -> item.toString()).collect(Collectors.toSet());
       Set<String> authzSet = new HashSet<>();
       for (String role : roleSet) {
-          var authz = securityConfig.getAuthzByRole(role);
-          if (authz != null) {
-            authzSet.addAll(authz);
-          }
+        var authz = permissionConfig.getAuthzByRole(role);
+        if (authz != null) {
+          authzSet.addAll(authz);
+        }
       }
 
       return new AuthResult(userId, refreshToken, rtExpirationTime.orElse(null), at.orElse(null),
@@ -177,20 +181,21 @@ public class AuthService {
     }
     var accessExpirationTime = ticket.getAccessExpirationTime();
 
-    List<String> roles = securityConfig.getRolesByUserId(ticket.getUserId());
+    List<String> roles = roleConfig.getRolesByUserId(ticket.getUserId());
     List<SimpleGrantedAuthority> authorities;
     if (roles == null) {
       authorities = new ArrayList<>();
     } else {
       authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-    } 
-    authorities.add(new SimpleGrantedAuthority(securityConfig.getDefaultRole()));
-    
+    }
+    authorities.add(new SimpleGrantedAuthority(permissionConfig.getDefaultRole()));
+
     log.debug("roles:{}", authorities);
     for (SimpleGrantedAuthority authority : authorities) {
-      log.debug("role:{}, authz:{}", authority.getAuthority(), securityConfig.getAuthzByRole(authority.getAuthority()));
+      log.debug("role:{}, authz:{}", authority.getAuthority(),
+          permissionConfig.getAuthzByRole(authority.getAuthority()));
     }
-    
+
     return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true, authorities);
   }
 
