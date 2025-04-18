@@ -15,5 +15,6 @@ public enum FunctionPermission {
     P_DB_START,
     P_DB_STOP,
     P_DB_STATUS,
-    P_TABLE_LIST;
+    P_TABLE_LIST,
+    P_ROLE_EDIT;
 }

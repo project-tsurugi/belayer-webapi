@@ -67,7 +67,11 @@ public enum RouterPath {
     SHOW_DB_STATUS_API("/api/db/status",
             "/api/db/status", P_DB_STATUS),
     LIST_TABLE_NAMES_API("/api/db/tablenames",
-            "/api/db/tablenames", P_TABLE_LIST);
+            "/api/db/tablenames", P_TABLE_LIST),
+    SHOW_ROLE_USER_MAPPING_API("/api/show/roleuser",
+            "/api/show/roleuser", P_ROLE_EDIT),
+    UPDATE_ROLE_USER_MAPPING_API("/api/update/roleuser",
+     "/api/update/roleuser", P_ROLE_EDIT);
 
     private final String path;
     private final String pathMatch;

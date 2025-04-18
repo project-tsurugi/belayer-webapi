@@ -58,6 +58,7 @@ import com.tsurugidb.belayer.webapi.api.DbControlApiHandler;
 import com.tsurugidb.belayer.webapi.api.DumpLoadApiHandler;
 import com.tsurugidb.belayer.webapi.api.FileSystemApiHandler;
 import com.tsurugidb.belayer.webapi.api.HelloHandler;
+import com.tsurugidb.belayer.webapi.api.RoleUserMappingHandler;
 import com.tsurugidb.belayer.webapi.api.SessionControlApiHandler;
 import com.tsurugidb.belayer.webapi.api.StatefulApiHandler;
 import com.tsurugidb.belayer.webapi.dto.AuthRequest;
@@ -74,7 +75,6 @@ import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
 
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import reactor.core.publisher.Mono;
-
 
 @Configuration
 public class Router {
@@ -93,11 +93,13 @@ public class Router {
       FileSystemApiHandler fileSystemApiHandler, BackupRestoreApiHandler backupRestoreApiHandler,
       DumpLoadApiHandler dumpLoadApiHandler, StatefulApiHandler statefulApiHandler,
       SessionControlApiHandler sessionControlApiHandler,
-      DbControlApiHandler dbControlHandler, HelloHandler helloHandler) {
+      DbControlApiHandler dbControlHandler, RoleUserMappingHandler roleUserMappingHandler,
+       HelloHandler helloHandler) {
 
     RouterFunction<ServerResponse> route = route().POST(AUTH_API.getPath(), authHandler::auth, authApiDoc()).build()
         .and(route().POST(AUTH_REFRESH_API.getPath(), authHandler::refresh, authRefreshApiDoc()).build())
-        .and(route().GET(HEALTH_API.getPath(), helloHandler::hello, opt -> opt.operationId("hello").build()).build())
+        .and(route().GET(HEALTH_API.getPath(), helloHandler::hello, opt -> opt.operationId("hello").build())
+            .build())
         .and(route().POST(UPLOAD_API.getPath(), fileSystemApiHandler::uploadFiles, uploadApiDoc())
             .build())
         .and(route()
@@ -222,6 +224,16 @@ public class Router {
             .GET(LIST_TABLE_NAMES_API.getPath(),
                 dbControlHandler::getTableNames,
                 opt -> opt.operationId("db").build())
+            .build())
+        .and(route()
+            .GET(SHOW_ROLE_USER_MAPPING_API.getPath(),
+                roleUserMappingHandler::show,
+                opt -> opt.operationId("role").build())
+            .build())
+        .and(route()
+            .POST(UPDATE_ROLE_USER_MAPPING_API.getPath(),
+                roleUserMappingHandler::update,
+                opt -> opt.operationId("role").build())
             .build());
 
     if (adminPageEnabled) {

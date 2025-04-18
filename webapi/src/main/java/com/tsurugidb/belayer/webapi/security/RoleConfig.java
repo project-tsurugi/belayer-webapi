@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -108,38 +109,39 @@ public class RoleConfig {
      * update user-role mapping from JSON string.
      * 
      * @param jsonString user-role mapping from JSON
+     * @throws JacksonException mapping error
      */
-    public synchronized void readFromJson(String jsonString) {
-        try {
-            roleUserMap = mapper.readValue(jsonString,
-                    new TypeReference<LinkedHashMap<String, Set<String>>>() {
-                    });
-            rebuildUserRole();
-            dumpToJsonFile();
+    public synchronized void readFromJson(String jsonString) throws JacksonException {
 
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        roleUserMap = mapper.readValue(jsonString,
+                new TypeReference<LinkedHashMap<String, Set<String>>>() {
+                });
 
+        rebuildUserRole();
+        dumpToJsonFile();
     }
 
     private synchronized void readFromJsonFile() {
 
-            if (Files.exists(Path.of(jsonFilePath)) && !Files.isDirectory(Path.of(jsonFilePath))) {
+        if (Files.exists(Path.of(jsonFilePath)) && !Files.isDirectory(Path.of(jsonFilePath))) {
+            try {
+                String jsonString = Files.readString(Path.of(jsonFilePath));
+                readFromJson(jsonString);
+            } catch (IOException ex) {
                 try {
-                    String jsonString = Files.readString(Path.of(jsonFilePath));
-                    readFromJson(jsonString);
-                } catch (IOException ex) {
-                    try {
-                        Files.delete(Path.of(jsonFilePath));
-                    } catch (IOException ignore) {
-                        // ignore
-                    }
+                    Files.delete(Path.of(jsonFilePath));
+                } catch (IOException ignore) {
+                    // ignore
                 }
-            } else {
+            }
+        } else {
+            try {
                 // default setting
                 readFromJson(defaultUserRoleMapping);
+            } catch (JacksonException ex) {
+                throw new IllegalArgumentException(ex);
             }
+        }
 
     }
 
