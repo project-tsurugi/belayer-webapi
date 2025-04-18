@@ -21,6 +21,7 @@ import static org.springdoc.core.fn.builders.parameter.Builder.parameterBuilder;
 import static org.springdoc.core.fn.builders.requestbody.Builder.requestBodyBuilder;
 import static org.springdoc.core.fn.builders.schema.Builder.schemaBuilder;
 import static org.springdoc.webflux.core.fn.SpringdocRouteBuilder.route;
+import static com.tsurugidb.belayer.webapi.config.RouterPath.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -48,6 +49,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tsurugidb.belayer.webapi.api.AuthHandler;
@@ -64,16 +66,15 @@ import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
 import com.tsurugidb.belayer.webapi.dto.DownloadZip;
-import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
 import com.tsurugidb.belayer.webapi.dto.JobList;
 import com.tsurugidb.belayer.webapi.dto.JobResult;
 import com.tsurugidb.belayer.webapi.dto.LoadRequestParam;
+import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
 
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import reactor.core.publisher.Mono;
 
-import static com.tsurugidb.belayer.webapi.config.RouterPath.*;
 
 @Configuration
 public class Router {
@@ -256,6 +257,7 @@ public class Router {
     module.addSerializer(Instant.class, new Iso8601WithoutMillisInstantSerializer());
     module.addDeserializer(Instant.class, new Iso8601WithoutMillisInstantDeserializer());
     objectMapper.registerModule(module);
+    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     return objectMapper;
   }
 
