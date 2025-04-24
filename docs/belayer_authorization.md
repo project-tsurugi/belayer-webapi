@@ -92,9 +92,9 @@ classDiagram
 
     ```text
     permission.defaultRole=ROLE_USER
-    permission.config.P_FILE_LIST=ROLE_ADMIN,ROLE_USER
+    permission.config.P_FILE_LIST=ROLE_ADMIN,ROLE_BACKUP,ROLE_RESTORE,ROLE_DUMP,ROLE_LOAD,ROLE_USER
     permission.config.P_UPLOAD=ROLE_ADMIN,ROLE_RESTORE,ROLE_LOAD
-    permission.config.P_DOWNLOAD=ROLE_ADMIN,ROLE_DUMP,ROLE_BACKUP
+    permission.config.P_DOWNLOAD=ROLE_ADMIN,ROLE_BACKUP,ROLE_RESTORE,ROLE_DUMP,ROLE_LOAD
     permission.config.P_FILE_DIR_DELETE=ROLE_ADMIN,ROLE_BACKUP,ROLE_RESTORE,ROLE_DUMP,ROLE_LOAD
     permission.config.P_BACKUP=ROLE_ADMIN,ROLE_BACKUP
     permission.config.P_RESTORE=ROLE_ADMIN,ROLE_RESTORE
@@ -102,23 +102,44 @@ classDiagram
     permission.config.P_LOAD=ROLE_ADMIN,ROLE_LOAD
     permission.config.P_STREAM_API=ROLE_ADMIN,ROLE_STREAM_API
     permission.config.P_SESSION_CTL=ROLE_ADMIN,ROLE_SESSION_CTL
-    permission.config.P_DB_START=ROLE_ADMIN,ROLE_RESTORE
-    permission.config.P_DB_STOP=ROLE_ADMIN,ROLE_RESTORE
+    permission.config.P_DB_START=ROLE_ADMIN,ROLE_RESTORE,ROLE_DB_UP
+    permission.config.P_DB_STOP=ROLE_ADMIN,ROLE_RESTORE,ROLE_DB_DOWN
     permission.config.P_DB_STATUS=ROLE_ADMIN,ROLE_USER
     permission.config.P_TABLE_LIST=ROLE_ADMIN,ROLE_DUMP,ROLE_LOAD
     permission.config.P_ROLE_EDIT=ROLE_ADMIN
     ```
+    
+    * 上記のマッピングの内容は以下のとおり
+        * 補足事項
+            * リストアのためにはDBの停止と起動が必要なため、DBの起動と停止の権限を一緒に付与する。
+            * ROLE_DB_UPロールは、Admin以外にDB起動を許すためのロールである。
+            * ROLE_DB_DOWNロールは、Admin以外にDB停止を許すためのロールである。
 
-    * ROLE_ADMINロールはすべての機能を実行可能
-    * P_BACKUP実行権限はROLE_BACKUPロールを持つユーザに付与される
-    * P_LOAD実行権限はROLE_EDITロールを持つユーザに付与される
-    * P_STREAM_API実行権限はROLE_STREAM_APIロールを持つユーザに付与される
+|                   | ROLE_ADMIN | ROLE_BACKUP | ROLE_RESTORE | ROLE_DUMP | ROLE_LOAD | ROLE_STREAM_API | ROLE_DB_UP | ROLE_DB_DOWN | ROLE_SESSION_CTL | ROLE_USER<br/>(all authenticated user) |
+|-------------------|:----------:|:-----------:|:------------:|:---------:|:---------:|:---------------:|:----------:|:----------:|:----------------:|:---------:|
+| P_FILE_LIST       |      ○     |      ○      |      ○       |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ○     |
+| P_UPLOAD          |      ○     |      ー     |       ○      |     ー    |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_DOWNLOAD        |      ○     |      ○      |       ○      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_FILE_DIR_DELETE |      ○     |      ○      |       ○      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_BACKUP          |      ○     |      ○      |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_RESTORE         |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_DUMP            |      ○     |      ー     |      ー      |     ○     |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_LOAD            |      ○     |      ー     |      ー      |     ー    |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_STREAM_API      |      ○     |      ー     |      ー      |     ー    |     ー    |        ○        |     ー     |     ー     |        ー        |     ー    |
+| P_SESSION_CTL     |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |         ○        |     ー    |
+| P_DB_START        |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |      ○     |     ー     |        ー        |     ー    |
+| P_DB_STOP         |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |     ー     |     ○     |        ー        |     ー    |
+| P_DB_STATUS       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ○     |
+| P_TABLE_LIST      |      ○     |      ー     |      ー      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
+| P_ROLE_EDIT       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
+
+
 
 ### ロールを持つユーザの指定例
 
 * 指定したロールを持つユーザIDを正規表現で指定することが可能
-* マッピングのデフォルト値はWebAPIサーバ起動時の環境変数で指定することが可能
-    * export ELAYER_DEFAULT_ROLE_USER_MAPPING='{"ROLE_ADMIN": ["tsurugi"]}'
+* マッピングのデフォルト値はWebAPIサーバ起動時の環境変数でJSON文字列で指定することが可能
+    * export ELAYER_DEFAULT_ROLE_USER_MAPPING='{"ROLE_ADMIN": ["tsurugi"], "ROLE_BACKUP": ["backup_.*"],"ROLE_STREAM_API": ["stream_.*"]}'
 * ロール・ユーザマッピング取得APIとロール・ユーザマッピング更新APIを使用して、ユーザ・ロールマッピング情報を編集することが可能
     * 更新した情報は${BELAYER_STORAGE_ROOT}/belayer_role_users.jsonに保存される。
 
