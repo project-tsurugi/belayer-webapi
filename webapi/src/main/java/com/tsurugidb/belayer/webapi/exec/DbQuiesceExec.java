@@ -67,11 +67,15 @@ public class DbQuiesceExec {
       ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_FINISH.equals(s.getKind()));
 
       log.debug("status:" + status);
-      if (status != null && ExecStatus.STATUS_SUCCESS.equals(status.getStatus())) {
+
+      if (status == null) {
+        throw new ProcessExecException("Process execution failed. status:unknown", null);
+      }
+      if (ExecStatus.STATUS_SUCCESS.equals(status.getStatus())) {
         return;
       }
 
-      throw new ProcessExecException("Process execution failed. status:" + status, null);
+      throw new ProcessExecException("Process execution failed. status:" + status.toStatusString(), null);
 
     } catch (IOException |
 
