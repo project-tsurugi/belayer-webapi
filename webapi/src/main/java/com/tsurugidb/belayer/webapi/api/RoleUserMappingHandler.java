@@ -46,7 +46,7 @@ public class RoleUserMappingHandler {
           try {
             roleConfig.readFromJson(json);
             return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON).bodyValue("");
+                .contentType(MediaType.APPLICATION_JSON).bodyValue("Success\n");
           } catch (JacksonException ex) {
             return ServerResponse.badRequest()
                 .contentType(MediaType.APPLICATION_JSON).bodyValue(new ErrorResult("Bad request format."));

@@ -73,7 +73,7 @@ public class RoleUserMappingHandlerTest {
         .exchange()
         .expectStatus().isOk()
         .expectBody(String.class)
-        .isEqualTo("");
+        .isEqualTo("Success\n");
   }
 
   @Test
