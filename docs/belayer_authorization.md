@@ -83,6 +83,7 @@ classDiagram
 |P_DB_STOP|DB停止API| |
 |P_DB_STATUS|DBステータス確認API| |
 |P_TABLE_LIST|テーブル名一覧取得API| |
+|P_ROLE_EDIT|ロール定義取得API| |
 |P_ROLE_EDIT|ロール・ユーザマッピング取得API| |
 |P_ROLE_EDIT|ロール・ユーザマッピング更新API| |
 
@@ -158,9 +159,12 @@ classDiagram
       "ROLE_LOAD": ["foo", "bar"]
     }
     $ curl -s -H "Authorization:Bearer $TOKEN" "localhost:8000/api/show/roleuser"  | jq "." > role.json
+    $
     $ vi role.json
-    <edit>
+    <edit role.json>
     $ curl -v -H "Authorization:Bearer $TOKEN" "localhost:8000/api/update/roleuser" -d @role.json
+    Success
+    $
     ```
 
 ## 【Appendix】 Belayer Web管理画面(Enterprise版)でのロール、ユーザ権限の確認方法

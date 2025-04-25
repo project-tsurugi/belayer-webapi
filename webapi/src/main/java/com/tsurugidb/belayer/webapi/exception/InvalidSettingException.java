@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tsurugidb.belayer.webapi.config;
+package com.tsurugidb.belayer.webapi.exception;
 
-public enum FunctionPermission {
-    P_NONE,
-    P_FILE_LIST,
-    P_UPLOAD,
-    P_DOWNLOAD,
-    P_FILE_DIR_DELETE,
-    P_BACKUP,
-    P_RESTORE,
-    P_DUMP,
-    P_LOAD,
-    P_STREAM_API,
-    P_SESSION_CTL,
-    P_DB_START,
-    P_DB_STOP,
-    P_DB_STATUS,
-    P_TABLE_LIST,
-    P_ROLE_EDIT;
+public class InvalidSettingException extends Exception {
+
+    public InvalidSettingException(String message) {
+        super(message);
+    }
+
+    public InvalidSettingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

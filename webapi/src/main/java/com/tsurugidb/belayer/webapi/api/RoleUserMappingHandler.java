@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.tsurugidb.belayer.webapi.dto.ErrorResult;
+import com.tsurugidb.belayer.webapi.exception.InvalidSettingException;
 import com.tsurugidb.belayer.webapi.security.RoleConfig;
 
 import reactor.core.publisher.Mono;
@@ -33,26 +33,50 @@ public class RoleUserMappingHandler {
   @Autowired
   RoleConfig roleConfig;
 
-  public Mono<ServerResponse> show(ServerRequest req) {
+  /**
+   * Show Role Definition.
+   * 
+   * @param req request
+   * @return response
+   */
+  public Mono<ServerResponse> showRoleDefinition(ServerRequest req) {
+    return ServerResponse.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(roleConfig.getRoleDefinition());
+  }
+
+
+  /**
+   * Show Role-User mapping Definition.
+   * 
+   * @param req request
+   * @return response
+   */
+  public Mono<ServerResponse> showMapping(ServerRequest req) {
     return ServerResponse.ok()
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(roleConfig.dumpToJson());
   }
 
-  public Mono<ServerResponse> update(ServerRequest req) {
+  /**
+   * Update Role-User mapping Definition.
+   * 
+   * @param req request
+   * @return response
+   */
+  public Mono<ServerResponse> updateMapping(ServerRequest req) {
 
     return req.bodyToMono(String.class)
         .flatMap(json -> {
           try {
-            roleConfig.readFromJson(json);
+            roleConfig.applyConfByJson(json);
             return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON).bodyValue("Success\n");
-          } catch (JacksonException ex) {
+          } catch (InvalidSettingException ex) {
             return ServerResponse.badRequest()
-                .contentType(MediaType.APPLICATION_JSON).bodyValue(new ErrorResult("Bad request format."));
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(new ErrorResult("Bad request format. " + ex.getMessage()));
           }
         });
-
   }
 
 }

@@ -17,20 +17,23 @@ package com.tsurugidb.belayer.webapi.api;
 
 import static org.mockito.ArgumentMatchers.anyString;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonLocation;
 import com.tsurugidb.belayer.webapi.config.RouterPath;
 import com.tsurugidb.belayer.webapi.dto.ErrorResult;
+import com.tsurugidb.belayer.webapi.exception.InvalidSettingException;
 import com.tsurugidb.belayer.webapi.security.RoleConfig;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -50,7 +53,21 @@ public class RoleUserMappingHandlerTest {
   }
 
   @Test
-  public void testShow_Success() {
+  public void testShowRoleDefinition_Success() {
+
+    Map<String, Set<String>> roleDef = Map.of("ROLE_FOO", Set.of("P_BAR"));
+
+    Mockito.when(roleConfig.getRoleDefinition()).thenReturn(roleDef);
+
+    client.get().uri(RouterPath.LIST_ROLES_API.getPath())
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(new ParameterizedTypeReference<Map<String, Set<String>>>(){})
+        .isEqualTo(roleDef);
+  }
+  
+  @Test
+  public void testShowMapping_Success() {
     String result = "{\"ROLE_ADMIN:\".*\"\"";
 
     Mockito.when(roleConfig.dumpToJson()).thenReturn(result);
@@ -63,10 +80,10 @@ public class RoleUserMappingHandlerTest {
   }
 
   @Test
-  public void testUpdate_Success() throws Exception {
+  public void testUpdateMapping_Success() throws Exception {
     String param = "{\"ROLE_ADMIN:\".*\"\"";
 
-    Mockito.doNothing().when(roleConfig).readFromJson(anyString());
+    Mockito.doNothing().when(roleConfig).applyConfByJson(anyString());
 
     client.post().uri(RouterPath.UPDATE_ROLE_USER_MAPPING_API.getPath())
         .bodyValue(param)
@@ -80,37 +97,15 @@ public class RoleUserMappingHandlerTest {
   public void testUpdate_Fail() throws Exception {
     String param = "{\"ROLE_ADMIN:\".*\"\"";
 
-    JacksonException ex = new JacksonTestException("test");
+    InvalidSettingException ex = new InvalidSettingException("test");
 
-    Mockito.doThrow(ex).when(roleConfig).readFromJson(anyString());
+    Mockito.doThrow(ex).when(roleConfig).applyConfByJson(anyString());
 
     client.post().uri(RouterPath.UPDATE_ROLE_USER_MAPPING_API.getPath())
         .bodyValue(param)
         .exchange()
         .expectStatus().isBadRequest()
         .expectBody(ErrorResult.class)
-        .isEqualTo(new ErrorResult("Bad request format."));
+        .isEqualTo(new ErrorResult("Bad request format. test"));
   }
-
-  public class JacksonTestException extends JacksonException {
-    public JacksonTestException(String message) {
-      super(message);
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-      throw new UnsupportedOperationException("Unimplemented method 'getLocation'");
-    }
-
-    @Override
-    public String getOriginalMessage() {
-      throw new UnsupportedOperationException("Unimplemented method 'getOriginalMessage'");
-    }
-
-    @Override
-    public Object getProcessor() {
-      throw new UnsupportedOperationException("Unimplemented method 'getProcessor'");
-    }
-  }
-
 }

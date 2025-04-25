@@ -33,6 +33,7 @@
   - [DB停止API](#db停止api)
   - [DBステータス確認API](#dbステータス確認api)
   - [テーブル名一覧取得API](#テーブル名一覧取得api)
+  - [ロール定義取得API](#ロール定義取得api)
   - [ロール・ユーザマッピング取得API](#ロールユーザマッピング取得api)
   - [ロール・ユーザマッピング更新API](#ロールユーザマッピング更新api)
 - [ファイルフォーマット](#ファイルフォーマット)
@@ -1934,6 +1935,36 @@
                       "bar",
                       "baz"
                   ]
+                }
+                ```
+
+## ロール定義取得API
+
+* 概要: Belayerサーバに登録されているロール・権限のマッピング情報を取得する。
+* リクエスト
+    * メソッド:GET
+    * パス: /api/list/roles
+    * パラメータ:なし
+    * ボディ:なし
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * ロールとそのロールに付与された権限リストの定義
+
+                ```
+                {
+                  "ROLE_DB_DOWN" : [ "P_DB_STOP" ],
+                  "ROLE_STREAM_API" : [ "P_STREAM_API" ],
+                  "ROLE_LOAD" : [ "P_TABLE_LIST", "P_UPLOAD", "P_LOAD", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ],
+                  "ROLE_DB_UP" : [ "P_DB_START" ],
+                  "ROLE_USER" : [ "P_DB_STATUS", "P_FILE_LIST" ],
+                  "ROLE_DUMP" : [ "P_TABLE_LIST", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DUMP", "P_DOWNLOAD" ],
+                  "ROLE_SESSION_CTL" : [ "P_SESSION_CTL" ],
+                  "ROLE_RESTORE" : [ "P_UPLOAD", "P_RESTORE", "P_FILE_DIR_DELETE", "P_DB_START", "P_FILE_LIST", "P_DOWNLOAD", "P_DB_STOP" ],
+                  "ROLE_ADMIN" : [ "P_DB_STATUS", "P_TABLE_LIST", "P_STREAM_API", "P_DB_START", "P_FILE_LIST", "P_SESSION_CTL", "P_DOWNLOAD", "P_DB_STOP", "P_BACKUP", "P_ROLE_EDIT", "P_UPLOAD", "P_RESTORE", "P_LOAD", "P_FILE_DIR_DELETE", "P_DUMP" ],
+                  "ROLE_BACKUP" : [ "P_BACKUP", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ]
                 }
                 ```
 

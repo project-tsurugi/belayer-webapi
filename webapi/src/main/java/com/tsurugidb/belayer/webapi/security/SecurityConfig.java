@@ -88,7 +88,7 @@ public class SecurityConfig {
     for (RouterPath path : RouterPath.values()) {
       String match = path.getPathMatch();
       Set<String> roleSet = Stream.of(path.getAuthorities())
-          .flatMap(a -> permissionConfig.getRoles(a).stream())
+          .flatMap(authority -> permissionConfig.getRoles(authority).stream())
           .collect(Collectors.toSet());
 
       if (roleSet.size() == 0) {

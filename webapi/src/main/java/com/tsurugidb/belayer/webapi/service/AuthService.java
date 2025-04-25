@@ -128,10 +128,8 @@ public class AuthService {
       var roleSet = auth.getAuthorities().stream().map(item -> item.toString()).collect(Collectors.toSet());
       Set<String> authzSet = new HashSet<>();
       for (String role : roleSet) {
-        var authz = permissionConfig.getAuthzByRole(role);
-        if (authz != null) {
-          authzSet.addAll(authz);
-        }
+        var authz = permissionConfig.getAuthoritiesByRole(role);
+        authzSet.addAll(authz);
       }
 
       return new AuthResult(userId, refreshToken, rtExpirationTime.orElse(null), at.orElse(null),
@@ -190,10 +188,9 @@ public class AuthService {
     }
     authorities.add(new SimpleGrantedAuthority(permissionConfig.getDefaultRole()));
 
-    log.debug("roles:{}", authorities);
     for (SimpleGrantedAuthority authority : authorities) {
       log.debug("role:{}, authz:{}", authority.getAuthority(),
-          permissionConfig.getAuthzByRole(authority.getAuthority()));
+          permissionConfig.getAuthoritiesByRole(authority.getAuthority()));
     }
 
     return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true, authorities);

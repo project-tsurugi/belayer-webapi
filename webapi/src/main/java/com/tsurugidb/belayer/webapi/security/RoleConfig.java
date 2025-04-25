@@ -1,11 +1,24 @@
+/*
+ * Copyright 2023 tsurugi project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.tsurugidb.belayer.webapi.security;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +33,15 @@ import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tsurugidb.belayer.webapi.exception.InvalidSettingException;
 
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * This holds role-user mappings.
+ */
 @Configuration
+@Slf4j
 public class RoleConfig {
     private static final String DUMP_FILE_NAME = "belayer_role_users.json";
 
@@ -29,7 +49,10 @@ public class RoleConfig {
     private String dumpFileDir;
 
     @Value("${webapi.user_role.default.mapping}")
-    private String defaultUserRoleMapping;
+    private String defaultUserRoleMappingJsonString;
+
+    @Autowired
+    private PermissionConfig permissionConfig;
 
     @Autowired
     private ObjectMapper mapper;
@@ -45,32 +68,20 @@ public class RoleConfig {
     Map<String, Set<String>> roleUserMap;
 
     /**
-     * UserId Matcher to role Map.
-     * 
-     * key: User ID matcher
-     * value: set of role names
-     */
-    Map<String, Set<String>> userRole = new HashMap<>();
-
-    /**
      * init role-user mapping
      *
      * @throws IOException
      */
     @PostConstruct
-    synchronized public void init() throws IOException {
+    synchronized public void init() throws InvalidSettingException {
         jsonFilePath = dumpFileDir + "/" + DUMP_FILE_NAME;
 
-        readFromJsonFile();
-    }
-
-    void rebuildUserRole() {
-        for (var entry : roleUserMap.entrySet()) {
-            var userConditions = entry.getValue();
-            for (String userCondition : userConditions) {
-                userRole.computeIfAbsent(userCondition, k -> new HashSet<>()).add(entry.getKey());
-            }
+        String jsonString = readFromJsonFile();
+        if (jsonString == null) {
+            jsonString = defaultUserRoleMappingJsonString;
         }
+
+        applyConfByJson(jsonString);
     }
 
     /**
@@ -80,15 +91,28 @@ public class RoleConfig {
      * @return Set of role names
      */
     public synchronized List<String> getRolesByUserId(String userId) {
-        List<String> result = new ArrayList<>();
-        for (var entry : userRole.entrySet()) {
-            var userCondition = entry.getKey();
-            // regexp match
-            if (userId.matches(userCondition)) {
-                result.addAll(entry.getValue());
+        List<String> roles = new ArrayList<>();
+        for (var entry : roleUserMap.entrySet()) {
+            var role = entry.getKey();
+            var userConditions = entry.getValue();
+            for (String userCondition : userConditions) {
+                // regexp match
+                if (userId.matches(userCondition)) {
+                    roles.add(role);
+                }
             }
         }
-        return result;
+        return roles;
+    }
+
+    /**
+     * Return role-permission mappings.
+     * 
+     * @return defined role-permission mappings
+     */
+    public synchronized Map<String, Set<String>> getRoleDefinition() {
+
+        return permissionConfig.getRoleDefinition();
     }
 
     /**
@@ -111,38 +135,54 @@ public class RoleConfig {
      * @param jsonString user-role mapping from JSON
      * @throws JacksonException mapping error
      */
-    public synchronized void readFromJson(String jsonString) throws JacksonException {
+    public synchronized void applyConfByJson(String jsonString) throws InvalidSettingException {
 
-        roleUserMap = mapper.readValue(jsonString,
-                new TypeReference<LinkedHashMap<String, Set<String>>>() {
-                });
+        log.debug(jsonString);
+        try {
+            Map<String, Set<String>> newRoleUserMap = mapper.readValue(jsonString,
+                    new TypeReference<LinkedHashMap<String, Set<String>>>() {
+                    });
+            if (newRoleUserMap == null) {
+                throw new InvalidSettingException("Invalid Setting. mapping:" + jsonString);
+            }
+            if (newRoleUserMap.size() == 0) {
+                throw new InvalidSettingException("No roles assinged. mapping:" + jsonString);
+            }
 
-        rebuildUserRole();
-        dumpToJsonFile();
+            for (var entry : newRoleUserMap.entrySet()) {
+                var roleName = entry.getKey();
+
+                if (!permissionConfig.isValidRole(roleName)) {
+                    throw new InvalidSettingException("Invalid Role name. role name:" + roleName);
+                }
+            }
+            roleUserMap = newRoleUserMap;
+
+            // output if success
+            dumpToJsonFile();
+
+        } catch (JacksonException ex) {
+            throw new InvalidSettingException("Invalid json expression.", ex);
+        }
     }
 
-    private synchronized void readFromJsonFile() {
+    private synchronized String readFromJsonFile() {
 
         if (Files.exists(Path.of(jsonFilePath)) && !Files.isDirectory(Path.of(jsonFilePath))) {
             try {
                 String jsonString = Files.readString(Path.of(jsonFilePath));
-                readFromJson(jsonString);
+                return jsonString;
             } catch (IOException ex) {
                 try {
                     Files.delete(Path.of(jsonFilePath));
                 } catch (IOException ignore) {
                     // ignore
                 }
-            }
-        } else {
-            try {
-                // default setting
-                readFromJson(defaultUserRoleMapping);
-            } catch (JacksonException ex) {
-                throw new IllegalArgumentException(ex);
+                return null;
             }
         }
 
+        return null;
     }
 
     private synchronized void dumpToJsonFile() {

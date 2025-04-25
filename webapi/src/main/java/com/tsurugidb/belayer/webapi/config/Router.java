@@ -94,7 +94,7 @@ public class Router {
       DumpLoadApiHandler dumpLoadApiHandler, StatefulApiHandler statefulApiHandler,
       SessionControlApiHandler sessionControlApiHandler,
       DbControlApiHandler dbControlHandler, RoleUserMappingHandler roleUserMappingHandler,
-       HelloHandler helloHandler) {
+      HelloHandler helloHandler) {
 
     RouterFunction<ServerResponse> route = route().POST(AUTH_API.getPath(), authHandler::auth, authApiDoc()).build()
         .and(route().POST(AUTH_REFRESH_API.getPath(), authHandler::refresh, authRefreshApiDoc()).build())
@@ -226,13 +226,18 @@ public class Router {
                 opt -> opt.operationId("db").build())
             .build())
         .and(route()
+            .GET(LIST_ROLES_API.getPath(),
+                roleUserMappingHandler::showRoleDefinition,
+                opt -> opt.operationId("role").build())
+            .build())
+        .and(route()
             .GET(SHOW_ROLE_USER_MAPPING_API.getPath(),
-                roleUserMappingHandler::show,
+                roleUserMappingHandler::showMapping,
                 opt -> opt.operationId("role").build())
             .build())
         .and(route()
             .POST(UPDATE_ROLE_USER_MAPPING_API.getPath(),
-                roleUserMappingHandler::update,
+                roleUserMappingHandler::updateMapping,
                 opt -> opt.operationId("role").build())
             .build());
 
