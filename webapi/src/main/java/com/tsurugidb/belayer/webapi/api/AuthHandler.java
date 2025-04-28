@@ -45,7 +45,6 @@ public class AuthHandler {
 
     return authReq.flatMap(this::verifyAuthParam)
         .flatMap(result -> {
-          log.debug("auth result:" + result.toString());
           if (result.getErrorMessage() != null) {
             return ServerResponse.status(HttpStatus.BAD_REQUEST)
                 .bodyValue(result);

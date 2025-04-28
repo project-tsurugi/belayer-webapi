@@ -96,7 +96,7 @@ public class FileSystemService {
 
     // prevent Dir Traversal
     Path downloadRoot = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
-    if (!dirPath.startsWith(downloadRoot.toString()) || dirNameCount < 1) {
+    if (!dirPath.startsWith(downloadRoot.toString())) {
       throw new BadRequestException("Invalid destination dir:" + dir,
           "invalid destination dir. dir:" + dirPath, null);
     }

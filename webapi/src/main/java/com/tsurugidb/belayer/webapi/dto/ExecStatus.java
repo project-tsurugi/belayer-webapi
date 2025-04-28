@@ -52,6 +52,7 @@ public class ExecStatus {
     private String kind;
     private String status;
     private String format;
+    private String reason;
     private BigDecimal progress = new BigDecimal(0, new MathContext(2, RoundingMode.HALF_UP));
     private String message;
     private String code;
@@ -74,7 +75,7 @@ public class ExecStatus {
             case KIND_START:
                 return String.format("[%s]%s", toTimestampString(), kind);
             case KIND_FINISH:
-                return String.format("[%s]%s:%s", toTimestampString(), kind, status);
+                return String.format("[%s]%s:%s:%s", toTimestampString(), kind, status, reason);
             case KIND_PROGRESS:
                 return String.format("[%s]%s:%s", toTimestampString(), kind, toPercentage(progress));
             default:
