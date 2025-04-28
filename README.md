@@ -63,6 +63,7 @@ See the env var table below.
 |TSURUGI_CONF|Tsurugi configuration file path.|`${TSURUGI_HOME}/var/etc/tsurugi.ini`|
 |TSURUGI_AUTH_URL|URL for authentication server "harinoki".|`http://localhost:8080/harinoki`|
 |TSURUGI_AUTH_AT_EXPIRATION_MIN|The expiration minutes for Access Token.|`10`|
+|BELAYER_DEFAULT_ROLE_USER_MAPPING|Initial role-user mapping(JSON String) *1|`{"ROLE_ADMIN": ["tsurugi"]}`|
 |BELAYER_MAX_FILE_LIST_SIZE|Max size to list the files.|`500`|
 |BELAYER_JOB_EXPIRATION_DAYS|Epiration days for the job history data.|`3`|
 |BELAYER_DL_ZIP_COMPRESS_LEVEL|Zip compress level to download the all file contents in the specified directory.<br/>(0-9 or -1 as default)|`-1`(default compress level)|
@@ -70,6 +71,8 @@ See the env var table below.
 |BELAYER_ADMIN_PAGE_ENABLED|Serve WebAdmin Contents.(optional, not supported as default)|`false`|
 |BELAYER_ADMIN_PAGE_PATH|WebAdmin page path.|`/admin`|
 |BELAYER_WEBADMIN_LOCATION|Path to WebAdmin Contents.(optional, not supported as default)|`file://dev/null`|
+
+* *1: See [Belayer Authorizaion](./docs/belayer_authorization.md#ロールを持つユーザの指定例) document.
 
 ### How to use mock Authentication for development
 

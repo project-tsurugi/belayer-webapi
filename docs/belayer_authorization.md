@@ -144,13 +144,17 @@ classDiagram
 ### ロールを持つユーザの指定例
 
 * 指定したロールを持つユーザIDを正規表現で指定することが可能
-* マッピングのデフォルト値はWebAPIサーバ起動時の環境変数でJSON文字列で指定することが可能
-    * export ELAYER_DEFAULT_ROLE_USER_MAPPING='{"ROLE_ADMIN": ["tsurugi"], "ROLE_BACKUP": ["backup_.*"],"ROLE_STREAM_API": ["stream_.*"]}'
+* マッピングのデフォルト値はWebAPIサーバ起動時の環境変数で**JSON文字列**を指定することが可能
+    * export BELAYER_DEFAULT_ROLE_USER_MAPPING='{"ROLE_ADMIN": ["tsurugi"], "ROLE_BACKUP": ["backup_.*"],"ROLE_STREAM_API": ["stream_.*"]}'
 * ロール・ユーザマッピング取得APIとロール・ユーザマッピング更新APIを使用して、ユーザ・ロールマッピング情報を編集することが可能
-    * 更新した情報は${BELAYER_STORAGE_ROOT}/belayer_role_users.jsonに保存される。
+    * Note: 更新した情報は`${BELAYER_STORAGE_ROOT}/belayer_role_users.json`に保存される。
+        * **サーバ再起動時はこのファイルが参照されるため、以降は`BELAYER_DEFAULT_ROLE_USER_MAPPING`環境変数は参照されないことに注意が必要である。**
+    * APIによるロール・ユーザマッピング定義の参照と更新方法は以下の通り。
 
     ```
+    # 認証トークンの取得
     $ TOKEN=`curl -s -d uid=tsurugi -d pw=password localhost:8000/api/auth | jq -r ".accessToken"`
+    # 現状のロール・ユーザマッピング定義を確認する
     $ curl -s -H "Authorization:Bearer $TOKEN" "localhost:8000/api/show/roleuser"  | jq "."
     {
       "ROLE_ADMIN": ["admin","admin_.*", "tsurugi"],
@@ -158,10 +162,12 @@ classDiagram
       "ROLE_BACKUP": ["backup_.*"],
       "ROLE_LOAD": ["foo", "bar"]
     }
+    # 現状のロール・ユーザマッピング定義をファイルにダンプする
     $ curl -s -H "Authorization:Bearer $TOKEN" "localhost:8000/api/show/roleuser"  | jq "." > role.json
-    $
+    # ロール・ユーザマッピング定義ファイルを編集する
     $ vi role.json
     <edit role.json>
+    # ロール・ユーザマッピング定義ファイルをBelyaer Serverに適用する
     $ curl -v -H "Authorization:Bearer $TOKEN" "localhost:8000/api/update/roleuser" -d @role.json
     Success
     $
