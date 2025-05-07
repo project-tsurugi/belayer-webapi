@@ -154,8 +154,22 @@ classDiagram
     ```
     # 認証トークンの取得
     $ TOKEN=`curl -s -d uid=tsurugi -d pw=password localhost:8000/api/auth | jq -r ".accessToken"`
+    # 設定可能なロール一覧を表示する
+    $ curl -s -H "Authorization:Bearer $TOKEN" localhost:8000/api/list/roles
+    {
+      "ROLE_DB_DOWN" : [ "P_DB_STOP" ],
+      "ROLE_STREAM_API" : [ "P_STREAM_API" ],
+      "ROLE_LOAD" : [ "P_TABLE_LIST", "P_UPLOAD", "P_LOAD", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ],
+      "ROLE_DB_UP" : [ "P_DB_START" ],
+      "ROLE_USER" : [ "P_DB_STATUS", "P_FILE_LIST" ],
+      "ROLE_DUMP" : [ "P_TABLE_LIST", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DUMP", "P_DOWNLOAD" ],
+      "ROLE_SESSION_CTL" : [ "P_SESSION_CTL" ],
+      "ROLE_RESTORE" : [ "P_UPLOAD", "P_RESTORE", "P_FILE_DIR_DELETE", "P_DB_START", "P_FILE_LIST", "P_DOWNLOAD", "P_DB_STOP" ],
+      "ROLE_ADMIN" : [ "P_DB_STATUS", "P_TABLE_LIST", "P_STREAM_API", "P_DB_START", "P_FILE_LIST", "P_SESSION_CTL", "P_DOWNLOAD", "P_DB_STOP", "P_BACKUP", "P_ROLE_EDIT", "P_UPLOAD", "P_RESTORE", "P_LOAD", "P_FILE_DIR_DELETE", "P_DUMP" ],
+      "ROLE_BACKUP" : [ "P_BACKUP", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ]
+    }
     # 現状のロール・ユーザマッピング定義を確認する
-    $ curl -s -H "Authorization:Bearer $TOKEN" "localhost:8000/api/show/roleuser"  | jq "."
+    $ curl -s -H "Authorization:Bearer $TOKEN" localhost:8000/api/show/roleuser
     {
       "ROLE_ADMIN": ["admin","admin_.*", "tsurugi"],
       "ROLE_STREAM_API": ["stream_.*"],
@@ -172,18 +186,3 @@ classDiagram
     Success
     $
     ```
-
-## 【Appendix】 Belayer Web管理画面(Enterprise版)でのロール、ユーザ権限の確認方法
-
-* Belayer Web管理画面では、ログインユーザ自身がもつロール・権限をユーザプロファイルパネルから確認可能
-* Belayer Web管理画面では、現状、ロール・ユーザのマッピング定義を確認する手段を提供していない
-
-## 【Appendix】 Belayer Web管理画面(Enterprise版)での導線制御の方法
-
-* Belayer Web管理画面では、ユーザが該当機能を使用するための実行権限を持つかどうかによって、導線（画面表示やボタン押下の可否）を制御する
-    * ロールによる制御ロジックを持つとサーバサイドとクライアントサイドで制御ロジックを二重に実装することになるため、それを避ける
-* 上記を実現するため、ユーザ認証APIにて以下を実現する
-    * ユーザ認証成功時に、ユーザIDからロールとロールが持つ実行権限を追跡し、ユーザが持つ『実行権限の集合』をユーザ認証APIのレスポンスで返す
-* Web管理画面では以下のようにして、導線を制御する
-    * ログイン時にユーザが持つ実行権限をキャッシュし、それ以降は、実行権限を持つ部分のみ提供するように導線を制御する
-
