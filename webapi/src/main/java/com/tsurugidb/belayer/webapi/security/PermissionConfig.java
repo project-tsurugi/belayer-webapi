@@ -30,6 +30,7 @@ import org.springframework.context.annotation.PropertySource;
 
 import com.tsurugidb.belayer.webapi.config.FunctionPermission;
 import com.tsurugidb.belayer.webapi.config.RouterPath;
+import com.tsurugidb.belayer.webapi.exception.InvalidSettingException;
 
 import io.netty.util.internal.ObjectUtil;
 import lombok.Getter;
@@ -48,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PermissionConfig {
 
     // set up by properties file
+    // key: permissions, value: set of roles
     private Map<String, Set<String>> config;
 
     // set up by properties file
@@ -57,20 +59,38 @@ public class PermissionConfig {
     // key: role, value: set of permissions
     private Map<String, Set<String>> rolePermissionMap = new HashMap<>();
 
+    private static Set<String> NOT_ASSIGNED = Set.of("==NOT_ASSIGNED==");
+
     /**
      * set up role permission Map
+     *
+     * @throws InvalidSettingException invalid Permission was set.
      */
     @PostConstruct
-    public void setUpRolePermissionMap() {
+    public void setUpRolePermissionMap() throws InvalidSettingException {
+        for (var permission : config.keySet()) {
+            if (!isValidPermission(permission)) {
+                throw new InvalidSettingException("Invalid permission was sepecified in permission.properties. permission:" + permission);
+            }
+        }
+
+        Set<String> notAsignedSet = new HashSet<>();
         for (RouterPath path : RouterPath.values()) {
             for (var authz : path.getAuthorities()) {
                 Set<String> roles = getRoles(authz);
-
+                if (roles == NOT_ASSIGNED) {
+                    notAsignedSet.add(authz.name());
+                    continue;
+                }
                 // construct pairs of role and authz
                 for (String role : roles) {
                     rolePermissionMap.computeIfAbsent(role, k -> new HashSet<>()).add(authz.name());
                 }
             }
+        }
+
+        for (String notAsignedPermission : notAsignedSet) {
+            log.warn("No role is assigned for permission:" + notAsignedPermission + ".");
         }
     }
 
@@ -133,11 +153,23 @@ public class PermissionConfig {
 
         var roles = config.get(permission.name());
         if (roles == null) {
-            log.warn("No role is assigned for permission:" + permission.name() + ".");
-            return Set.of("==NOT_ASSIGNED==");
+            return NOT_ASSIGNED;
         }
 
         return roles;
+    }
+
+    public boolean isValidPermission(@Nonnull String permission) {
+        ObjectUtil.checkNotNull(permission, "specified role is null.");
+        for (RouterPath path : RouterPath.values()) {
+            for (var authz : path.getAuthorities()) {
+                if (permission.equals(authz.name())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 }
