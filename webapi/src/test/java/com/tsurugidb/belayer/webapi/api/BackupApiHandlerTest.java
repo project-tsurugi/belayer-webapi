@@ -39,7 +39,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
+import com.tsurugidb.belayer.webapi.config.RouterPath;
 import com.tsurugidb.belayer.webapi.dto.BackupJob;
 import com.tsurugidb.belayer.webapi.dto.BackupRestoreStartRequestBody;
 import com.tsurugidb.belayer.webapi.dto.Job;
@@ -103,7 +103,7 @@ public class BackupApiHandlerTest {
     when(jobIdService.createNewJobId()).thenReturn(jobId);
     when(backupService.startBackup(any())).thenReturn(Mono.just(exp));
 
-    String url = ApiPath.BACKUP_START_API;
+    String url = RouterPath.BACKUP_START_API.getPath();
     String dirPath = "path/to/savedir";
     var reqBody = new BackupRestoreStartRequestBody();
     reqBody.setDirPath(dirPath);
@@ -127,9 +127,9 @@ public class BackupApiHandlerTest {
     when(backupService.getJob(anyString(), anyString(), anyString()))
         .thenReturn(Mono.just(expectJobStatus));
 
-    String url = ApiPath.BACKUP_STATUS_API + "/backup/{jobid}";
+    String url = RouterPath.BACKUP_STATUS_API.getPath();
 
-    client.get().uri(url, jobId)
+    client.get().uri(url, "backup", jobId)
         .exchange()
         .expectStatus().isOk()
         .expectBody(BackupJob.class)
@@ -146,9 +146,9 @@ public class BackupApiHandlerTest {
 
     when(backupService.getJobList(anyString(), anyString())).thenReturn(Flux.fromIterable(jobList));
 
-    String url = ApiPath.LIST_BACKUP_STATUS_API + "/backup";
+    String url = RouterPath.LIST_BACKUP_STATUS_API.getPath();
 
-    client.get().uri(url)
+    client.get().uri(url, "backup")
         .exchange()
         .expectStatus().isOk()
         .expectBody(JobList.class)
@@ -166,9 +166,9 @@ public class BackupApiHandlerTest {
     when(backupService.cancelBackupRestoreJob(anyString(), anyString(), anyString()))
         .thenReturn(Mono.just(expectedReturn));
 
-    String url = ApiPath.CANCEL_BACKUP_RESTORE_API + "/backup/{jobId}";
+    String url = RouterPath.CANCEL_BACKUP_RESTORE_API.getPath();
 
-    client.post().uri(url, jobId)
+    client.post().uri(url, "backup", jobId)
         .exchange()
         .expectStatus().isOk()
         .expectBody(RestoreJob.class)
@@ -191,7 +191,7 @@ public class BackupApiHandlerTest {
     doNothing().when(fileSystemService).checkDirPath(anyString(), anyString());
     doNothing().when(fileSystemService).checkFileExists(anyString(), anyString());
 
-    String url = ApiPath.RESTORE_START_API;
+    String url = RouterPath.RESTORE_START_API.getPath();
     String zipFilePath = "path/to/backup.zip";
     var reqBody = new BackupRestoreStartRequestBody();
     reqBody.setZipFilePath(zipFilePath);

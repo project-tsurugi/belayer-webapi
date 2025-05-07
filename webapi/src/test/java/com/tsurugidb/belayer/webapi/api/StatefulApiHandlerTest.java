@@ -47,7 +47,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.api.helper.UploadHelper;
-import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
+import com.tsurugidb.belayer.webapi.config.RouterPath;
 import com.tsurugidb.belayer.webapi.dto.DumpLoadRequestParam;
 import com.tsurugidb.belayer.webapi.dto.DumpResult;
 import com.tsurugidb.belayer.webapi.dto.Job.JobStatus;
@@ -134,14 +134,14 @@ public class StatefulApiHandlerTest {
         when(tsubakuroService.createTransaction(any(), any(), any(), any(), any(), anyBoolean(), any()))
                 .thenCallRealMethod();
 
-        client.post().uri(ApiPath.START_TRANSACTION_API)
+        client.post().uri(RouterPath.START_TRANSACTION_API.getPath())
                 .body(BodyInserters.fromValue(new TransactionStartBody(mode, "10", null)))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TransactionStatus.class)
                 .isEqualTo(status);
 
-        String url = ApiPath.SHOW_TRANSACTION_STATUS_API + "/{transactionid}";
+        String url = RouterPath.SHOW_TRANSACTION_STATUS_API.getPath();
         client.get().uri(url, jobId)
                 .exchange()
                 .expectStatus().isOk()
@@ -158,7 +158,7 @@ public class StatefulApiHandlerTest {
         when(fileSystemService.convertToDownloadPath(any(), any())).thenReturn(Path.of("foo/aaa.parquet"));
         when(tsubakuroService.dumpTable(any())).thenReturn(Flux.fromIterable(List.of(Path.of("/aaa"))));
 
-        url = ApiPath.STREAM_DUMP_API + "/{transactionid}/{table_name}";
+        url = RouterPath.STREAM_DUMP_API.getPath();
         client.post().uri(url, jobId, tableName)
                 // .body(BodyInserters.fromValue(new StreamDumpRequestBody("parquet",
                 // "normal")))
@@ -184,7 +184,7 @@ public class StatefulApiHandlerTest {
         bodyBuilder.part("file", "abcd".getBytes(StandardCharsets.US_ASCII))
                 .header("Content-Disposition", "form-data; name=file; filename=" + fileName);
 
-        url = ApiPath.STREAM_LOAD_API + "/{transactionid}/{table_name}";
+        url = RouterPath.STREAM_LOAD_API.getPath();
         client.post().uri(url, jobId, tableName)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
@@ -196,8 +196,8 @@ public class StatefulApiHandlerTest {
         status.setStatus(JobStatus.COMMITED.name());
         status.setEndTime(now);
 
-        url = ApiPath.FINISH_TRANSACTION_API + "/commit/{transactionid}";
-        client.post().uri(url, jobId)
+        url = RouterPath.FINISH_TRANSACTION_API.getPath();
+        client.post().uri(url, "commit", jobId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TransactionStatus.class)

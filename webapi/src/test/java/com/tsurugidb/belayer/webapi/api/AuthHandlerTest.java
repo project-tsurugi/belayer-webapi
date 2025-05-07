@@ -58,7 +58,7 @@ public class AuthHandlerTest {
     String at = "token";
     Instant atExpirationTime = Instant.now();
 
-    AuthResult result = new AuthResult(userId, rt, rtExpirationTime, at, atExpirationTime, null);
+    AuthResult result = new AuthResult(userId, rt, rtExpirationTime, at, atExpirationTime, null, null, null);
 
     Mockito.when(authService.verifyCredential(anyString(), anyString())).thenReturn(result);
 
@@ -76,7 +76,7 @@ public class AuthHandlerTest {
 
   @Test
   public void testAuth_Fail() {
-    AuthResult result = new AuthResult("user1", null, null, null, null, "auth failed.");
+    AuthResult result = new AuthResult("user1", null, null, null, null, null, null,"auth failed.");
     Mockito.when(authService.verifyCredential(anyString(), anyString())).thenReturn(result);
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -93,7 +93,7 @@ public class AuthHandlerTest {
 
   @Test
   public void testAuth_No_args() {
-    AuthResult result = new AuthResult("user1", null, null, null, null, "auth failed.");
+    AuthResult result = new AuthResult("user1", null, null, null, null, null, null, "auth failed.");
     Mockito.when(authService.verifyCredential(anyString(), anyString())).thenReturn(result);
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -113,7 +113,7 @@ public class AuthHandlerTest {
     String at = "token";
     Instant atExpirationTime = Instant.now();
 
-    AuthResult result = new AuthResult("user1", rt, rtExpirationTime, at, atExpirationTime, null);
+    AuthResult result = new AuthResult("user1", rt, rtExpirationTime, at, atExpirationTime, null, null, null);
 
     Mockito.when(authService.refreshToken(anyString())).thenReturn(result);
 
@@ -131,7 +131,7 @@ public class AuthHandlerTest {
   @Test
   public void testRefreshToken_Fail() {
     var msg = "Token is exprired.";
-    AuthResult result = new AuthResult("user1", null, null, null, null, msg);
+    AuthResult result = new AuthResult("user1", null, null, null, null, null, null, msg);
 
     Mockito.when(authService.refreshToken(anyString())).thenReturn(result);
 
