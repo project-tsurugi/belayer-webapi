@@ -59,7 +59,7 @@ public class PermissionConfig {
     // key: role, value: set of permissions
     private Map<String, Set<String>> rolePermissionMap = new HashMap<>();
 
-    private static Set<String> NOT_ASSIGNED = Set.of("==NOT_ASSIGNED==");
+    public static Set<String> NOT_ASSIGNED = Set.of("==NOT_ASSIGNED==");
 
     /**
      * set up role permission Map

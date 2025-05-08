@@ -94,6 +94,9 @@ public class SecurityConfig {
       if (roleSet.size() == 0) {
         log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:Permit_All");
         spec = spec.pathMatchers(match).permitAll();
+      } else if (roleSet == PermissionConfig.NOT_ASSIGNED) {
+        log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:Deny_All");
+        spec = spec.pathMatchers(match).denyAll();
       } else {
         log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:" + roleSet);
         spec = spec.pathMatchers(match).hasAnyAuthority(roleSet.toArray(new String[0]));
