@@ -106,7 +106,6 @@ public class BackupRestoreApiHandler {
         .map(SecurityContext::getAuthentication)
         .flatMap(auth -> fillParams(auth, req, jobId))
         .map(this::checkFileExists)
-        .map(this::checkFileDir)
         // exec restore
         .flatMap(backupRestoreService::startRestore)
         .map(this::createResult);
@@ -147,14 +146,6 @@ public class BackupRestoreApiHandler {
 
     // check dir path -> throw error
     fileSystemService.checkDirPath(param.getUid(), param.getDirPath());
-
-    return param;
-  }
-
-  private BackupRestoreRequestParam checkFileDir(BackupRestoreRequestParam param) {
-
-    // check file path -> throw error
-    fileSystemService.checkDirPath(param.getUid(), Path.of(param.getZipFilePath()).getParent().toString());
 
     return param;
   }
