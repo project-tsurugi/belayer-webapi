@@ -13,33 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tsurugidb.belayer.webapi.dto;
+package com.tsurugidb.belayer.webapi.exception;
 
-import java.time.Instant;
-import java.util.Set;
+public class InvalidSettingException extends Exception {
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+    public InvalidSettingException(String message) {
+        super(message);
+    }
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class AuthResult {
+    public InvalidSettingException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    private String userId;
-
-    private String refreshToken;
-
-    private Instant refreshExpirationTime;
-
-    private String accessToken;
-
-    private Instant accessExpirationTime;
-
-    private Set<String> roles;
-
-    private Set<String> authorities;
-
-    private String errorMessage;
 }

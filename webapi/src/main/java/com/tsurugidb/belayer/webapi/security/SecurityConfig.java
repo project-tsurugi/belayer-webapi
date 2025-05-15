@@ -15,10 +15,17 @@
  */
 package com.tsurugidb.belayer.webapi.security;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -27,14 +34,16 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 
-import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
+import com.tsurugidb.belayer.webapi.config.RouterPath;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
  * Configuration for SpringSecurity.
  */
 @Configuration
+@Slf4j
 public class SecurityConfig {
 
   @Value("${belayer.adminpage.path}")
@@ -43,6 +52,9 @@ public class SecurityConfig {
   @Value("${management.endpoints.web.base-path}")
   String managementPath;
 
+  @Autowired
+  PermissionConfig permissionConfig;
+
   /**
    * SecurityWebFilterChain for this app.
    */
@@ -50,27 +62,50 @@ public class SecurityConfig {
   public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
       ServerHttpBearerAuthenticationConverter bearerAuthenticationConverter) {
 
-    // Disable things in spring security.
-    http.httpBasic().disable();
-    http.formLogin().disable();
-    http.csrf().disable();
-    http.logout().disable();
-
-    // Those that should be pass authentication.
-    http.authorizeExchange().pathMatchers("/favicon.ico", managementPath + "/**", "/api/hello", adminPagePath, adminPagePath + "/**", ApiPath.AUTH_API, ApiPath.AUTH_REFRESH_API).permitAll();
-    http.authorizeExchange().pathMatchers(HttpMethod.OPTIONS).permitAll();
-
-    // Apply a auth filter to all /**
-    http.authorizeExchange()
-        .pathMatchers("/**")
-        .authenticated()
+    http = http.exceptionHandling()
+        .authenticationEntryPoint((swe, e) -> Mono.fromRunnable(() -> {
+          swe.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        }))
+        .accessDeniedHandler((swe, e) -> Mono.fromRunnable(() -> {
+          swe.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        }))
         .and()
-        .addFilterAt(bearerAuthenticationFilter(bearerAuthenticationConverter), SecurityWebFiltersOrder.AUTHENTICATION)
         .httpBasic().disable()
         .formLogin().disable()
         .csrf().disable()
         .logout().disable()
-        .cors();
+        .cors().disable()
+        .addFilterAt(bearerAuthenticationFilter(bearerAuthenticationConverter), SecurityWebFiltersOrder.AUTHENTICATION);
+
+    // pathes that should be pass the authentication.
+    var spec = http
+        .authorizeExchange()
+        .pathMatchers("/favicon.ico", managementPath + "/**", adminPagePath, adminPagePath + "/**")
+        .permitAll()
+        .pathMatchers(HttpMethod.OPTIONS).permitAll();
+
+    // require authorities
+    for (RouterPath path : RouterPath.values()) {
+      String match = path.getPathMatch();
+      Set<String> roleSet = Stream.of(path.getAuthorities())
+          .flatMap(authority -> permissionConfig.getRoles(authority).stream())
+          .collect(Collectors.toSet());
+
+      if (roleSet.size() == 0) {
+        log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:Permit_All");
+        spec = spec.pathMatchers(match).permitAll();
+      } else if (roleSet == PermissionConfig.NOT_ASSIGNED) {
+        log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:Deny_All");
+        spec = spec.pathMatchers(match).denyAll();
+      } else {
+        log.info("---" + path.getPathMatch() + ", permission:" + List.of(path.getAuthorities()) + ", role:" + roleSet);
+        spec = spec.pathMatchers(match).hasAnyAuthority(roleSet.toArray(new String[0]));
+      }
+    }
+
+    // Apply a auth filter to all /**
+    http = spec.pathMatchers("/**")
+        .hasAuthority(permissionConfig.getDefaultRole()).and();
 
     return http.build();
   }

@@ -33,9 +33,13 @@
   - [DB停止API](#db停止api)
   - [DBステータス確認API](#dbステータス確認api)
   - [テーブル名一覧取得API](#テーブル名一覧取得api)
+  - [ロール定義取得API](#ロール定義取得api)
+  - [ロール・ユーザマッピング取得API](#ロールユーザマッピング取得api)
+  - [ロール・ユーザマッピング更新API](#ロールユーザマッピング更新api)
 - [ファイルフォーマット](#ファイルフォーマット)
   - [ダンプファイルCSVフォーマット](#ダンプファイルcsvフォーマット)
 - [補足事項](#補足事項)
+  - [認可制御](#認可制御)
   - [ログ出力](#ログ出力)
   - [ジョブ情報の永続化](#ジョブ情報の永続化)
   - [テンポラリファイル](#テンポラリファイル)
@@ -71,6 +75,8 @@
             * refreshExpirationTime: リフレッシュトークンの有効期限日時
             * accessToken: アクセストークン
             * accessExpirationTime: アクセストークンの有効期限日時
+            * roles: ユーザが保持するロールの羅列
+            * authorities: ユーザが保持する機能権限の羅列
             * errorMessage: 常にnull
 
             ```
@@ -80,6 +86,8 @@
               "refreshExpirationTime":"2022-12-09T10:05:40Z",
               "accessToken":"[ACCESS_TOKEN_VALUE]",
               "accessExpirationTime":"2022-12-09T10:05:40Z",
+              "roles": ["ROLE_ADMIN", "ROLE_USER"],
+              "authorities" ["P_FILE_CTL", "P_BACKUP", "P_RESTORE"],
               "errorMessage":null
             }
             ```
@@ -1931,6 +1939,88 @@
                 }
                 ```
 
+## ロール定義取得API
+
+* 概要: Belayerサーバに登録されているロール・権限のマッピング情報を取得する。
+* リクエスト
+    * メソッド:GET
+    * パス: /api/list/roles
+    * パラメータ:なし
+    * ボディ:なし
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * ロールとそのロールに付与された権限リストの定義
+
+                ```
+                {
+                  "ROLE_DB_DOWN" : [ "P_DB_STOP" ],
+                  "ROLE_STREAM_API" : [ "P_STREAM_API" ],
+                  "ROLE_LOAD" : [ "P_TABLE_LIST", "P_UPLOAD", "P_LOAD", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ],
+                  "ROLE_DB_UP" : [ "P_DB_START" ],
+                  "ROLE_USER" : [ "P_DB_STATUS", "P_FILE_LIST" ],
+                  "ROLE_DUMP" : [ "P_TABLE_LIST", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DUMP", "P_DOWNLOAD" ],
+                  "ROLE_SESSION_CTL" : [ "P_SESSION_CTL" ],
+                  "ROLE_RESTORE" : [ "P_UPLOAD", "P_RESTORE", "P_FILE_DIR_DELETE", "P_DB_START", "P_FILE_LIST", "P_DOWNLOAD", "P_DB_STOP" ],
+                  "ROLE_ADMIN" : [ "P_DB_STATUS", "P_TABLE_LIST", "P_STREAM_API", "P_DB_START", "P_FILE_LIST", "P_SESSION_CTL", "P_DOWNLOAD", "P_DB_STOP", "P_BACKUP", "P_ROLE_EDIT", "P_UPLOAD", "P_RESTORE", "P_LOAD", "P_FILE_DIR_DELETE", "P_DUMP" ],
+                  "ROLE_BACKUP" : [ "P_BACKUP", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ]
+                }
+                ```
+
+## ロール・ユーザマッピング取得API
+
+* 概要: Belayerサーバに登録されているロール・ユーザマッピング情報を取得する。
+* リクエスト
+    * メソッド:GET
+    * パス: /api/show/roleuser
+    * パラメータ:なし
+    * ボディ:なし
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * ロールに対応するユーザIDのマッチングエントリ
+
+                ```
+                {
+                  "ROLE_ADMIN": [
+                      "tsurugi"
+                  ]
+                }
+                ```
+
+## ロール・ユーザマッピング更新API
+
+* 概要: Belayerサーバに登録されているロール・ユーザマッピング情報をパラメータで渡したJSONで更新する。
+* リクエスト
+    * メソッド:GET
+    * パス: /api/show/roleuser
+    * パラメータ:なし
+    * ボディ:ロール・ユーザマッピング情報
+        ```
+        {
+          "ROLE_ADMIN": [
+              "tsurugi"
+          ],
+          "ROLE_BACKUP": [
+              "backup_.*"
+          ]
+        }
+        ```
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * ボディ: 
+            ```
+            Success
+            ```
+    * 異常(JSONフォーマットエラー)
+        * ステータスコード:400
+        * ボディ: ```{"errorMessage": "Bad request format."}```
+
 # ファイルフォーマット
 
 ## ダンプファイルCSVフォーマット
@@ -1990,6 +2080,10 @@
         ```
 
 # Web API 補足事項
+
+## 認可制御
+
+認可制御については[Belayer Web API 認可制御](./belayer_authorization.md)を参照のこと。
 
 ## ログ出力
 

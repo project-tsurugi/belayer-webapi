@@ -56,7 +56,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.util.UriBuilder;
 
-import com.tsurugidb.belayer.webapi.config.Router.ApiPath;
+import com.tsurugidb.belayer.webapi.config.RouterPath;
 import com.tsurugidb.belayer.webapi.dto.DeleteTarget;
 import com.tsurugidb.belayer.webapi.dto.DownloadPathList;
 import com.tsurugidb.belayer.webapi.dto.DownloadZip;
@@ -127,7 +127,7 @@ public class FileSystemApiHandlerTest {
 
     String[] expectFileNames = { destDir + "/" + fileName };
 
-    client.post().uri(ApiPath.UPLOAD_API)
+    client.post().uri(RouterPath.UPLOAD_API.getPath())
         .contentType(MediaType.MULTIPART_FORM_DATA)
         .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
         .exchange()
@@ -259,31 +259,32 @@ public class FileSystemApiHandlerTest {
     } catch (Exception ex) {
       System.out.println(ex.toString());
     }
-    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+    Function<UriBuilder, URI> uri = (builder -> builder.path(RouterPath.DOWNLOADZIP_API.getPath())
         // .queryParam("csv", "true")
         .build());
 
     var param = new DownloadZip();
     param.setPathList(
-      new String[] {
-        destDir + "/" + fileName,
-        destDir + "/" + fileName2,
-      }
-    );
+        new String[] {
+            destDir + "/" + fileName,
+            destDir + "/" + fileName2,
+        });
 
     var strDateTime = "2022-06-30T12:12:34.567Z";
     var now = Instant.parse(strDateTime);
     Mockito.when(systemTime.now()).thenReturn(now);
 
     var formattedString = DateTimeFormatter
-      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+        .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
 
     client.post().uri(uri)
         .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType("application/zip")
-        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
+        .expectHeader()
+        .contentDisposition(
+            ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
         .expectBody(byte[].class)
         .consumeWith(body -> {
           var bytes = body.getResponseBodyContent();
@@ -317,24 +318,23 @@ public class FileSystemApiHandlerTest {
     } catch (Exception ex) {
       System.out.println(ex.toString());
     }
-    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+    Function<UriBuilder, URI> uri = (builder -> builder.path(RouterPath.DOWNLOADZIP_API.getPath())
         .queryParam("csv", "true")
         .build());
 
     var param = new DownloadZip();
     param.setPathList(
-      new String[] {
-        destDir + "/" + fileName,
-        destDir + "/" + fileName2,
-      }
-    );
+        new String[] {
+            destDir + "/" + fileName,
+            destDir + "/" + fileName2,
+        });
 
     var strDateTime = "2022-06-30T12:12:34.567Z";
     var now = Instant.parse(strDateTime);
     Mockito.when(systemTime.now()).thenReturn(now);
 
     var formattedString = DateTimeFormatter
-      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+        .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
 
     String fileName_conv = "test_" + formattedString + ".csv";
     String fileName2_conv = "test2_" + formattedString + ".csv";
@@ -344,7 +344,9 @@ public class FileSystemApiHandlerTest {
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType("application/zip")
-        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
+        .expectHeader()
+        .contentDisposition(
+            ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
         .expectBody(byte[].class)
         .consumeWith(body -> {
           var bytes = body.getResponseBodyContent();
@@ -378,30 +380,31 @@ public class FileSystemApiHandlerTest {
     } catch (Exception ex) {
       System.out.println(ex.toString());
     }
-    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+    Function<UriBuilder, URI> uri = (builder -> builder.path(RouterPath.DOWNLOADZIP_API.getPath())
         .build());
 
     var param = new DownloadZip();
     param.setPathList(
-      new String[] {
-        destDir + "/" + fileName,
-        destDir + "/" + fileName2,
-      }
-    );
+        new String[] {
+            destDir + "/" + fileName,
+            destDir + "/" + fileName2,
+        });
 
     var strDateTime = "2022-06-30T12:12:34.567Z";
     var now = Instant.parse(strDateTime);
     Mockito.when(systemTime.now()).thenReturn(now);
 
     var formattedString = DateTimeFormatter
-      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+        .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
 
     client.post().uri(uri)
         .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType("application/zip")
-        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
+        .expectHeader()
+        .contentDisposition(
+            ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
         .expectBody(byte[].class)
         .consumeWith(body -> {
           var bytes = body.getResponseBodyContent();
@@ -435,24 +438,23 @@ public class FileSystemApiHandlerTest {
     } catch (Exception ex) {
       System.out.println(ex.toString());
     }
-    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+    Function<UriBuilder, URI> uri = (builder -> builder.path(RouterPath.DOWNLOADZIP_API.getPath())
         .queryParam("csv", "true")
         .build());
 
     var param = new DownloadZip();
     param.setPathList(
-      new String[] {
-        destDir + "/" + fileName,
-        destDir + "/" + fileName2,
-      }
-    );
+        new String[] {
+            destDir + "/" + fileName,
+            destDir + "/" + fileName2,
+        });
 
     var strDateTime = "2022-06-30T12:12:34.567Z";
     var now = Instant.parse(strDateTime);
     Mockito.when(systemTime.now()).thenReturn(now);
 
     var formattedString = DateTimeFormatter
-      .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
+        .ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.ofInstant(now, ZoneOffset.UTC));
 
     String fileName_comv = "test_" + formattedString + ".csv";
 
@@ -461,7 +463,9 @@ public class FileSystemApiHandlerTest {
         .exchange()
         .expectStatus().isOk()
         .expectHeader().contentType("application/zip")
-        .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
+        .expectHeader()
+        .contentDisposition(
+            ContentDisposition.parse("attachment; filename=\"" + "belayer_download_" + formattedString + ".zip\""))
         .expectBody(byte[].class)
         .consumeWith(body -> {
           var bytes = body.getResponseBodyContent();
@@ -485,16 +489,15 @@ public class FileSystemApiHandlerTest {
     String fileName = "test.parquet";
     String fileName2 = "test2.parquet";
 
-    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+    Function<UriBuilder, URI> uri = (builder -> builder.path(RouterPath.DOWNLOADZIP_API.getPath())
         .build());
 
     var param = new DownloadZip();
     param.setPathList(
-      new String[] {
-        destDir + "/" + fileName,
-        destDir2 + "/" + fileName2,
-      }
-    );
+        new String[] {
+            destDir + "/" + fileName,
+            destDir2 + "/" + fileName2,
+        });
 
     var strDateTime = "2022-06-30T12:12:34.567Z";
     var now = Instant.parse(strDateTime);
@@ -506,18 +509,16 @@ public class FileSystemApiHandlerTest {
         .expectStatus().isBadRequest();
   }
 
-
   @Test
   @WithMockUser(username = TEST_USER)
   public void testDownloadZipFile_empty_path() throws IOException {
 
-    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+    Function<UriBuilder, URI> uri = (builder -> builder.path(RouterPath.DOWNLOADZIP_API.getPath())
         .build());
 
     var param = new DownloadZip();
     param.setPathList(
-      new String[] {}
-    );
+        new String[] {});
 
     var strDateTime = "2022-06-30T12:12:34.567Z";
     var now = Instant.parse(strDateTime);
@@ -537,16 +538,15 @@ public class FileSystemApiHandlerTest {
     String fileName = "test.parquet";
     String fileName2 = "test2.parquet";
 
-    Function<UriBuilder, URI> uri = (builder -> builder.path(ApiPath.DOWNLOADZIP_API)
+    Function<UriBuilder, URI> uri = (builder -> builder.path(RouterPath.DOWNLOADZIP_API.getPath())
         .build());
 
     var param = new DownloadZip();
     param.setPathList(
-      new String[] {
-        destDir + "/" + fileName,
-        destDir + "/" + fileName2,
-      }
-    );
+        new String[] {
+            destDir + "/" + fileName,
+            destDir + "/" + fileName2,
+        });
 
     var strDateTime = "2022-06-30T12:12:34.567Z";
     var now = Instant.parse(strDateTime);
@@ -584,7 +584,7 @@ public class FileSystemApiHandlerTest {
     Files.write(Path.of(dir.toString(), fileName2), contents);
     Files.write(Path.of(dir.toString(), fileName3), contents);
 
-    String url = ApiPath.LIST_FILES_API + "/{path}";
+    String url = RouterPath.LIST_FILES_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).queryParam("hide_dir", "true")
         .build(destDir));
 
@@ -619,7 +619,7 @@ public class FileSystemApiHandlerTest {
     Files.write(Path.of(dir.toString(), fileName2), contents);
     Files.write(Path.of(dir.toString(), fileName3), contents);
 
-    String url = ApiPath.LIST_FILES_API + "/{path}";
+    String url = RouterPath.LIST_FILES_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).queryParam("hide_file", "true")
         .build(destDir));
 
@@ -657,7 +657,7 @@ public class FileSystemApiHandlerTest {
     Files.write(Path.of(dir.toString(), fileName2), contents);
     Files.write(Path.of(dir.toString(), fileName3), contents);
 
-    String url = ApiPath.LIST_FILES_API + "/{path}";
+    String url = RouterPath.LIST_FILES_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).build(destDir));
 
     client.get().uri(uriBuilder)
@@ -688,7 +688,7 @@ public class FileSystemApiHandlerTest {
       Files.write(Path.of(dir.toString(), String.format("test%03d.txt", i)), contents);
     }
 
-    String url = ApiPath.LIST_FILES_API + "/{path}";
+    String url = RouterPath.LIST_FILES_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).queryParam("hide_dir", "true")
         .build(destDir));
 
@@ -722,7 +722,7 @@ public class FileSystemApiHandlerTest {
     Files.createDirectories(dir);
     Files.write(Path.of(dir.toString(), fileName1), contents);
 
-    String url = ApiPath.LIST_FILES_API + "/{path}";
+    String url = RouterPath.LIST_FILES_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).queryParam("hide_file", "true")
         .queryParam("hide_dir", "true").build(destDir));
 
@@ -750,7 +750,7 @@ public class FileSystemApiHandlerTest {
     var param = new DeleteTarget();
     param.setPath(deleteFile);
 
-    client.post().uri(ApiPath.DELETE_FILE_API)
+    client.post().uri(RouterPath.DELETE_FILE_API.getPath())
         .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
@@ -778,7 +778,7 @@ public class FileSystemApiHandlerTest {
     var param = new DeleteTarget();
     param.setPathList(files);
 
-    String url = ApiPath.DELETE_FILES_API;
+    String url = RouterPath.DELETE_FILES_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
         .build());
 
@@ -804,12 +804,13 @@ public class FileSystemApiHandlerTest {
     Files.write(Path.of(dir.toString(), fileName1), contents);
 
     String deleteFile = destDir + "/invalid.txt";
+    var param = new DeleteTarget();
+    param.setPath(deleteFile);
 
-    String url = ApiPath.DELETE_FILE_API + "/{path}";
-    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(deleteFile));
-
+    String url = RouterPath.DELETE_FILE_API.getPath();
+    Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).build());
     client.post().uri(uriBuilder)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isNotFound();
   }
@@ -823,7 +824,7 @@ public class FileSystemApiHandlerTest {
     Path dir = Path.of(storageRootDir, TEST_USER, destDir);
     Files.createDirectories(dir);
 
-    String url = ApiPath.DELETE_FILE_API + "/{path}";
+    String url = RouterPath.DELETE_FILE_API + "/{path}";
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
         .build(destDir));
 
@@ -841,7 +842,7 @@ public class FileSystemApiHandlerTest {
     var param = new DeleteTarget();
     param.setPath(destDir);
 
-    client.post().uri(ApiPath.DELETE_FILE_API)
+    client.post().uri(RouterPath.DELETE_FILE_API.getPath())
         .bodyValue(param)
         .exchange()
         .expectStatus().isBadRequest();
@@ -859,7 +860,7 @@ public class FileSystemApiHandlerTest {
     var param = new DeleteTarget();
     param.setPath(destDir);
 
-    client.post().uri(ApiPath.DELETE_DIR_API)
+    client.post().uri(RouterPath.DELETE_DIR_API.getPath())
         .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
@@ -883,7 +884,7 @@ public class FileSystemApiHandlerTest {
     var param = new DeleteTarget();
     param.setPath(destDir);
 
-    client.post().uri(ApiPath.DELETE_DIR_API)
+    client.post().uri(RouterPath.DELETE_DIR_API.getPath())
         .bodyValue(param)
         .exchange()
         .expectStatus().isBadRequest();
@@ -894,12 +895,15 @@ public class FileSystemApiHandlerTest {
   public void testDeleteDir_not_found() throws IOException {
 
     String destDir = "dir_for_test";
+    var param = new DeleteTarget();
+    param.setPath(destDir);
 
-    String url = ApiPath.DELETE_DIR_API + "/{path}";
+    String url = RouterPath.DELETE_DIR_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(destDir));
+        .build());
 
     client.post().uri(uriBuilder)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isNotFound();
   }
@@ -913,7 +917,7 @@ public class FileSystemApiHandlerTest {
     var param = new DeleteTarget();
     param.setPath(destDir);
 
-    client.post().uri(ApiPath.DELETE_DIR_API)
+    client.post().uri(RouterPath.DELETE_DIR_API.getPath())
         .bodyValue(param)
         .exchange()
         .expectStatus().isBadRequest();
@@ -932,11 +936,15 @@ public class FileSystemApiHandlerTest {
     Files.createDirectories(dir);
     Files.write(Path.of(dir.toString(), fileName1), contents);
 
-    String url = ApiPath.DELETE_DIR_API + "/{path}";
+    var param = new DeleteTarget();
+    param.setPath(destDir + "/" + fileName1);
+
+    String url = RouterPath.DELETE_DIR_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url)
-        .build(destDir + "/" + fileName1));
+        .build());
 
     client.post().uri(uriBuilder)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isNotFound();
   }
@@ -958,7 +966,7 @@ public class FileSystemApiHandlerTest {
     param.setPath(destDir);
     param.setForce(true);
 
-    client.post().uri(ApiPath.DELETE_DIR_API)
+    client.post().uri(RouterPath.DELETE_DIR_API.getPath())
         .bodyValue(param)
         .exchange()
         .expectStatus().isOk()
@@ -970,11 +978,16 @@ public class FileSystemApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void testDeleteDir_force_not_found() throws IOException {
 
-    String url = ApiPath.DELETE_DIR_API + "/{path}";
+    var param = new DeleteTarget();
+    param.setPath("invalid");
+    param.setForce(true);
+
+    String url = RouterPath.DELETE_DIR_API.getPath();
     Function<UriBuilder, URI> uriBuilder = (builder -> builder.path(url).queryParam("force", "true")
-        .build("invalid"));
+        .build());
 
     client.post().uri(uriBuilder)
+        .bodyValue(param)
         .exchange()
         .expectStatus().isNotFound();
   }
