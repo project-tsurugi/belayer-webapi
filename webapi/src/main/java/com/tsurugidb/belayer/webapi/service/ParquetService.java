@@ -218,19 +218,7 @@ public class ParquetService {
                 }
 
                 long nanoSecFromMidNight = simpleGourp.getLong(fieldCount, 0);
-
-                if (adjustmentedToUtc) {
-                    BigInteger value = BigInteger.valueOf(nanoSecFromMidNight);
-                    var nanoUnit = BigInteger.valueOf(1000000000L);
-                    long epochSecond = value.divide(nanoUnit).longValue();
-                    long nanoSec = value.remainder(nanoUnit).longValue();
-                    Instant instant = Instant.ofEpochSecond(epochSecond, nanoSec);
-                    LocalTime ldt = LocalTime.ofInstant(instant, ZoneOffset.UTC);
-                    return DateTimeFormatter.ofPattern("HH:mm:ss.nnnnnnnnn").format(ldt);
-                }
-
-                LocalTime time = LocalTime.ofNanoOfDay(nanoSecFromMidNight);
-                return time.format(DateTimeFormatter.ofPattern("HH:mm:ss.nnnnnnnnn"));
+                return toTimeString(nanoSecFromMidNight, adjustmentedToUtc, ZoneId.systemDefault());
             }
 
             // TIMESTAMP
@@ -254,19 +242,7 @@ public class ParquetService {
                     return "?";
                 }
 
-                var nanoUnit = BigInteger.valueOf(1000000000L);
-                long epochSecond = nanoValue.divide(nanoUnit).longValue();
-                long nanoSec = nanoValue.remainder(nanoUnit).longValue();
-                ZoneOffset zoneOffset;
-                if (adjustmentedToUtc) {
-                    zoneOffset = ZoneOffset.UTC;
-                } else {
-                    OffsetDateTime odt = OffsetDateTime.now(ZoneId.systemDefault());
-                    zoneOffset = odt.getOffset();
-                }
-                var timestamp = LocalDateTime.ofEpochSecond(epochSecond, (int) nanoSec, zoneOffset);
-                return timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.nnnnnnnnn"));
-
+                return toDateTimeString(nanoValue, adjustmentedToUtc, ZoneId.systemDefault());
             }
 
             // DECIMAL
@@ -296,6 +272,49 @@ public class ParquetService {
         }
 
         return "?";
+    }
+
+    String toTimeString(long nanoSecFromMidNight, boolean adjustmentedToUtc, ZoneId zoneId) {
+
+        if (adjustmentedToUtc) {
+            BigInteger nanoValue = BigInteger.valueOf(nanoSecFromMidNight);
+            var nanoUnit = BigInteger.valueOf(1000000000L);
+            long epochSecond = nanoValue.divide(nanoUnit).longValue();
+            long nanoSec = nanoValue.remainder(nanoUnit).longValue();
+
+            //OffsetDateTime odt = OffsetDateTime.now(zoneId);
+            //ZoneOffset offset = odt.getOffset();
+
+            // This ALWAYS treats as UTC
+            ZoneOffset offset = ZoneOffset.UTC;
+
+            var timestamp = OffsetDateTime.ofInstant(Instant.ofEpochSecond(epochSecond, nanoSec), offset);
+            return timestamp.format(DateTimeFormatter.ofPattern("HH:mm:ss.nnnnnnnnn"));
+        }
+
+        LocalTime time = LocalTime.ofNanoOfDay(nanoSecFromMidNight);
+        return time.format(DateTimeFormatter.ofPattern("HH:mm:ss.nnnnnnnnn"));
+
+    }
+
+    String toDateTimeString(BigInteger nanoValue, boolean adjustmentedToUtc, ZoneId zoneId) {
+
+        var nanoUnit = BigInteger.valueOf(1000000000L);
+        long epochSecond = nanoValue.divide(nanoUnit).longValue();
+        long nanoSec = nanoValue.remainder(nanoUnit).longValue();
+
+        if (adjustmentedToUtc) {
+            // OffsetDateTime odt = OffsetDateTime.now(ZoneId.systemDefault());
+            // ZoneOffset offset = odt.getOffset();
+
+            // This ALWAYS treats as UTC
+            ZoneOffset offset = ZoneOffset.UTC;
+            var timestamp = OffsetDateTime.ofInstant(Instant.ofEpochSecond(epochSecond, nanoSec), offset);
+            return timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.nnnnnnnnn"));
+        }
+
+        var timestamp = LocalDateTime.ofEpochSecond(epochSecond, (int) nanoSec, ZoneOffset.UTC);
+        return timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.nnnnnnnnn"));
     }
 
     /**
