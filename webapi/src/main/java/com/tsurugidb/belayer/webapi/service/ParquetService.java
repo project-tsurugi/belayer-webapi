@@ -226,11 +226,11 @@ public class ParquetService {
                     long nanoSec = value.remainder(nanoUnit).longValue();
                     Instant instant = Instant.ofEpochSecond(epochSecond, nanoSec);
                     LocalTime ldt = LocalTime.ofInstant(instant, ZoneOffset.UTC);
-                    return DateTimeFormatter.ofPattern("HH:mm:ss.SSSnnnnnn").format(ldt);
+                    return DateTimeFormatter.ofPattern("HH:mm:ss.nnnnnnnnn").format(ldt);
                 }
 
                 LocalTime time = LocalTime.ofNanoOfDay(nanoSecFromMidNight);
-                return time.format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSnnnnnn"));
+                return time.format(DateTimeFormatter.ofPattern("HH:mm:ss.nnnnnnnnn"));
             }
 
             // TIMESTAMP
@@ -265,7 +265,7 @@ public class ParquetService {
                     zoneOffset = odt.getOffset();
                 }
                 var timestamp = LocalDateTime.ofEpochSecond(epochSecond, (int) nanoSec, zoneOffset);
-                return timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSnnnnnn"));
+                return timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.nnnnnnnnn"));
 
             }
 
