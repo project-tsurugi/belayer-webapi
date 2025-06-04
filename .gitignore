@@ -37,3 +37,5 @@
 /webapi/test_tmp/belayer_jobs.json
 /webapi/test_tmp/test_user/
 webapi/test_tmp/belayer_role_users.json
+webapi/src/test/files/parquet/out/type.parquet
+webapi/src/test/files/parquet/out/type.csv
