@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.security;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +34,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import com.tsurugidb.belayer.webapi.config.RouterPath;
 
@@ -74,7 +78,7 @@ public class SecurityConfig {
         .formLogin().disable()
         .csrf().disable()
         .logout().disable()
-        .cors().disable()
+        .cors(cors -> {cors.configurationSource(corsConfigurationSource());})
         .addFilterAt(bearerAuthenticationFilter(bearerAuthenticationConverter), SecurityWebFiltersOrder.AUTHENTICATION);
 
     // pathes that should be pass the authentication.
@@ -108,6 +112,20 @@ public class SecurityConfig {
         .hasAuthority(permissionConfig.getDefaultRole()).and();
 
     return http.build();
+  }
+
+  private CorsConfigurationSource corsConfigurationSource() {
+
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    configuration.setAllowedOrigins(Arrays.asList("*"));
+    configuration.setAllowedMethods(Arrays.asList("*"));
+    //configuration.setAllowedHeaders(Arrays.asList("X-Custom-Header"));
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+
+    return source;
   }
 
   /**
