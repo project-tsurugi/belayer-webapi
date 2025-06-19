@@ -15,6 +15,13 @@
  */
 package com.tsurugidb.belayer.webapi.service;
 
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+
 import org.junit.jupiter.api.Test;
 
 public class ParquetServiceTest {
@@ -53,6 +60,90 @@ public class ParquetServiceTest {
 
         target.convertCsvToParquet(TEST_CSV, OUT_DIR + "/type.parquet");
 
+    }
+
+    @Test
+    public void test_toTimeString() throws Exception {
+
+        long millisec = new SimpleDateFormat("HH:mm:ss.SSSX").parse("01:02:03.123Z").getTime();
+
+        var nanos = BigInteger.valueOf(millisec)
+                .multiply(BigInteger.valueOf(1000000L))
+                .add(BigInteger.valueOf(456789)).longValue();
+
+        String timeString = target.toTimeString(nanos, true, ZoneId.of("+0900"));
+
+        assertEquals("01:02:03.123456789", timeString);
+    }
+
+    @Test
+    public void test_toTimeString2() throws Exception {
+
+        long millisec = new SimpleDateFormat("HH:mm:ss.SSSX").parse("01:02:03.123Z").getTime();
+
+        var nanos = BigInteger.valueOf(millisec)
+                .multiply(BigInteger.valueOf(1000000L))
+                .add(BigInteger.valueOf(456789)).longValue();
+
+        String timeString = target.toTimeString(nanos, true, ZoneId.of("UTC"));
+
+        assertEquals("01:02:03.123456789", timeString);
+    }
+
+    @Test
+    public void test_toTimeString3() throws Exception {
+
+        long millisec = new SimpleDateFormat("HH:mm:ss.SSSX").parse("01:02:03.123Z").getTime();
+
+        var nanos = BigInteger.valueOf(millisec)
+                .multiply(BigInteger.valueOf(1000000L))
+                .add(BigInteger.valueOf(456789)).longValue();
+
+        String timeString = target.toTimeString(nanos, false, ZoneId.of("+0900"));
+
+        assertEquals("01:02:03.123456789", timeString);
+    }
+
+    @Test
+    public void test_toDateTimeString() throws Exception {
+
+        long millisec = new SimpleDateFormat("yyyy/MM/dd HH:mm:ssX").parse("2025/06/01 01:02:03Z").getTime();
+
+        BigInteger nanos = BigInteger.valueOf(millisec)
+                .multiply(BigInteger.valueOf(1000000L))
+                .add(BigInteger.valueOf(123456789));
+
+        String timeString = target.toDateTimeString(nanos, true, ZoneId.of("+0900"));
+
+        assertEquals("2025-06-01 01:02:03.123456789", timeString);
+    }
+
+    @Test
+    public void test_toDateTimeString2() throws Exception {
+
+        long millisec = new SimpleDateFormat("yyyy/MM/dd HH:mm:ssX").parse("2025/06/01 01:02:03Z").getTime();
+
+        BigInteger nanos = BigInteger.valueOf(millisec)
+                .multiply(BigInteger.valueOf(1000000L))
+                .add(BigInteger.valueOf(123456789));
+
+        String timeString = target.toDateTimeString(nanos, true, ZoneId.of("UTC"));
+
+        assertEquals("2025-06-01 01:02:03.123456789", timeString);
+    }
+
+    @Test
+    public void test_toDateTimeString3() throws Exception {
+
+        long millisec = new SimpleDateFormat("yyyy/MM/dd HH:mm:ssX").parse("2025/06/01 01:02:03Z").getTime();
+
+        BigInteger nanos = BigInteger.valueOf(millisec)
+                .multiply(BigInteger.valueOf(1000000L))
+                .add(BigInteger.valueOf(123456789));
+
+        String timeString = target.toDateTimeString(nanos, false, ZoneId.of("+0900"));
+
+        assertEquals("2025-06-01 01:02:03.123456789", timeString);
     }
 
 }
