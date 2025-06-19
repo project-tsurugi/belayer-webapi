@@ -15,15 +15,13 @@
  */
 package com.tsurugidb.belayer.webapi.service;
 
-<<<<<<< HEAD
-=======
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 
->>>>>>> cc702d9 (refine code and add unit tests)
 import org.junit.jupiter.api.Test;
 
 public class ParquetServiceTest {
@@ -63,9 +61,6 @@ public class ParquetServiceTest {
         target.convertCsvToParquet(TEST_CSV, OUT_DIR + "/type.parquet");
 
     }
-
-<<<<<<< HEAD
-=======
 
     @Test
     public void test_toTimeString() throws Exception {
@@ -151,15 +146,4 @@ public class ParquetServiceTest {
         assertEquals("2025-06-01 01:02:03.123456789", timeString);
     }
 
-    @Test
-    public void test_toBinaryString() throws Exception {
-
-        byte[] bytes = new byte[]{(byte)0x10, (byte)0xbf, (byte)0xef};
-
-        String binString = target.toBinaryString(bytes);
-
-        assertEquals("10bfef", binString);
-    }
-
->>>>>>> cc702d9 (refine code and add unit tests)
 }
