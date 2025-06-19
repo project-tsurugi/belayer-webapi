@@ -78,7 +78,7 @@ public class AuthService {
   /**
    * verify user password credential and return access token.
    * 
-   * @param userId   Uesr Id
+   * @param userId   user Id
    * @param password Password
    * @return Authentication Result
    */
