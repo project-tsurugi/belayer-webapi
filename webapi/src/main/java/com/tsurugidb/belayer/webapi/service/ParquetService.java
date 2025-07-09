@@ -31,6 +31,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -258,8 +259,12 @@ public class ParquetService {
 
             // BINARY
             if (primitiveType.getPrimitiveTypeName() == PrimitiveTypeName.BINARY) {
-                // TODO: now treat BINARY as NULL on CSV
-                return null;
+                Binary value = simpleGourp.getBinary(fieldCount, 0);
+                if (value == null) {
+                    return null;
+                }
+
+                return Base64.getEncoder().encodeToString(value.getBytes());
             }
 
             log.debug("Single {}({}):{}", fieldName, fieldCount, fieldType);
@@ -282,8 +287,8 @@ public class ParquetService {
             long epochSecond = nanoValue.divide(nanoUnit).longValue();
             long nanoSec = nanoValue.remainder(nanoUnit).longValue();
 
-            //OffsetDateTime odt = OffsetDateTime.now(zoneId);
-            //ZoneOffset offset = odt.getOffset();
+            // OffsetDateTime odt = OffsetDateTime.now(zoneId);
+            // ZoneOffset offset = odt.getOffset();
 
             // This ALWAYS treats as UTC
             ZoneOffset offset = ZoneOffset.UTC;

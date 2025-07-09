@@ -58,6 +58,8 @@ import com.tsurugidb.belayer.webapi.service.FileSystemService;
 import com.tsurugidb.belayer.webapi.service.ParquetService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 import com.tsurugidb.belayer.webapi.util.FileUtil;
+import com.tsurugidb.sql.proto.SqlCommon.AtomType;
+import com.tsurugidb.sql.proto.SqlCommon.Column;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
@@ -206,7 +208,8 @@ public class TsubakuroServiceImpl implements TsubakuroService {
     var credentials = Objects.requireNonNull((String) job.getCredentials(), "credentials is not supplied");
 
     var cred = new RememberMeCredential(credentials);
-    var tx = createTransaction(TransactionType.READ_ONLY, cred, job.getJobId(), "dump", Optional.empty(), true, job.getTable());
+    var tx = createTransaction(TransactionType.READ_ONLY, cred, job.getJobId(), "dump", Optional.empty(), true,
+        job.getTable());
     job.setTsurugiTransaction(tx);
 
     return job;
@@ -216,7 +219,8 @@ public class TsubakuroServiceImpl implements TsubakuroService {
     var credentials = (String) job.getCredentials();
     Objects.requireNonNull(credentials);
     var cred = new RememberMeCredential(credentials);
-    var tx = createTransaction(TransactionType.LONG, cred, job.getJobId(), "load", Optional.empty(), job.isTransactionNeeded(),
+    var tx = createTransaction(TransactionType.LONG, cred, job.getJobId(), "load", Optional.empty(),
+        job.isTransactionNeeded(),
         job.getTable());
     job.setTsurugiTransaction(tx);
 
@@ -543,9 +547,18 @@ public class TsubakuroServiceImpl implements TsubakuroService {
         Objects.requireNonNull(tableMd);
         LoadBuilder builder = LoadBuilder.loadTo(tableMd)
             .style(LoadBuilder.Style.OVERWRITE);
-        for (LoadColumnMapping mapping : statement.getColMapping()) {
+        var colMapping = statement.getColMapping();
+        for (LoadColumnMapping mapping : colMapping) {
           if (fromCsv) {
-            builder = builder.mapping(mapping.getTableColumn(), mapping.getParquetColumn(), String.class);
+            Column column = mapping.getTableColumn();
+            AtomType type = column.getAtomType();
+            log.debug("column:{}, type:{}", column.getName(), type.name());
+            if (type == AtomType.OCTET) {
+              builder = builder.mapping(column, mapping.getParquetColumn(), String.class,
+                  LoadBuilder.Conversion.BASE64);
+            } else {
+              builder = builder.mapping(column, mapping.getParquetColumn(), String.class);
+            }
           } else {
             log.debug("mapping to:{}, from:{}", mapping.getTableColumn(), mapping.getParquetColumn());
             builder = builder.mapping(mapping.getTableColumn(), mapping.getParquetColumn());
