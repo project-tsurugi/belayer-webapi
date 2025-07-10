@@ -260,7 +260,7 @@ public class ParquetService {
             // BINARY
             if (primitiveType.getPrimitiveTypeName() == PrimitiveTypeName.BINARY) {
                 Binary value = simpleGourp.getBinary(fieldCount, 0);
-                if (value == null) {
+                if (value == null || value.getBytes() == null) {
                     return null;
                 }
 
