@@ -299,8 +299,6 @@ public class Router {
     }
   }
 
-  // TODO: add error status code into API Docs.
-
   /**
    * API Doc for Auth API.
    */

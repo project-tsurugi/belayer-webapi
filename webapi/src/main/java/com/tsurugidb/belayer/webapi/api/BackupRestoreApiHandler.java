@@ -15,7 +15,6 @@
  */
 package com.tsurugidb.belayer.webapi.api;
 
-import java.nio.file.Path;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
