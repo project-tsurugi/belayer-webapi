@@ -16,7 +16,6 @@
 package com.tsurugidb.belayer.webapi.service.tsubakuro;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -50,7 +49,6 @@ import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
 import com.tsurugidb.tsubakuro.channel.common.connection.RememberMeCredential;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.ResponseProcessor;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.Wire;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -240,21 +238,6 @@ public class TsubakuroServiceStub implements TsubakuroService {
         }
 
         @Override
-        public <R> FutureResponse<R> send(int serviceId, @Nonnull byte[] payload, @Nonnull ResponseProcessor<R> processor) throws IOException {
-            return null;
-        }
-
-        @Override
-        public <R> FutureResponse<R> send(int serviceId, @Nonnull ByteBuffer payload, @Nonnull ResponseProcessor<R> processor) throws IOException {
-            return null;
-        }
-
-        @Override
-        public FutureResponse<Void> updateCredential(@Nonnull Credential credential) throws IOException {
-            return null;
-        }
-
-        @Override
         public FutureResponse<Void> updateExpirationTime(long time, @Nonnull TimeUnit unit) throws IOException {
             return new FutureResponse<Void>() {
 
@@ -300,17 +283,6 @@ public class TsubakuroServiceStub implements TsubakuroService {
         @Override
         public void remove(@Nonnull ServerResource resource) {
         }
-
-        @Deprecated public <R> FutureResponse<R> send(int serviceId, @Nonnull byte[] payload, @Nonnull ResponseProcessor<R> processor,
-                boolean background) throws IOException {
-            return null;
-        }
-
-        @Deprecated public <R> FutureResponse<R> send(int serviceId, @Nonnull ByteBuffer payload, @Nonnull ResponseProcessor<R> processor,
-                boolean background) throws IOException {
-            return null;
-        }
-
     }
 
     public class SqlClientStub implements SqlClient {
