@@ -72,7 +72,7 @@ public class DbControlApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void startDatabase() {
 
-    doNothing().when(dbControlService).startDatabase(anyString());
+    doNothing().when(dbControlService).startDatabase(anyString(), anyString());
     client.post()
         .uri("/api/db/start")
         .exchange()
@@ -83,7 +83,7 @@ public class DbControlApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void shutdown() {
 
-    doNothing().when(dbControlService).shutdownDatabase(anyString());
+    doNothing().when(dbControlService).shutdownDatabase(anyString(), anyString());
     client.get()
         .uri("/api/db/status")
         .exchange()

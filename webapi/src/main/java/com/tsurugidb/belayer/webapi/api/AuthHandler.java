@@ -30,10 +30,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.service.AuthService;
 
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-@Slf4j
 @Component
 public class AuthHandler {
 

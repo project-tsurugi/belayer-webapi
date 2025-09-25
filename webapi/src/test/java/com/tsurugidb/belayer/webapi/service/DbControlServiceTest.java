@@ -32,14 +32,14 @@ public class DbControlServiceTest {
 
     @Test
     public void test_startDatabase() throws Exception {
-        doNothing().when(dbStartExec).startDatabse(anyString());
-        dbControlService.startDatabase("test");
+        doNothing().when(dbStartExec).startDatabse(anyString(), anyString());
+        dbControlService.startDatabase("test", "xxx");
     }
 
     @Test
     public void test_shutdownDatabase() throws Exception {
-        doNothing().when(dbShutdownExec).shutdownDatabase(anyString());
-        dbControlService.shutdownDatabase("test");
+        doNothing().when(dbShutdownExec).shutdownDatabase(anyString(), anyString());
+        dbControlService.shutdownDatabase("test", "xxx");
     }
 
     @Test

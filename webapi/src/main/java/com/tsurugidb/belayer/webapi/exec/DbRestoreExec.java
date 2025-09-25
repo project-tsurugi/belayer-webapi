@@ -57,6 +57,11 @@ public class DbRestoreExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
+  /**
+   * execute the command to restore Database.
+   *
+   * @param job Job
+   */
   public RestoreJob startRestore(RestoreJob job) {
     log.debug("start restore:{}", job);
     FileWatcher watcher = null;
@@ -82,7 +87,7 @@ public class DbRestoreExec {
 
       stopWatch.start();
 
-      Process proc = runProcess(dirPath, filePath, stdOutput);
+      Process proc = runProcess(dirPath, filePath, stdOutput, (String)job.getCredentials());
       // set process as Disposable into job.
       job.setDisposable(new DisposableProcess(proc));
 
@@ -107,8 +112,8 @@ public class DbRestoreExec {
     }
   }
 
-  public Process runProcess(String dirPath, Path monitoringFilePath, Path outFile) {
-    String argsLine = String.format(cmdString, dirPath, monitoringFilePath.toString(), conf);
+  protected Process runProcess(String dirPath, Path monitoringFilePath, Path outFile, String token) {
+    String argsLine = String.format(cmdString, dirPath, monitoringFilePath.toString(), conf, token);
     String[] args = argsLine.split(" ");
 
     List<String> argList = Arrays.asList(args);

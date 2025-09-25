@@ -46,7 +46,13 @@ public class DbStartExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
-  public void startDatabse(String jobId) {
+  /**
+   * execute the command to start Database.
+   *
+   * @param jobId Job ID
+   * @param token authentication token
+   */
+  public void startDatabse(String jobId, String token) {
 
     FileWatcher watcher = null;
 
@@ -64,7 +70,7 @@ public class DbStartExec {
       });
       monitoringManager.addFileWatcher(watcher);
 
-      var proc = runProcess(filePath.toString(), stdOutput.toString());
+      var proc = runProcess(filePath.toString(), stdOutput.toString(), token);
 
       proc.waitFor();
 
@@ -80,8 +86,8 @@ public class DbStartExec {
     }
   }
 
-  public Process runProcess(String monitoringFile, String outFile) {
-    String argsLine = String.format(cmdString, monitoringFile, conf);
+  protected Process runProcess(String monitoringFile, String outFile, String token) {
+    String argsLine = String.format(cmdString, monitoringFile, conf, token);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

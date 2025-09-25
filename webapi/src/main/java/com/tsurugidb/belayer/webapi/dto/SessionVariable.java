@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -40,4 +41,7 @@ public class SessionVariable {
 
     @JsonInclude(Include.NON_NULL)
     private String varValue;
+
+    @JsonIgnore
+    private String token;
 }

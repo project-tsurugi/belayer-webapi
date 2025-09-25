@@ -42,21 +42,23 @@ public class SessionControlService {
    * kill Tsurugi Session.
    *
    * @param sessionId Session ID
+   * @param token authentication token
    * @return kill succeeded
    */
-  public boolean killSession(String sessionId) {
-    return sessionKillExec.killSession(sessionId);
+  public boolean killSession(String sessionId, String token) {
+    return sessionKillExec.killSession(sessionId, token);
   }
 
   /**
    * determine Tsurugi Session is available.
    *
    * @param sessionId Session ID
+   * @param token authentication token
    * @return true if availavle.
    */
-  public boolean isAvailable(String sessionId) {
+  public boolean isAvailable(String sessionId, String token) {
 
-    return sessionStatusExec.existsSession(sessionId);
+    return sessionStatusExec.existsSession(sessionId, token);
   }
 
   /**
@@ -67,7 +69,7 @@ public class SessionControlService {
    */
   public boolean setVariable(SessionVariable param) {
 
-    return sessionSetVariableExec.setVariable(param.getSessionId(), param.getVarName(), param.getVarValue());
+    return sessionSetVariableExec.setVariable(param.getSessionId(), param.getVarName(), param.getVarValue(), param.getToken());
   }
 
 }

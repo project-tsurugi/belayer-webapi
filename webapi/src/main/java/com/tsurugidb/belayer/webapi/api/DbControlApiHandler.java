@@ -46,8 +46,12 @@ public class DbControlApiHandler {
      * @return Response
      */
     public Mono<ServerResponse> startDatabase(ServerRequest req) {
-        dbControlService.startDatabase("start");
-        return ServerResponse.ok().build();
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    dbControlService.startDatabase("start", (String) auth.getCredentials());
+                    return ServerResponse.ok().build();
+                });
     }
 
     /**
@@ -57,8 +61,13 @@ public class DbControlApiHandler {
      * @return Response
      */
     public Mono<ServerResponse> shutdownDatabase(ServerRequest req) {
-        dbControlService.shutdownDatabase("shutdown");
-        return ServerResponse.ok().build();
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    dbControlService.shutdownDatabase("shutdown", (String) auth.getCredentials());
+                    return ServerResponse.ok().build();
+                });
+
     }
 
     /**
