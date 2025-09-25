@@ -29,9 +29,11 @@
   - [セッションステータス確認API](#セッションステータス確認api)
   - [セッション変数設定API](#セッション変数設定api)
   - [セッション停止API](#セッション停止api)
+  - [エンドポイント一覧取得API](#エンドポイント一覧取得api)
   - [DB起動API](#db起動api)
   - [DB停止API](#db停止api)
   - [DBステータス確認API](#dbステータス確認api)
+  - [DB同期API](#db同期api)
   - [テーブル名一覧取得API](#テーブル名一覧取得api)
   - [ロール定義取得API](#ロール定義取得api)
   - [ロール・ユーザマッピング取得API](#ロールユーザマッピング取得api)
@@ -179,8 +181,7 @@
 * リクエスト
     * メソッド:POST
     * パス: /api/upload
-    * パラメータ
-        * なし
+    * パラメータ: なし
     * Content-Type: multipart/form-data
     * ボディ:
         * マルチパート形式
@@ -1861,6 +1862,30 @@
         * ステータスコード:400
         * ボディ: ```{"errorMessage": "sessionId is not specified."}```
 
+## エンドポイント一覧取得API
+
+* 概要: Belayerに登録されているBelayerエンドポイント一覧を取得する。
+* リクエスト
+    * メソッド:GET
+    * パス: /api/instance/list
+    * パラメータ:なし
+    * ボディ:なし
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * Content-Type: application/json
+        * ボディ: 処理成功の場合
+            * endpoints: Belayer接続先の配列
+            ```
+            {
+              "endpoinsts": [
+                "192.168.0.10:8080",
+                "192.168.0.11:8080",
+                "192.168.0.12:8080"
+              ]
+            }
+            ```
+
 ## DB起動API
 
 * 概要: DBの起動を指示する。
@@ -1869,11 +1894,25 @@
 * リクエスト
     * メソッド:POST
     * パス: /api/db/start
-    * パラメータ:なし
-    * ボディ:なし
+    * パラメータ: なし
+    * ボディ:任意
+        * mode: モード指定
+            * `standalone`: スタンドアローンモード（デフォルト）
+            * `master`: マスターモード
+            * `replica`: レプリカモード
+        * follow: マスターノードの接続先（レプリカモード指定時には必須）
+        ```
+        {
+          "mode":"replica",
+          "follow":"tsurugi_master:12345"
+        }
+        ```
 * レスポンス
     * 正常
         * ステータスコード:200
+        * ボディ: なし
+    * 異常
+        * ステータスコード:500
         * ボディ: なし
 
 ## DB停止API
@@ -1904,15 +1943,57 @@
         * ステータスコード:200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
+            * instance_id: TsurugiDBインスタンスID
+            * instance_name: TsurugiDB名称（Belayerで保持するラベル）
+            * mode: モード種別（standalone, master, replica）
+            * sync_with: 同期元DB（レプリカモードのみ値が設定される）
             * status: 稼働状態
                 * stop: 未稼働状態
                 * starting: 起動し、稼働する手前の状態
                 * running: 正常に稼働している状態
                 * shutdown: シャットダウン処理を実行中
                 * disconnected: 稼動していた痕跡はあるが、接続できない状態
-                ```
-                {"status": "running"}
-                ```
+            * wal_version: 同期済みWALバージョン
+            * tags: タグの一覧(配列)
+            ```
+            {
+              "instance_id": "tsurugidb_t3",
+              "instance_name": "tsurugidb_tokyo_t3",
+              "mode": "replica",
+              "sync_with": "tsurugidb_t1",
+              "status": "running",
+              "wal_version": "XXXXXXXX",
+              "tags": [
+                "replica",
+                "T001",
+                "tokyo"
+              ]
+            }
+            ```
+
+## DB同期API
+
+* 概要: DBに対し、WALの同期を指示する。
+* リクエスト
+    * メソッド:POST
+    * パス: /api/db/sync
+    * パラメータ: なし
+    * ボディ:任意
+        * from: 連携元の接続先
+        * to: 連携先の接続先
+        ```
+        {
+          "from": "tsurugi_master:12345"
+          "to": "tsurugi_replica1:12345"
+        }
+        ```
+* レスポンス
+    * 正常
+        * ステータスコード:200
+        * ボディ: なし
+    * 異常
+        * ステータスコード:500
+        * ボディ: なし
 
 ## テーブル名一覧取得API
 
@@ -1996,8 +2077,8 @@
 
 * 概要: Belayerサーバに登録されているロール・ユーザマッピング情報をパラメータで渡したJSONで更新する。
 * リクエスト
-    * メソッド:GET
-    * パス: /api/show/roleuser
+    * メソッド:POST
+    * パス: /api/update/roleuser
     * パラメータ:なし
     * ボディ:ロール・ユーザマッピング情報
         ```
