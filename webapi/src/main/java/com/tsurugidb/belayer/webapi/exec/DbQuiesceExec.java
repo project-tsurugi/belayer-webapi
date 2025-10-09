@@ -47,6 +47,11 @@ public class DbQuiesceExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
+  /**
+   * execute quiesce command to Database.
+   *
+   * @param job Job
+   */
   public void callQuiesce(BackupJob job) {
     FileWatcher watcher = null;
 
@@ -60,7 +65,7 @@ public class DbQuiesceExec {
       monitoringManager.addFileWatcher(watcher);
 
       var label = job.getJobId();
-      var proc = runProcess(filePath, label, stdOutput);
+      var proc = runProcess(filePath, label, stdOutput, (String)job.getCredentials());
 
       proc.waitFor();
 
@@ -88,8 +93,8 @@ public class DbQuiesceExec {
     }
   }
 
-  public Process runProcess(Path monitoringFilePath, String label, Path outFile) {
-    String argsLine = String.format(cmdString, monitoringFilePath.toString(), conf, label);
+  protected Process runProcess(Path monitoringFilePath, String label, Path outFile, String token) {
+    String argsLine = String.format(cmdString, monitoringFilePath.toString(), conf, label, token);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

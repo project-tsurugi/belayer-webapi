@@ -56,6 +56,11 @@ public class OfflineBackupExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
+  /**
+   * execute the command to back up Database offline.
+   *
+   * @param job Job
+   */
   public BackupJob backupOffline(BackupJob job) {
     FileWatcher watcher = null;
     StopWatch stopWatch = new StopWatch();
@@ -80,7 +85,7 @@ public class OfflineBackupExec {
 
       stopWatch.start();
 
-      Process proc = runProcess(dirPath, filePath, stdOutput);
+      Process proc = runProcess(dirPath, filePath, stdOutput, (String)job.getCredentials());
       // set process as Disposable into job.
       job.setDisposable(new DisposableProcess(proc));
 
@@ -106,8 +111,8 @@ public class OfflineBackupExec {
     }
   }
 
-  public Process runProcess(String dirPath, Path monitoringFilePath, Path outFile) {
-    String argsLine = String.format(cmdString, dirPath, monitoringFilePath.toString(), conf);
+  protected Process runProcess(String dirPath, Path monitoringFilePath, Path outFile, String token) {
+    String argsLine = String.format(cmdString, dirPath, monitoringFilePath.toString(), conf, token);
     String[] args = argsLine.split(" ");
 
     var argList = Arrays.asList(args);

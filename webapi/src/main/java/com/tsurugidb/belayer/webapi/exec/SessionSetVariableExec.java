@@ -46,7 +46,13 @@ public class SessionSetVariableExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
-  public boolean setVariable(String sessionId, String variableName, String variableValue) {
+  /**
+   * execute the command to set the session variable.
+   *
+   * @param sessionId Session ID
+   * @param token authentication token
+   */
+  public boolean setVariable(String sessionId, String variableName, String variableValue, String token) {
 
     FileWatcher watcher = null;
     Path filePath = null;
@@ -70,7 +76,7 @@ public class SessionSetVariableExec {
       });
       monitoringManager.addFileWatcher(watcher);
 
-      var proc = runProcess(sessionId, variableName, variableValue, filePath.toString(), stdOutput.toString());
+      var proc = runProcess(sessionId, variableName, variableValue, filePath.toString(), stdOutput.toString(), token);
 
       proc.waitFor();
 
@@ -104,9 +110,9 @@ public class SessionSetVariableExec {
     }
   }
 
-  public Process runProcess(String sessionId, String variableName, String variableValue, String monitoringFile,
-      String outFile) {
-    String argsLine = String.format(cmdString, sessionId, variableName, variableValue, monitoringFile, conf);
+  protected Process runProcess(String sessionId, String variableName, String variableValue, String monitoringFile,
+      String outFile, String token) {
+    String argsLine = String.format(cmdString, sessionId, variableName, variableValue, monitoringFile, conf, token);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

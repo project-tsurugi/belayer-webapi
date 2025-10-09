@@ -37,17 +37,19 @@ public class DbControlService {
   /**
    * start Tsurugi DB.
    * @param jobId Job ID
+   * @param token authentication token
    */
-  public void startDatabase(String jobId) {
-    dbStartExec.startDatabse(jobId);
+  public void startDatabase(String jobId, String token) {
+    dbStartExec.startDatabse(jobId, token);
   }
 
   /**
    * shutdown Tsurugi DB.
    * @param jobId Job ID
+   * @param token authentication token
    */
-  public void shutdownDatabase(String jobId) {
-    dbShutdownExec.shutdownDatabase(jobId);
+  public void shutdownDatabase(String jobId, String token) {
+    dbShutdownExec.shutdownDatabase(jobId, token);
   }
 
   /**

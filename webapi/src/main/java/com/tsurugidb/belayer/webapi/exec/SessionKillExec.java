@@ -46,7 +46,13 @@ public class SessionKillExec {
   @Autowired
   private MonitoringManager monitoringManager;
 
-  public boolean killSession(String sessionId) {
+  /**
+   * execute the command to kill the session.
+   *
+   * @param sessionId Session ID
+   * @param token authentication token
+   */
+  public boolean killSession(String sessionId, String token) {
 
     FileWatcher watcher = null;
     Path filePath = null;
@@ -70,7 +76,7 @@ public class SessionKillExec {
       });
       monitoringManager.addFileWatcher(watcher);
 
-      var proc = runProcess(sessionId, filePath.toString(), stdOutput.toString());
+      var proc = runProcess(sessionId, filePath.toString(), stdOutput.toString(), token);
 
       proc.waitFor();
 
@@ -105,8 +111,8 @@ public class SessionKillExec {
     }
   }
 
-  public Process runProcess(String sessionId, String monitoringFile, String outFile) {
-    String argsLine = String.format(cmdString, sessionId, monitoringFile, conf);
+  public Process runProcess(String sessionId, String monitoringFile, String outFile, String token) {
+    String argsLine = String.format(cmdString, sessionId, monitoringFile, conf, token);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

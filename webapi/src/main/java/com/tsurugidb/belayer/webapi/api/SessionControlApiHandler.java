@@ -16,6 +16,8 @@
 package com.tsurugidb.belayer.webapi.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -43,11 +45,16 @@ public class SessionControlApiHandler {
      * @return Response
      */
     public Mono<ServerResponse> getStatus(ServerRequest req) {
-        String sessionId = req.pathVariable("session_id");
-        boolean available = sessionControlService.isAvailable(sessionId);
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    String sessionId = req.pathVariable("session_id");
+                    boolean available = sessionControlService.isAvailable(sessionId, (String)auth.getCredentials());
 
-        String status = available ? "available" : "unavailable";
-        return ServerResponse.ok().body(BodyInserters.fromValue(new SessionStatus(sessionId, status, null)));
+                    String status = available ? "available" : "unavailable";
+                    return ServerResponse.ok()
+                            .body(BodyInserters.fromValue(new SessionStatus(sessionId, status, null, null)));
+                });
     }
 
     /**
@@ -58,9 +65,18 @@ public class SessionControlApiHandler {
      */
     public Mono<ServerResponse> setVariable(ServerRequest req) {
 
-        return req.bodyToMono(SessionVariable.class)
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    return req.bodyToMono(SessionVariable.class)
+                            .map(param -> {
+                                param.setToken((String) auth.getCredentials());
+                                return param;
+                            });
+                })
                 .flatMap(param -> {
-                    if (!StringUtils.hasLength(param.getSessionId()) || !StringUtils.hasLength(param.getVarName()) || !StringUtils.hasLength(param.getVarValue())) {
+                    if (!StringUtils.hasLength(param.getSessionId()) || !StringUtils.hasLength(param.getVarName())
+                            || !StringUtils.hasLength(param.getVarValue())) {
                         var msg = "invalid parameters.";
                         throw new BadRequestException(msg, msg);
                     }
@@ -68,7 +84,8 @@ public class SessionControlApiHandler {
                     if (result) {
                         return ServerResponse.ok()
                                 .body(BodyInserters
-                                        .fromValue(new SessionStatus(param.getSessionId(), null, param.getVarName())));
+                                        .fromValue(new SessionStatus(param.getSessionId(), null, param.getVarName(),
+                                                null)));
                     }
                     var msg = "unable to set variable to session :" + param.getSessionId() + ". (name:"
                             + param.getVarName()
@@ -86,14 +103,22 @@ public class SessionControlApiHandler {
      */
     public Mono<ServerResponse> killSession(ServerRequest req) {
 
-        return req.bodyToMono(SessionStatus.class)
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    return req.bodyToMono(SessionStatus.class)
+                            .map(param -> {
+                                param.setToken((String) auth.getCredentials());
+                                return param;
+                            });
+                })
                 .flatMap(param -> {
                     if (!StringUtils.hasLength(param.getSessionId())) {
                         var msg = "sessionId is not specified.";
                         throw new BadRequestException(msg, msg);
                     }
 
-                    boolean success = sessionControlService.killSession(param.getSessionId());
+                    boolean success = sessionControlService.killSession(param.getSessionId(), param.getToken());
                     if (success) {
                         return ServerResponse.ok().build();
                     }
