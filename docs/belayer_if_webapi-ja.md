@@ -1900,11 +1900,10 @@
             * `standalone`: スタンドアローンモード（デフォルト）
             * `master`: マスターモード
             * `replica`: レプリカモード
-        * follow: マスターノードの接続先（レプリカモード指定時には必須）
+            * `standby`: スタンバイモード
         ```
         {
           "mode":"replica",
-          "follow":"tsurugi_master:12345"
         }
         ```
 * レスポンス
@@ -1919,7 +1918,7 @@
 
 * 概要: DBの停止を指示する。
     * DBの停止完了まで待機せずに終了する。1秒以内に停止コマンドのプロセスが異常終了しない場合は正常結果を返す。
-    * timeout値はプロパティ`webapi.cli.timeout`値で変更可能
+    * timeout値は内部プロパティ`webapi.cli.timeout`値で変更可能
 * リクエスト
     * メソッド:POST
     * パス: /api/db/shutdown
@@ -1942,10 +1941,10 @@
     * 正常
         * ステータスコード:200
         * Content-Type: application/json
-        * ボディ: 処理成功の場合
+        * ボディ:
             * instance_id: TsurugiDBインスタンスID
             * instance_name: TsurugiDB名称（Belayerで保持するラベル）
-            * mode: モード種別（standalone, master, replica）
+            * mode: モード種別（standalone, master, replica, standby）
             * sync_with: 同期元DB（レプリカモードのみ値が設定される）
             * status: 稼働状態
                 * stop: 未稼働状態
@@ -1980,11 +1979,9 @@
     * パラメータ: なし
     * ボディ:任意
         * from: 連携元の接続先
-        * to: 連携先の接続先
         ```
         {
           "from": "tsurugi_master:12345"
-          "to": "tsurugi_replica1:12345"
         }
         ```
 * レスポンス
