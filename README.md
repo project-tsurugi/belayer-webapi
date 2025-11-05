@@ -55,6 +55,7 @@ See the env var table below.
 |BELAYER_SERVER_PORT|server port for this web application.|`8000`|
 |BELAYER_MANAGEMENT_PORT|management port for this web application.|`18000`|
 |BELAYER_LOG_LEVEL|Log level for belaer WebAPI Server.|`WARN`|
+|BELAYER_CONFIG_ROOT|The directory path to place Belayer config files.|`/opt/belayer`|
 |BELAYER_STORAGE_ROOT|The directory path to use as Belayer storage.|`/opt/belayer/storage`|
 |TSURUGI_URL|URL to connect Tsurugi database.|`ipc:tsurugi`|
 |TSURUGI_CONNECT_TIMEOUT_SEC|connect timeout seconds for Tsurugi database.|`5`|

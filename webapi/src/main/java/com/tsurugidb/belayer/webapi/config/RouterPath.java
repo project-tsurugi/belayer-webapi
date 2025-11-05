@@ -60,6 +60,8 @@ public enum RouterPath {
             "/api/session/set", P_SESSION_CTL),
     KILL_SESSION_API("/api/session/kill",
             "/api/session/kill", P_SESSION_CTL),
+    ENDPOINTS_API("/api/instance/list",
+            "/api/instance/list", P_LIST_ENDPOINTS),
     START_DB_API("/api/db/start",
             "/api/db/start", P_DB_START),
     SHUTDOWN_DB_API("/api/db/shutdown",

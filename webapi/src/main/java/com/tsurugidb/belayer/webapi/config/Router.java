@@ -56,6 +56,7 @@ import com.tsurugidb.belayer.webapi.api.AuthHandler;
 import com.tsurugidb.belayer.webapi.api.BackupRestoreApiHandler;
 import com.tsurugidb.belayer.webapi.api.DbControlApiHandler;
 import com.tsurugidb.belayer.webapi.api.DumpLoadApiHandler;
+import com.tsurugidb.belayer.webapi.api.EndpointsApiHandler;
 import com.tsurugidb.belayer.webapi.api.FileSystemApiHandler;
 import com.tsurugidb.belayer.webapi.api.HelloHandler;
 import com.tsurugidb.belayer.webapi.api.RoleUserMappingHandler;
@@ -93,6 +94,7 @@ public class Router {
       FileSystemApiHandler fileSystemApiHandler, BackupRestoreApiHandler backupRestoreApiHandler,
       DumpLoadApiHandler dumpLoadApiHandler, StatefulApiHandler statefulApiHandler,
       SessionControlApiHandler sessionControlApiHandler,
+      EndpointsApiHandler endpointsApiHandler,
       DbControlApiHandler dbControlHandler, RoleUserMappingHandler roleUserMappingHandler,
       HelloHandler helloHandler) {
 
@@ -204,6 +206,11 @@ public class Router {
             .POST(KILL_SESSION_API.getPath(),
                 sessionControlApiHandler::killSession,
                 opt -> opt.operationId("session").build())
+            .build())
+        .and(route()
+            .GET(ENDPOINTS_API.getPath(),
+                endpointsApiHandler::listEndpoints,
+                opt -> opt.operationId("instance").build())
             .build())
         .and(route()
             .POST(START_DB_API.getPath(),
