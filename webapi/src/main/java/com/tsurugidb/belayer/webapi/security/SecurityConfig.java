@@ -56,6 +56,12 @@ public class SecurityConfig {
   @Value("${management.endpoints.web.base-path}")
   String managementPath;
 
+  @Value("${webapi.config.allow_origins}")
+  String allowOrigins;
+
+  @Value("${webapi.config.allow_methods}")
+  String allowMethods;
+
   @Autowired
   PermissionConfig permissionConfig;
 
@@ -78,7 +84,9 @@ public class SecurityConfig {
         .formLogin().disable()
         .csrf().disable()
         .logout().disable()
-        .cors(cors -> {cors.configurationSource(corsConfigurationSource());})
+        .cors(cors -> {
+          cors.configurationSource(corsConfigurationSource());
+        })
         .addFilterAt(bearerAuthenticationFilter(bearerAuthenticationConverter), SecurityWebFiltersOrder.AUTHENTICATION);
 
     // pathes that should be pass the authentication.
@@ -118,9 +126,9 @@ public class SecurityConfig {
 
     CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedOrigins(Arrays.asList("*"));
-    configuration.setAllowedMethods(Arrays.asList("*"));
-    //configuration.setAllowedHeaders(Arrays.asList("X-Custom-Header"));
+    configuration.setAllowedOrigins(toList(allowOrigins));
+    configuration.setAllowedMethods(toList(allowMethods));
+    // configuration.setAllowedHeaders(Arrays.asList("X-Custom-Header"));
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
@@ -153,6 +161,13 @@ public class SecurityConfig {
     public Mono<Authentication> authenticate(Authentication authentication) {
       return Mono.just(authentication);
     }
+  }
+
+  private List<String> toList(String commaString) {
+    return Arrays.stream(commaString.split(","))
+        .map(String::trim)
+        .collect(Collectors.toList());
+
   }
 
 }
