@@ -38,9 +38,10 @@ public class DbControlService {
    * start Tsurugi DB.
    * @param jobId Job ID
    * @param token authentication token
+   * @param mode launch mode
    */
-  public void startDatabase(String jobId, String token) {
-    dbStartExec.startDatabse(jobId, token);
+  public void startDatabase(String jobId, String token, String mode) {
+    dbStartExec.startDatabse(jobId, token, mode);
   }
 
   /**

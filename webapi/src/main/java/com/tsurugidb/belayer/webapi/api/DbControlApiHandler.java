@@ -24,13 +24,16 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.DbStatus;
+import com.tsurugidb.belayer.webapi.dto.StartDbParam;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
 import com.tsurugidb.belayer.webapi.service.DbControlService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Component
+@Slf4j
 public class DbControlApiHandler {
 
     @Autowired
@@ -49,8 +52,17 @@ public class DbControlApiHandler {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .flatMap(auth -> {
-                    dbControlService.startDatabase("start", (String) auth.getCredentials());
-                    return ServerResponse.ok().build();
+                    return req.bodyToMono(StartDbParam.class)
+                            .switchIfEmpty(Mono.just(new StartDbParam()))
+                            .flatMap(param -> {
+                                String mode = param.getMode();
+                                if (mode == null) {
+                                    mode = "standalone";
+                                }
+                                log.debug("db launch mode:" + mode);
+                                dbControlService.startDatabase("start", (String) auth.getCredentials(), mode);
+                                return ServerResponse.ok().build();
+                            });
                 });
     }
 

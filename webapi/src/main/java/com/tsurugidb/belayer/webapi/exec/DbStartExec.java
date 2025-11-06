@@ -51,8 +51,9 @@ public class DbStartExec {
    *
    * @param jobId Job ID
    * @param token authentication token
+   * @param mode launch mode
    */
-  public void startDatabse(String jobId, String token) {
+  public void startDatabse(String jobId, String token, String mode) {
 
     FileWatcher watcher = null;
 
@@ -70,7 +71,7 @@ public class DbStartExec {
       });
       monitoringManager.addFileWatcher(watcher);
 
-      var proc = runProcess(filePath.toString(), stdOutput.toString(), token);
+      var proc = runProcess(filePath.toString(), stdOutput.toString(), token, mode);
 
       proc.waitFor();
 
@@ -86,8 +87,8 @@ public class DbStartExec {
     }
   }
 
-  protected Process runProcess(String monitoringFile, String outFile, String token) {
-    String argsLine = String.format(cmdString, monitoringFile, conf, token);
+  protected Process runProcess(String monitoringFile, String outFile, String token, String mode) {
+    String argsLine = String.format(cmdString, monitoringFile, conf, token, mode);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

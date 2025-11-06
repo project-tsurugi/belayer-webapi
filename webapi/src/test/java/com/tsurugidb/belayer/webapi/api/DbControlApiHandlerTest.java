@@ -72,7 +72,7 @@ public class DbControlApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void startDatabase() {
 
-    doNothing().when(dbControlService).startDatabase(anyString(), anyString());
+    doNothing().when(dbControlService).startDatabase(anyString(), anyString(), anyString());
     client.post()
         .uri("/api/db/start")
         .exchange()

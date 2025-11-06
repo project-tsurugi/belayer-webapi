@@ -32,8 +32,8 @@ public class DbControlServiceTest {
 
     @Test
     public void test_startDatabase() throws Exception {
-        doNothing().when(dbStartExec).startDatabse(anyString(), anyString());
-        dbControlService.startDatabase("test", "xxx");
+        doNothing().when(dbStartExec).startDatabse(anyString(), anyString(), anyString());
+        dbControlService.startDatabase("test", "xxx", "mode");
     }
 
     @Test
