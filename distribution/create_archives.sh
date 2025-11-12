@@ -34,8 +34,7 @@ fi
 
 # scripts and replace version.
 mkdir -p $DIST_TEMP_DIR/systemd
-cp -p server_script/install.sh $DIST_TEMP_DIR/install.sh
-cp -p server_script/start_server.sh $DIST_TEMP_DIR/start_server.sh
+cp -p server_script/*.sh $DIST_TEMP_DIR/
 cp -p systemd/tsurugi-webapp.service $DIST_TEMP_DIR/systemd/tsurugi-webapp.service
 cp -p systemd/add_service.sh $DIST_TEMP_DIR/systemd/add_service.sh
 sed -i "s/#VERSION#/$VERSION/g" $DIST_TEMP_DIR/install.sh

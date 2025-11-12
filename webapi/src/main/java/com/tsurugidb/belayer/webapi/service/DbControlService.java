@@ -18,6 +18,9 @@ package com.tsurugidb.belayer.webapi.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.tsurugidb.belayer.webapi.dto.DbStatus;
+import com.tsurugidb.belayer.webapi.dto.ExecStatus;
+import com.tsurugidb.belayer.webapi.dto.InstanceInfo;
 import com.tsurugidb.belayer.webapi.exec.DbShutdownExec;
 import com.tsurugidb.belayer.webapi.exec.DbStartExec;
 import com.tsurugidb.belayer.webapi.exec.DbStatusExec;
@@ -33,6 +36,9 @@ public class DbControlService {
 
   @Autowired
   DbStatusExec dbStatusExec;
+
+  @Autowired
+  InstanceInfoService instanceInfoService;
 
   /**
    * start Tsurugi DB.
@@ -56,10 +62,28 @@ public class DbControlService {
   /**
    * get staus of Tsurugi DB.
    * @param jobId Job ID
+   * @return DB status
    */
-  public String getStatus(String jobId) {
+  public DbStatus getStatus(String jobId) {
 
-    return dbStatusExec.getStatus(jobId);
+    DbStatus dbStatus = dbStatusExec.getStatus(jobId);
+    InstanceInfo instanceInfo = instanceInfoService.getInstanceInfo();
+
+    dbStatus.setInstanceName(instanceInfo.getInstanceName());
+    dbStatus.setTags(instanceInfo.getTags());
+
+    return dbStatus;
+  }
+
+  /**
+   * determine Tsurugi DB is running
+   * @param jobId Job ID
+   * @return true if Tsurugi DB is running
+   */
+  public boolean isOnline(String jobId) {
+    
+    var status = getStatus(jobId);
+    return ExecStatus.STATUS_RUNNING.equals(status.getStatus());
   }
 
 }

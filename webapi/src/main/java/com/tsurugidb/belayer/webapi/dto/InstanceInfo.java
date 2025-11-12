@@ -21,21 +21,15 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class DbStatus {
+public class InstanceInfo {
 
-    private String instanceId;
-    private String instanceName;
-    private String mode;
-    private String status;
-    private String walVersion;
-    private List<String> tags;
+    private String instanceName = "[no name]";
+    private List<String> tags = List.of();
 }

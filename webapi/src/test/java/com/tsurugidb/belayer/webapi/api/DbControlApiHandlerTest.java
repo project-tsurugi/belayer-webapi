@@ -36,6 +36,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.DbStatus;
+import com.tsurugidb.belayer.webapi.dto.ExecStatus;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
 import com.tsurugidb.belayer.webapi.service.DbControlService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
@@ -84,8 +85,8 @@ public class DbControlApiHandlerTest {
   public void shutdown() {
 
     doNothing().when(dbControlService).shutdownDatabase(anyString(), anyString());
-    client.get()
-        .uri("/api/db/status")
+    client.post()
+        .uri("/api/db/shutdown")
         .exchange()
         .expectStatus().isOk();
   }
@@ -93,10 +94,11 @@ public class DbControlApiHandlerTest {
 
   @Test
   @WithMockUser(username = TEST_USER)
-  public void isOnline() {
+  public void getStatus() {
 
-    when(dbControlService.getStatus(anyString())).thenReturn("running");
-    var expect = new DbStatus("running");
+    when(dbControlService.getStatus(anyString())).thenReturn(DbStatus.builder().status(ExecStatus.STATUS_RUNNING).build());
+
+    var expect = DbStatus.builder().status("running").build();
     client.get()
         .uri("/api/db/status")
         .exchange()

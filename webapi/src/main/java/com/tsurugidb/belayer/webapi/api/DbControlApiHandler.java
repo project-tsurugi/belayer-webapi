@@ -23,7 +23,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import com.tsurugidb.belayer.webapi.dto.DbStatus;
 import com.tsurugidb.belayer.webapi.dto.StartDbParam;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
 import com.tsurugidb.belayer.webapi.service.DbControlService;
@@ -89,8 +88,8 @@ public class DbControlApiHandler {
      * @return Response
      */
     public Mono<ServerResponse> getStatus(ServerRequest req) {
-        String status = dbControlService.getStatus("status");
-        return ServerResponse.ok().body(BodyInserters.fromValue(new DbStatus(status)));
+        var status = dbControlService.getStatus("status");
+        return ServerResponse.ok().body(BodyInserters.fromValue(status));
     }
 
     /**

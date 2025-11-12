@@ -1,16 +1,20 @@
 package com.tsurugidb.belayer.webapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import com.tsurugidb.belayer.webapi.dto.DbStatus;
+import com.tsurugidb.belayer.webapi.dto.ExecStatus;
+import com.tsurugidb.belayer.webapi.dto.InstanceInfo;
 import com.tsurugidb.belayer.webapi.exec.DbShutdownExec;
 import com.tsurugidb.belayer.webapi.exec.DbStartExec;
 import com.tsurugidb.belayer.webapi.exec.DbStatusExec;
@@ -20,6 +24,9 @@ public class DbControlServiceTest {
 
     @Autowired
     DbControlService dbControlService;
+
+    @MockBean
+    InstanceInfoService instanceInfoService;
 
     @MockBean
     DbStartExec dbStartExec;
@@ -44,10 +51,14 @@ public class DbControlServiceTest {
 
     @Test
     public void test_getStatus() throws Exception {
-        when(dbStatusExec.getStatus(any())).thenReturn("running");
+        InstanceInfo iInfo = new InstanceInfo("ins001", List.of("tag1", "tag2"));
+        var status = DbStatus.builder().status(ExecStatus.STATUS_RUNNING).instanceName(iInfo.getInstanceName()).tags(iInfo.getTags()).build();
+        when(dbStatusExec.getStatus(anyString())).thenReturn(status);
+        when(instanceInfoService.getInstanceInfo()).thenReturn(iInfo);
+
         var result = dbControlService.getStatus("test");
 
-        assertEquals("running", result);
+        assertEquals(status, result);
     }
 
 }

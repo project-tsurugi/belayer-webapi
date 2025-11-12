@@ -42,7 +42,7 @@ public class ExecStatus {
 
     public static final String STATUS_STOP = "stop";
     public static final String STATUS_STARTING = "starting";
-    public static final String STATUS_RUNNNING = "running";
+    public static final String STATUS_RUNNING = "running";
     public static final String STATUS_SHUTDOWN = "shutdown";
     public static final String STATUS_DISCONNECTED = "disconnected";
     public static final String STATUS_SUCCESS = "success";

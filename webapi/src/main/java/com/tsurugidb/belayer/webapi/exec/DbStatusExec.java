@@ -15,21 +15,20 @@
  */
 package com.tsurugidb.belayer.webapi.exec;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.tsurugidb.belayer.webapi.dto.ExecStatus;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tsurugidb.belayer.webapi.dto.DbStatus;
 import com.tsurugidb.belayer.webapi.exception.ProcessExecException;
-import com.tsurugidb.belayer.webapi.model.FileWatcher;
-import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,16 +43,10 @@ public class DbStatusExec {
   String cmdString;
 
   @Autowired
-  private MonitoringManager monitoringManager;
+  private ObjectMapper mapper;
 
-  public boolean isOnline(String jobId) {
+  public DbStatus getStatus(String jobId) {
 
-    return ExecStatus.STATUS_RUNNNING.equals(getStatus(jobId));
-  }
-
-  public String getStatus(String jobId) {
-
-    FileWatcher watcher = null;
     Path filePath = null;
     Path stdOutput = null;
     boolean success = false;
@@ -67,34 +60,12 @@ public class DbStatusExec {
       filePath = tmpDirPath.resolve(String.format("monitoring-%s.log", id));
       stdOutput = tmpDirPath.resolve(String.format("stdout-%s.log", id));
 
-      watcher = new FileWatcher(filePath);
-      watcher.setCallback(status -> {
-        if (status != null && ExecStatus.KIND_DATA.equals(status.getKind())) {
-          status.setFreezed(true);
-        }
-      });
-      monitoringManager.addFileWatcher(watcher);
+      var result = runProcess(filePath.toString(), stdOutput.toString());
 
-      var proc = runProcess(filePath.toString(), stdOutput.toString());
-
-      proc.waitFor();
-
-      ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_DATA.equals(s.getKind()));
-
-      if (status != null) {
-        var statusString = status.getStatus();
-        success = true;
-        return statusString;
-      }
-
-      throw new ProcessExecException("tsurugi status is unknown.", null);
-
-    } catch (IOException | InterruptedException ex) {
+      return result;
+    } catch (IOException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {
-      if (watcher != null) {
-        watcher.close();
-      }
       if (success) {
         try {
           if (filePath != null) {
@@ -110,19 +81,21 @@ public class DbStatusExec {
     }
   }
 
-  public Process runProcess(String monitoringFile, String outFile) {
+  public DbStatus runProcess(String monitoringFile, String outFile) {
     String argsLine = String.format(cmdString, monitoringFile, conf);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
-    // stdout -> file
-    pb.redirectOutput(new File(outFile));
-    log.debug("exec cmd: {}", Arrays.asList(args));
+
     try {
       var proc = pb.start();
-      return proc;
+      InputStream is = proc.getInputStream();
+
+      return mapper.readValue(is, new TypeReference<DbStatus>() {
+      });
+
     } catch (IOException ex) {
       throw new ProcessExecException("Process execution error caused.", ex);
     }

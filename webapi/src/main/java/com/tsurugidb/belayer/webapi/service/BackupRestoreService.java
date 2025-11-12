@@ -40,7 +40,6 @@ import com.tsurugidb.belayer.webapi.exception.InternalServerErrorException;
 import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.exec.DbQuiesceExec;
 import com.tsurugidb.belayer.webapi.exec.DbRestoreExec;
-import com.tsurugidb.belayer.webapi.exec.DbStatusExec;
 import com.tsurugidb.belayer.webapi.exec.OfflineBackupExec;
 import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.JobManager;
@@ -72,7 +71,7 @@ public class BackupRestoreService {
   FileSystemService fileSystemService;
 
   @Autowired
-  DbStatusExec dbStatusExec;
+  DbControlService dbControlService;
 
   @Autowired
   DbQuiesceExec dbQuiesceExec;
@@ -105,7 +104,7 @@ public class BackupRestoreService {
   public Mono<BackupJob> startBackup(BackupRestoreRequestParam param) {
 
     // determine online or offline and call each service
-    if (dbStatusExec.isOnline(param.getJobId())) {
+    if (dbControlService.isOnline(param.getJobId())) {
       return backupOnline(param);
     }
 
@@ -253,7 +252,7 @@ public class BackupRestoreService {
     log.debug("register job :" + param.toString());
 
     // determine online or offline and call each service
-    if (dbStatusExec.isOnline(param.getJobId())) {
+    if (dbControlService.isOnline(param.getJobId())) {
       var msg = "DB is online.";
       throw new BadRequestException(msg, msg);
     }

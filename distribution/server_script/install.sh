@@ -47,10 +47,10 @@ fi
 mkdir -p ${INSTALL_DIR}/bin/
 mkdir -p ${INSTALL_DIR}/jar/
 
-/bin/cp start_server.sh $INSTALL_DIR/bin/start_server.sh
+/bin/cp *.sh $INSTALL_DIR/bin/
 /bin/cp app/${JAR_NAME_PREFIX}*.jar $INSTALL_DIR/jar/
 
-chmod u+x $INSTALL_DIR/bin/start_server.sh
+chmod u+x $INSTALL_DIR/bin/*.sh
 
 echo "install dir: $INSTALL_DIR"
 echo "installed."

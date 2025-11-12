@@ -18,7 +18,6 @@ package com.tsurugidb.belayer.webapi.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +53,6 @@ import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.exec.DbQuiesceExec;
 import com.tsurugidb.belayer.webapi.exec.DbRestoreExec;
-import com.tsurugidb.belayer.webapi.exec.DbStatusExec;
 import com.tsurugidb.belayer.webapi.exec.OfflineBackupExec;
 import com.tsurugidb.belayer.webapi.model.Constants;
 import com.tsurugidb.belayer.webapi.model.SystemTime;
@@ -79,7 +77,7 @@ public class BackupRestoreServiceTest {
     TsubakuroService tsubakuroService;
 
     @MockBean
-    DbStatusExec dbStatusExec;
+    DbControlService dbControlService;
 
     @MockBean
     DbQuiesceExec dbQuiesceExec;
@@ -145,7 +143,7 @@ public class BackupRestoreServiceTest {
         expectJob.setProgress(100);
         expectJob.setProgressNumerator(4);
 
-        when(dbStatusExec.isOnline(jobId)).thenReturn(true);
+        when(dbControlService.isOnline(jobId)).thenReturn(true);
         for (BackupContext backupCtx : backupFiles) {
             Files.write(backupCtx.getTargetFilePath(), "test".getBytes());
         }
@@ -189,7 +187,8 @@ public class BackupRestoreServiceTest {
 
         var errorMessage = "test error";
 
-        when(dbStatusExec.isOnline(jobId)).thenReturn(true);
+        when(dbControlService.isOnline(jobId)).thenReturn(true);
+
         var pathList = new ArrayList<Path>();
         pathList.add(Path.of("./src/test/files/backup_restore/file1.txt"));
         when(tsubakuroService.createBackupTransaction(any())).thenThrow(new RuntimeException(errorMessage));
@@ -243,7 +242,8 @@ public class BackupRestoreServiceTest {
     @Test
     public void test_startBackup_offline() throws Exception {
 
-        when(dbStatusExec.isOnline(anyString())).thenReturn(false);
+        when(dbControlService.isOnline(jobId)).thenReturn(false);
+
         doNothing().when(dbQuiesceExec).callQuiesce(any());
 
         var now = Instant.parse("2022-06-30T12:00:00.000Z");
@@ -309,7 +309,7 @@ public class BackupRestoreServiceTest {
         job.setJobId(jobId);
         job.setUid(uid);
 
-        when(dbStatusExec.isOnline(anyString())).thenReturn(false);
+        when(dbControlService.isOnline(jobId)).thenReturn(false);
 
         when(fileSystemService.createTempDirectory(any())).thenAnswer(new Answer<Path>() {
             @Override
@@ -357,7 +357,7 @@ public class BackupRestoreServiceTest {
     @Test
     public void test_startRestore_in_online() throws Exception {
 
-        when(dbStatusExec.isOnline(anyString())).thenReturn(true);
+        when(dbControlService.isOnline(jobId)).thenReturn(true);
 
         var uid = "test_user";
         var zipFilePath = "bk1/backup.zip";
@@ -404,7 +404,8 @@ public class BackupRestoreServiceTest {
         var uid = "test_user";
         var dirPath = "bk1";
 
-        when(dbStatusExec.isOnline(jobId)).thenReturn(true);
+        when(dbControlService.isOnline(jobId)).thenReturn(true);
+
         var pathList = new ArrayList<Path>();
         pathList.add(Path.of("./src/test/files/backup_restore/file1.txt"));
 
