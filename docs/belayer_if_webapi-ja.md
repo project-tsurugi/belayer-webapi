@@ -1946,7 +1946,6 @@
             * instance_id: TsurugiDBインスタンスID
             * instance_name: TsurugiDB名称（Belayerで保持するラベル）
             * mode: モード種別（standalone, master, replica, standby）
-            * sync_with: 同期元DB（レプリカモードのみ値が設定される）
             * status: 稼働状態
                 * stop: 未稼働状態
                 * starting: 起動し、稼働する手前の状態
@@ -1960,7 +1959,6 @@
               "instance_id": "tsurugidb_t3",
               "instance_name": "tsurugidb_tokyo_t3",
               "mode": "replica",
-              "sync_with": "tsurugidb_t1",
               "status": "running",
               "wal_version": "XXXXXXXX",
               "tags": [
