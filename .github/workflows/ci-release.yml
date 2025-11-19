@@ -63,7 +63,7 @@ jobs:
           rm -fr work
 
       - name: Download_Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: belayer-webapi-dists
           path: work
