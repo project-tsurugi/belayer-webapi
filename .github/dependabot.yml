@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Gradle dependencies for webapi
+  - package-ecosystem: "gradle"
+    directory: "/webapi"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  # npm dependencies for e2e tests
+  - package-ecosystem: "npm"
+    directory: "/test_work/e2e"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
