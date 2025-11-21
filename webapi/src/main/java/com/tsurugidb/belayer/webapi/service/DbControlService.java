@@ -66,6 +66,18 @@ public class DbControlService {
   }
 
   /**
+   * change Tsurugi DB launch mode.
+   * 
+   * @param jobId Job ID
+   * @param token authentication token
+   * @param mode launch mode
+   * @param replicateFrom target to replicate
+   */
+  public void changeDatabaseMode(String jobId, String token, String mode, String replicateFrom) {
+    //dbChangeModeExec.changeDatabseLauchMode(jobId, token, mode, replicateFrom);
+  }
+
+  /**
    * synchronize DB Transaction log.
    * 
    * @param jobId      Job ID

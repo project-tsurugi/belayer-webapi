@@ -66,6 +66,8 @@ public enum RouterPath {
             "/api/db/start", P_DB_START),
     SHUTDOWN_DB_API("/api/db/shutdown",
             "/api/db/shutdown", P_DB_STOP),
+    CHANGE_DB_MODE_API("/api/db/changemode",
+            "/api/db/changemode", P_DB_CHANGE_MODE),
     SYNC_TRAN_LOG_API("/api/db/sync",
             "/api/db/sync", P_DB_SYNC),
     SHOW_DB_STATUS_API("/api/db/status",

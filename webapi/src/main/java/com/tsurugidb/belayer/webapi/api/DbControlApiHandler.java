@@ -23,6 +23,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import com.tsurugidb.belayer.webapi.dto.ChangeLauchModeParam;
 import com.tsurugidb.belayer.webapi.dto.StartDbParam;
 import com.tsurugidb.belayer.webapi.dto.SyncTransactionLogParam;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
@@ -81,6 +82,34 @@ public class DbControlApiHandler {
                     return ServerResponse.ok().build();
                 });
 
+    }
+
+    /**
+     * Change Tsurugi Database launch mode
+     *
+     * @param req Request
+     * @return Response
+     */
+    public Mono<ServerResponse> changeLaunchMode(ServerRequest req) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    return req.bodyToMono(ChangeLauchModeParam.class)
+                            .switchIfEmpty(Mono.just(new ChangeLauchModeParam()))
+                            .flatMap(param -> {
+                                String mode = param.getMode();
+                                String from = param.getReplicateFrom();
+                                
+                                if (mode == null) {
+                                    throw new BadRequestException("mode is not specified", "mode is not specified");
+                                } else if (mode.equals("replica") && from == null) {
+                                    throw new BadRequestException("replicaFrom is not specified","replicaFrom is not specified");
+                                }
+
+                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode, from);
+                                return ServerResponse.ok().build();
+                            });
+                });
     }
 
     /**

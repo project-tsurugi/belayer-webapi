@@ -218,6 +218,11 @@ public class Router {
                 opt -> opt.operationId("db").build())
             .build())
         .and(route()
+            .POST(CHANGE_DB_MODE_API.getPath(),
+                dbControlHandler::changeLaunchMode,
+                opt -> opt.operationId("db").build())
+            .build())
+        .and(route()
             .POST(SHUTDOWN_DB_API.getPath(),
                 dbControlHandler::shutdownDatabase,
                 opt -> opt.operationId("db").build())
