@@ -13,25 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tsurugidb.belayer.webapi.config;
+package com.tsurugidb.belayer.webapi.dto;
 
-public enum FunctionPermission {
-    P_NONE,
-    P_FILE_LIST,
-    P_UPLOAD,
-    P_DOWNLOAD,
-    P_FILE_DIR_DELETE,
-    P_BACKUP,
-    P_RESTORE,
-    P_DUMP,
-    P_LOAD,
-    P_STREAM_API,
-    P_SESSION_CTL,
-    P_LIST_ENDPOINTS,
-    P_DB_START,
-    P_DB_STOP,
-    P_DB_SYNC,
-    P_DB_STATUS,
-    P_TABLE_LIST,
-    P_ROLE_EDIT;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class SyncTransactionLogParam {
+
+    private String from;
+  
 }

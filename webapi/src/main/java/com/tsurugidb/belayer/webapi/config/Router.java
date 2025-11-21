@@ -223,6 +223,11 @@ public class Router {
                 opt -> opt.operationId("db").build())
             .build())
         .and(route()
+            .POST(SYNC_TRAN_LOG_API.getPath(),
+                dbControlHandler::syncTransactionLog,
+                opt -> opt.operationId("db").build())
+            .build())
+        .and(route()
             .GET(SHOW_DB_STATUS_API.getPath(),
                 dbControlHandler::getStatus,
                 opt -> opt.operationId("db").build())

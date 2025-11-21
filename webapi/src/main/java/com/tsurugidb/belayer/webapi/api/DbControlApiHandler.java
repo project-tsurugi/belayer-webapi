@@ -24,7 +24,9 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.StartDbParam;
+import com.tsurugidb.belayer.webapi.dto.SyncTransactionLogParam;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
+import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 import com.tsurugidb.belayer.webapi.service.DbControlService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 
@@ -79,6 +81,29 @@ public class DbControlApiHandler {
                     return ServerResponse.ok().build();
                 });
 
+    }
+
+    /**
+     * synchronize transaction log
+     *
+     * @param req Request
+     * @return Response
+     */
+    public Mono<ServerResponse> syncTransactionLog(ServerRequest req) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    return req.bodyToMono(SyncTransactionLogParam.class)
+                            .switchIfEmpty(Mono.just(new SyncTransactionLogParam()))
+                            .flatMap(param -> {
+                                String fromHost = param.getFrom();
+                                if (fromHost == null) {
+                                    throw new BadRequestException("from is not specified.", "from is not specified.");
+                                }
+                                dbControlService.synchronizeTransactionLog("change_mode", (String) auth.getCredentials(), fromHost);
+                                return ServerResponse.ok().build();
+                            });
+                });
     }
 
     /**

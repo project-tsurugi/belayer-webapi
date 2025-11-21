@@ -24,6 +24,7 @@ import com.tsurugidb.belayer.webapi.dto.InstanceInfo;
 import com.tsurugidb.belayer.webapi.exec.DbShutdownExec;
 import com.tsurugidb.belayer.webapi.exec.DbStartExec;
 import com.tsurugidb.belayer.webapi.exec.DbStatusExec;
+import com.tsurugidb.belayer.webapi.exec.DbSyncWalExec;
 
 @Component
 public class DbControlService {
@@ -35,6 +36,9 @@ public class DbControlService {
   DbShutdownExec dbShutdownExec;
 
   @Autowired
+  DbSyncWalExec dbSyncWalExec;
+
+  @Autowired
   DbStatusExec dbStatusExec;
 
   @Autowired
@@ -42,9 +46,10 @@ public class DbControlService {
 
   /**
    * start Tsurugi DB.
+   * 
    * @param jobId Job ID
    * @param token authentication token
-   * @param mode launch mode
+   * @param mode  launch mode
    */
   public void startDatabase(String jobId, String token, String mode) {
     dbStartExec.startDatabse(jobId, token, mode);
@@ -52,6 +57,7 @@ public class DbControlService {
 
   /**
    * shutdown Tsurugi DB.
+   * 
    * @param jobId Job ID
    * @param token authentication token
    */
@@ -60,7 +66,19 @@ public class DbControlService {
   }
 
   /**
+   * synchronize DB Transaction log.
+   * 
+   * @param jobId      Job ID
+   * @param token      authentication token
+   * @param sourceHost source database to syncronize log
+   */
+  public void synchronizeTransactionLog(String jobId, String token, String sourceHost) {
+    dbSyncWalExec.synchronizeTransactionLog(jobId, token, sourceHost);
+  }
+
+  /**
    * get staus of Tsurugi DB.
+   * 
    * @param jobId Job ID
    * @return DB status
    */
@@ -77,11 +95,12 @@ public class DbControlService {
 
   /**
    * determine Tsurugi DB is running
+   * 
    * @param jobId Job ID
    * @return true if Tsurugi DB is running
    */
   public boolean isOnline(String jobId) {
-    
+
     var status = getStatus(jobId);
     return ExecStatus.STATUS_RUNNING.equals(status.getStatus());
   }
