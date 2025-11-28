@@ -58,11 +58,16 @@ public class DbControlApiHandler {
                             .switchIfEmpty(Mono.just(new StartDbParam()))
                             .flatMap(param -> {
                                 String mode = param.getMode();
+                                String replicateFrom = param.getReplicateFrom();
+                                boolean autoFetchWal = param.isAutoFetchWal();
+                                
                                 if (mode == null) {
                                     mode = "standalone";
+                                } else if (mode.equals("replica") && replicateFrom == null) {
+                                    throw new BadRequestException("replicaFrom is not specified","replicaFrom is not specified");
                                 }
                                 log.debug("db launch mode:" + mode);
-                                dbControlService.startDatabase("start", (String) auth.getCredentials(), mode);
+                                dbControlService.startDatabase("start", (String) auth.getCredentials(), mode, replicateFrom, autoFetchWal);
                                 return ServerResponse.ok().build();
                             });
                 });
@@ -106,7 +111,7 @@ public class DbControlApiHandler {
                                     throw new BadRequestException("replicaFrom is not specified","replicaFrom is not specified");
                                 }
 
-                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode, from);
+                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode, from, param.isAutoFetchWal());
                                 return ServerResponse.ok().build();
                             });
                 });

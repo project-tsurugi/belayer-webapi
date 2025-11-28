@@ -26,5 +26,6 @@ public class ChangeLauchModeParam {
 
     private String mode;
     private String replicateFrom;
+    private boolean autoFetchWal;
   
 }

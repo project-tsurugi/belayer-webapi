@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.tsurugidb.belayer.webapi.dto.DbStatus;
 import com.tsurugidb.belayer.webapi.dto.ExecStatus;
 import com.tsurugidb.belayer.webapi.dto.InstanceInfo;
+import com.tsurugidb.belayer.webapi.exec.DbChangeModeExec;
 import com.tsurugidb.belayer.webapi.exec.DbShutdownExec;
 import com.tsurugidb.belayer.webapi.exec.DbStartExec;
 import com.tsurugidb.belayer.webapi.exec.DbStatusExec;
@@ -31,6 +32,9 @@ public class DbControlService {
 
   @Autowired
   DbStartExec dbStartExec;
+
+  @Autowired
+  DbChangeModeExec dbChangeModeExec;
 
   @Autowired
   DbShutdownExec dbShutdownExec;
@@ -51,8 +55,8 @@ public class DbControlService {
    * @param token authentication token
    * @param mode  launch mode
    */
-  public void startDatabase(String jobId, String token, String mode) {
-    dbStartExec.startDatabse(jobId, token, mode);
+  public void startDatabase(String jobId, String token, String mode, String replicaFrom, boolean autoFetchWal) {
+    dbStartExec.startDatabse(jobId, token, mode, replicaFrom, autoFetchWal);
   }
 
   /**
@@ -72,9 +76,10 @@ public class DbControlService {
    * @param token authentication token
    * @param mode launch mode
    * @param replicateFrom target to replicate
+   * @param autoFetchWal if true, fetch required WAL automatically
    */
-  public void changeDatabaseMode(String jobId, String token, String mode, String replicateFrom) {
-    //dbChangeModeExec.changeDatabseLauchMode(jobId, token, mode, replicateFrom);
+  public void changeDatabaseMode(String jobId, String token, String mode, String replicateFrom, boolean autoFetchWal) {
+    dbChangeModeExec.changeMode(jobId, token, mode, replicateFrom, autoFetchWal);
   }
 
   /**

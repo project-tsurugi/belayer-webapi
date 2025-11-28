@@ -35,27 +35,27 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class DbStartExec {
+public class DbChangeModeExec {
 
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
-  @Value("${webapi.cli.cmd.start}")
+  @Value("${webapi.cli.cmd.db-changemode}")
   String cmdString;
 
   @Autowired
   private MonitoringManager monitoringManager;
 
   /**
-   * execute the command to start Database.
+   * execute the command to synchronize Database.
    *
    * @param jobId Job ID
    * @param token authentication token
    * @param mode launch mode
-   * @param replicateFrom grpc endpoint that replicate from
+   * @param replicateFrom source host for synchronization
    * @param autoFetchWal if true, fetch required WAL automatically
    */
-  public void startDatabse(String jobId, String token, String mode, String replicateFrom, boolean autoFetchWal) {
+  public void changeMode(String jobId, String token, String mode, String replicateFrom, boolean autoFetchWal) {
 
     FileWatcher watcher = null;
 
@@ -80,6 +80,7 @@ public class DbStartExec {
       ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_DATA.equals(s.getKind()));
 
       log.debug("status:" + status);
+
     } catch (IOException | InterruptedException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {
@@ -94,7 +95,6 @@ public class DbStartExec {
     if (autoFetchWal) {
       modeAndOptions += " --auto-fetch-wal";
     }
-
     String argsLine = String.format(cmdString, monitoringFile, conf, token, modeAndOptions);
     String[] args = argsLine.split(" ");
 

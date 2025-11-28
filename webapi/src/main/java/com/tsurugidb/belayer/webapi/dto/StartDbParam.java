@@ -25,5 +25,7 @@ import lombok.NoArgsConstructor;
 public class StartDbParam {
 
     private String mode;
+    private String replicateFrom;
+    private boolean autoFetchWal;
   
 }
