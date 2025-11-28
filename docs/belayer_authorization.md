@@ -79,8 +79,11 @@ classDiagram
 |P_SESSION_CTL|セッションステータス確認API| |
 |P_SESSION_CTL|セッション変数設定API| |
 |P_SESSION_CTL|セッション停止API| |
+|P_LIST_ENDPOINTS|エンドポイント一覧取得API| |
 |P_DB_START|DB起動API| |
 |P_DB_STOP|DB停止API| |
+|P_DB_CHANGE_MODE|DBモード変更API| |
+|P_DB_SYNC|DB同期API| |
 |P_DB_STATUS|DBステータス確認API| |
 |P_TABLE_LIST|テーブル名一覧取得API| |
 |P_ROLE_EDIT|ロール定義取得API| |
@@ -107,10 +110,13 @@ classDiagram
     permission.config.P_DUMP=ROLE_ADMIN,ROLE_DUMP
     permission.config.P_LOAD=ROLE_ADMIN,ROLE_LOAD
     permission.config.P_STREAM_API=ROLE_ADMIN,ROLE_STREAM_API
+    permission.config.P_LIST_ENDPOINTS=ROLE_ADMIN,ROLE_USER
     permission.config.P_SESSION_CTL=ROLE_ADMIN,ROLE_SESSION_CTL
-    permission.config.P_DB_START=ROLE_ADMIN,ROLE_RESTORE,ROLE_DB_UP
-    permission.config.P_DB_STOP=ROLE_ADMIN,ROLE_RESTORE,ROLE_DB_DOWN
+    permission.config.P_DB_START=ROLE_ADMIN,ROLE_RESTORE,ROLE_DB_UP,ROLE_DB_ADMIN
+    permission.config.P_DB_STOP=ROLE_ADMIN,ROLE_RESTORE,ROLE_DB_DOWN,ROLE_DB_ADMIN
     permission.config.P_DB_STATUS=ROLE_ADMIN,ROLE_USER
+    permission.config.P_DB_CHANGE_MODE=ROLE_ADMIN,ROLE_DB_UP,ROLE_DB_ADMIN
+    permission.config.P_DB_SYNC=ROLE_ADMIN,ROLE_DB_ADMIN
     permission.config.P_TABLE_LIST=ROLE_ADMIN,ROLE_DUMP,ROLE_LOAD
     permission.config.P_ROLE_EDIT=ROLE_ADMIN
     ```
@@ -121,23 +127,26 @@ classDiagram
             * ROLE_DB_UPロールは、Admin以外にDB起動を許すためのロールである。
             * ROLE_DB_DOWNロールは、Admin以外にDB停止を許すためのロールである。
 
-|                   | ROLE_ADMIN | ROLE_BACKUP | ROLE_RESTORE | ROLE_DUMP | ROLE_LOAD | ROLE_STREAM_API | ROLE_DB_UP | ROLE_DB_DOWN | ROLE_SESSION_CTL | ROLE_USER<br/>(all authenticated user) |
-|-------------------|:----------:|:-----------:|:------------:|:---------:|:---------:|:---------------:|:----------:|:----------:|:----------------:|:---------:|
-| P_FILE_LIST       |      ○     |      ○      |      ○       |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ○     |
-| P_UPLOAD          |      ○     |      ー     |       ○      |     ー    |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_DOWNLOAD        |      ○     |      ○      |       ○      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_FILE_DIR_DELETE |      ○     |      ○      |       ○      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_BACKUP          |      ○     |      ○      |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_RESTORE         |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_DUMP            |      ○     |      ー     |      ー      |     ○     |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_LOAD            |      ○     |      ー     |      ー      |     ー    |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_STREAM_API      |      ○     |      ー     |      ー      |     ー    |     ー    |        ○        |     ー     |     ー     |        ー        |     ー    |
-| P_SESSION_CTL     |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |         ○        |     ー    |
-| P_DB_START        |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |      ○     |     ー     |        ー        |     ー    |
-| P_DB_STOP         |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |     ー     |     ○     |        ー        |     ー    |
-| P_DB_STATUS       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ○     |
-| P_TABLE_LIST      |      ○     |      ー     |      ー      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |     ー    |
-| P_ROLE_EDIT       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |     ー    |
+|                   | ROLE_ADMIN | ROLE_BACKUP | ROLE_RESTORE | ROLE_DUMP | ROLE_LOAD | ROLE_STREAM_API | ROLE_DB_UP | ROLE_DB_DOWN | ROLE_DB_ADMIN | ROLE_SESSION_CTL | ROLE_USER<br/>(all authenticated user) |
+|-------------------|:----------:|:-----------:|:------------:|:---------:|:---------:|:---------------:|:----------:|:----------:|:----------------:|:--------------:|:--------:|
+| P_LIST_ENDPOINTS  |      ○     |      ー     |      ー      |     ー    |     ー    |        ー        |     ー     |     ー     |        ー        |        ー       |     ○    |
+| P_FILE_LIST       |      ○     |      ○      |      ○       |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |        ー       |     ○    |
+| P_UPLOAD          |      ○     |      ー     |       ○      |     ー    |     ○     |        ー       |     ー     |     ー     |        ー        |        ー       |     ー    |
+| P_DOWNLOAD        |      ○     |      ○      |       ○      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |        ー       |     ー    |
+| P_FILE_DIR_DELETE |      ○     |      ○      |       ○      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |        ー       |     ー    |
+| P_BACKUP          |      ○     |      ○      |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
+| P_RESTORE         |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
+| P_DUMP            |      ○     |      ー     |      ー      |     ○     |     ー    |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
+| P_LOAD            |      ○     |      ー     |      ー      |     ー    |     ○     |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
+| P_STREAM_API      |      ○     |      ー     |      ー      |     ー    |     ー    |        ○        |     ー     |     ー     |        ー        |        ー        |     ー    |
+| P_SESSION_CTL     |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー         |        ○        |     ー    |
+| P_DB_START        |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |      ○     |     ー     |        ○          |       ー        |     ー    |
+| P_DB_STOP         |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |     ー     |     ○     |         ○         |        ー        |     ー    |
+| P_DB_STATUS       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ○         |        ー        |     ○     |
+| P_DB_CHANGE_MODE  |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ○         |        ー        |     ー    |
+| P_DB_SYNC         |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ○         |        ー        |     ー    |
+| P_TABLE_LIST      |      ○     |      ー     |      ー      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
+| P_ROLE_EDIT       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
 
 
 
