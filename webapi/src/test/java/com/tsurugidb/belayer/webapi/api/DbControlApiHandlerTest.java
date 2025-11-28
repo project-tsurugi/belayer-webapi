@@ -15,7 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.api;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -73,7 +73,7 @@ public class DbControlApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void startDatabase() {
 
-    doNothing().when(dbControlService).startDatabase(anyString(), anyString(), anyString());
+    doNothing().when(dbControlService).startDatabase(anyString(), anyString(), anyString(), anyString(), anyBoolean());
     client.post()
         .uri("/api/db/start")
         .exchange()

@@ -1,7 +1,7 @@
 package com.tsurugidb.belayer.webapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -39,8 +39,8 @@ public class DbControlServiceTest {
 
     @Test
     public void test_startDatabase() throws Exception {
-        doNothing().when(dbStartExec).startDatabse(anyString(), anyString(), anyString());
-        dbControlService.startDatabase("test", "xxx", "mode");
+        doNothing().when(dbStartExec).startDatabse(anyString(), anyString(), anyString(), anyString(), anyBoolean());
+        dbControlService.startDatabase("test", "xxx", "mode", "from", true);
     }
 
     @Test
