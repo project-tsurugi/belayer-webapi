@@ -52,8 +52,9 @@ public class DbSyncWalExec {
    * @param jobId Job ID
    * @param token authentication token
    * @param fromHost source host for synchronization
+   * @param autoFetchWal if true, auto fetch WAL
    */
-  public void synchronizeTransactionLog(String jobId, String token, String fromHost) {
+  public void synchronizeTransactionLog(String jobId, String token, String fromHost, boolean autoFetchWal) {
 
     FileWatcher watcher = null;
 
@@ -71,7 +72,7 @@ public class DbSyncWalExec {
       });
       monitoringManager.addFileWatcher(watcher);
 
-      var proc = runProcess(filePath.toString(), stdOutput.toString(), token, fromHost);
+      var proc = runProcess(filePath.toString(), stdOutput.toString(), token, fromHost, autoFetchWal);
 
       proc.waitFor();
 
@@ -88,8 +89,12 @@ public class DbSyncWalExec {
     }
   }
 
-  protected Process runProcess(String monitoringFile, String outFile, String token, String fromHost) {
+  protected Process runProcess(String monitoringFile, String outFile, String token, String fromHost, boolean autoFetchWal) {
     String argsLine = String.format(cmdString, monitoringFile, conf, token, fromHost);
+    if (autoFetchWal) {
+      argsLine += " --auto-fetch-wal";
+    }
+
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

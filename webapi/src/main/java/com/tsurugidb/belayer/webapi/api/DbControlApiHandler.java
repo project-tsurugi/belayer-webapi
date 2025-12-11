@@ -31,6 +31,7 @@ import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 import com.tsurugidb.belayer.webapi.service.DbControlService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -59,7 +60,8 @@ public class DbControlApiHandler {
                             .flatMap(param -> {
                                 String mode = param.getMode();
                                 String replicateFrom = param.getReplicateFrom();
-                                boolean autoFetchWal = param.isAutoFetchWal();
+                                String autoFetchWalStr = param.getAutoFetchWal();
+                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true : Boolean.parseBoolean(autoFetchWalStr);
                                 
                                 if (mode == null) {
                                     mode = "standalone";
@@ -104,6 +106,8 @@ public class DbControlApiHandler {
                             .flatMap(param -> {
                                 String mode = param.getMode();
                                 String from = param.getReplicateFrom();
+                                String autoFetchWalStr = param.getAutoFetchWal();
+                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true : Boolean.parseBoolean(autoFetchWalStr);
                                 
                                 if (mode == null) {
                                     throw new BadRequestException("mode is not specified", "mode is not specified");
@@ -111,7 +115,7 @@ public class DbControlApiHandler {
                                     throw new BadRequestException("replicaFrom is not specified","replicaFrom is not specified");
                                 }
 
-                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode, from, param.isAutoFetchWal());
+                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode, from, autoFetchWal);
                                 return ServerResponse.ok().build();
                             });
                 });
@@ -131,10 +135,12 @@ public class DbControlApiHandler {
                             .switchIfEmpty(Mono.just(new SyncTransactionLogParam()))
                             .flatMap(param -> {
                                 String fromHost = param.getFrom();
+                                String autoFetchWalStr = param.getAutoFetchWal();
+                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true : Boolean.parseBoolean(autoFetchWalStr);
                                 if (fromHost == null) {
                                     throw new BadRequestException("from is not specified.", "from is not specified.");
                                 }
-                                dbControlService.synchronizeTransactionLog("change_mode", (String) auth.getCredentials(), fromHost);
+                                dbControlService.synchronizeTransactionLog("change_mode", (String) auth.getCredentials(), fromHost, autoFetchWal);
                                 return ServerResponse.ok().build();
                             });
                 });

@@ -1902,9 +1902,13 @@
             * `master`: マスターモード
             * `replica`: レプリカモード
             * `standby`: スタンバイモード
+        * replicateFrom: レプリカモードの場合の同期元GRPCエンドポイント（mode=replicaの時は必須）
+        * autoFetchWal: レプリカ時WALの自動フェッチをするかどうか（mode=replicaの場合のみ、デフォルトはtrue）
         ```
         {
           "mode":"replica",
+          "replicateFrom": "dns:///tsurugihost:50051",
+          "autoFetchWal": true
         }
         ```
 * レスポンス
@@ -1931,10 +1935,12 @@
             * `replica`: レプリカモード
             * `standby`: スタンバイモード
         * replicateFrom: レプリカモードの場合の同期元GRPCエンドポイント（mode=replicaの時は必須）
+        * autoFetchWal: レプリカ時WALの自動フェッチをするかどうか（mode=replicaの場合のみ、デフォルトはtrue）
         ```
         {
           "mode":"replica",
-          "replicateFrom": "dns:///tsurugihost:50051"
+          "replicateFrom": "dns:///tsurugihost:50051",
+          "autoFetchWal": true
         }
         ```
 * レスポンス
@@ -1983,6 +1989,7 @@
                 * shutdown: シャットダウン処理を実行中
                 * disconnected: 稼動していた痕跡はあるが、接続できない状態
             * wal_version: 同期済みWALバージョン
+            * follows: 同期元（mode=replicaの場合のみ）
             * tags: タグの一覧(配列)
             ```
             {
@@ -1991,6 +1998,7 @@
               "mode": "replica",
               "status": "running",
               "wal_version": "XXXXXXXX",
+              "follows": "dns:///tsurugihost:50051"
               "tags": [
                 "replica",
                 "T001",
@@ -2008,9 +2016,11 @@
     * パラメータ: なし
     * ボディ:任意
         * from: 連携元の接続先
+        * replicateFrom: レプリカモードの場合の同期元GRPCエンドポイント（mode=replicaの時は必須）
         ```
         {
-          "from": "tsurugi_master:12345"
+          "from": "tsurugi_master:12345",
+          "autoFetchWal": true
         }
         ```
 * レスポンス

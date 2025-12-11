@@ -26,6 +26,6 @@ public class StartDbParam {
 
     private String mode;
     private String replicateFrom;
-    private boolean autoFetchWal;
+    private String autoFetchWal;
   
 }

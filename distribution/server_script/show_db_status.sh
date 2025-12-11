@@ -11,6 +11,7 @@ CONFFILE=$2
 # kind=data status=<value>  item_name=status
 # ${TSURUGI_HOME}/bin/tgha mode show --conf ${CONFFILE} --monitor ${OUTFILE}
 # item_name=mode
+# item_name=follows?
 # ${TSURUGI_HOME}/bin/tgha database version --conf ${CONFFILE} --monitor ${OUTFILE}
 # item_name=version
 
@@ -19,6 +20,7 @@ echo "{ \
        \"mode\": \"replica\", \
        \"status\": \"running\", \
        \"wal_version\": \"XXXXXXXX\", \
+       \"follows\": \"dns:///master:50051\", \
        \"grpc_server_enabled\": true, \
        \"grpc_server_endpoint\": \"dns:///tsurugidb:50051\" \
      }"
