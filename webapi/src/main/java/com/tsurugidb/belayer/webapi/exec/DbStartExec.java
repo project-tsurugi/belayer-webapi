@@ -91,7 +91,7 @@ public class DbStartExec {
 
   protected Process runProcess(String monitoringFile, String outFile, String token, String mode, String replicateFrom, boolean autoFetchWal) {
     String modeAndOptions = !"replica".equals(mode) ? mode : mode + " --replicate-from " + replicateFrom;
-    if (autoFetchWal) {
+    if ("replica".equals(mode) && autoFetchWal) {
       modeAndOptions += " --auto-fetch-wal";
     }
 
