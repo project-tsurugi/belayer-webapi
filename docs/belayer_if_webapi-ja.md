@@ -2016,11 +2016,9 @@
     * パラメータ: なし
     * ボディ:任意
         * from: 連携元の接続先
-        * replicateFrom: レプリカモードの場合の同期元GRPCエンドポイント（mode=replicaの時は必須）
         ```
         {
-          "from": "tsurugi_master:12345",
-          "autoFetchWal": true
+          "from": "tsurugi_master:12345"
         }
         ```
 * レスポンス

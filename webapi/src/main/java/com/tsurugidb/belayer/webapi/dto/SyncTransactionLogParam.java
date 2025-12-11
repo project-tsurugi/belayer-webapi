@@ -25,6 +25,5 @@ import lombok.NoArgsConstructor;
 public class SyncTransactionLogParam {
 
     private String from;
-    private String autoFetchWal;
   
 }

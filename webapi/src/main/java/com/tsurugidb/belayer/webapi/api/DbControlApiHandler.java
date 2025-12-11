@@ -135,12 +135,10 @@ public class DbControlApiHandler {
                             .switchIfEmpty(Mono.just(new SyncTransactionLogParam()))
                             .flatMap(param -> {
                                 String fromHost = param.getFrom();
-                                String autoFetchWalStr = param.getAutoFetchWal();
-                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true : Boolean.parseBoolean(autoFetchWalStr);
                                 if (fromHost == null) {
                                     throw new BadRequestException("from is not specified.", "from is not specified.");
                                 }
-                                dbControlService.synchronizeTransactionLog("change_mode", (String) auth.getCredentials(), fromHost, autoFetchWal);
+                                dbControlService.synchronizeTransactionLog("change_mode", (String) auth.getCredentials(), fromHost);
                                 return ServerResponse.ok().build();
                             });
                 });

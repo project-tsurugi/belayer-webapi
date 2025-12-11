@@ -88,10 +88,9 @@ public class DbControlService {
    * @param jobId      Job ID
    * @param token      authentication token
    * @param sourceHost source database to syncronize log
-   * @param autoFetchWal if true, auto fetch WAL
    */
-  public void synchronizeTransactionLog(String jobId, String token, String sourceHost, boolean autoFetchWal) {
-    dbSyncWalExec.synchronizeTransactionLog(jobId, token, sourceHost, autoFetchWal);
+  public void synchronizeTransactionLog(String jobId, String token, String sourceHost) {
+    dbSyncWalExec.synchronizeTransactionLog(jobId, token, sourceHost);
   }
 
   /**
