@@ -1988,6 +1988,7 @@
                 * running: 正常に稼働している状態
                 * shutdown: シャットダウン処理を実行中
                 * disconnected: 稼動していた痕跡はあるが、接続できない状態
+            * mode_status: モード状態(modeがmaster, replica, standbyのどれでもない場合は空文字)
             * wal_version: 同期済みWALバージョン
             * follows: 同期元（mode=replicaの場合のみ）
             * tags: タグの一覧(配列)
@@ -1997,6 +1998,7 @@
               "instance_name": "tsurugidb_tokyo_t3",
               "mode": "replica",
               "status": "running",
+              "mode_status": "ok",
               "wal_version": "XXXXXXXX",
               "follows": "dns:///tsurugihost:50051"
               "tags": [

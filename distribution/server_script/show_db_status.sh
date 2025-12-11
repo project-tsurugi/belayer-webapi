@@ -11,7 +11,10 @@ CONFFILE=$2
 # kind=data status=<value>  item_name=status
 # ${TSURUGI_HOME}/bin/tgha mode show --conf ${CONFFILE} --monitor ${OUTFILE}
 # item_name=mode
-# item_name=follows?
+# item_name=master.replication_status
+# item_name=replica.replication_status
+# item_name=replica.upstream
+# item_name=standby.replication_status
 # ${TSURUGI_HOME}/bin/tgha database version --conf ${CONFFILE} --monitor ${OUTFILE}
 # item_name=version
 
@@ -19,6 +22,7 @@ echo "{ \
        \"instance_id\": \"tsurugidb_t3\", \
        \"mode\": \"replica\", \
        \"status\": \"running\", \
+       \"mode_status\": \"ok", \
        \"wal_version\": \"XXXXXXXX\", \
        \"follows\": \"dns:///master:50051\", \
        \"grpc_server_enabled\": true, \

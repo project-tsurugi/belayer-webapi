@@ -36,6 +36,7 @@ public class DbStatus {
     private String instanceName;
     private String mode;
     private String status;
+    private String modeStatus;
     private String walVersion;
     private String follows;
     private boolean grpc_server_enabled;
