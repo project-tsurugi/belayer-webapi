@@ -1,28 +1,56 @@
-#!/bin/sh
+#!/bin/bash
 
 OUTFILE=$1
 CONFFILE=$2
 
-# ${TSURUGI_HOME}/bin/tgctl config --conf ${CONFFILE} --monitor ${OUTFILE}
+${TSURUGI_HOME}/bin/tgctl status --conf ${CONFFILE} --monitor ${OUTFILE}
+# kind=data status=<value>  key=status
+OUT_JSON=$(cat $OUTFILE | jq -s '.[]|select(.format == "status")|{status: .status}')
+
+${TSURUGI_HOME}/bin/tgctl config --conf ${CONFFILE} --monitor ${OUTFILE}
 # section=system key=instance_id value=<value> item_name=instance_id
 # section=grpc_server key=enabled value=<value>  item_name=grpc_server_enabled
 # section=grpc_server key=endpoint value=<value>  item_name=grpc_server_endpoint
-# ${TSURUGI_HOME}/bin/tgctl status --conf ${CONFFILE} --monitor ${OUTFILE}
-# kind=data status=<value>  item_name=status
-# ${TSURUGI_HOME}/bin/tgha mode show --conf ${CONFFILE} --monitor ${OUTFILE}
-# item_name=mode
-# item_name=master.replication_status
-# item_name=replica.replication_status
-# item_name=replica.upstream
-# item_name=standby.replication_status
-# ${TSURUGI_HOME}/bin/tgha database version --conf ${CONFFILE} --monitor ${OUTFILE}
-# item_name=version
+ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.section == "system" and .key == "instance_id"))|map({key:.key, value:.value})|from_entries')
+OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
+ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.section == "grpc_server" and .key == "enabled"))|map({key:"grpc_server_enabled", value:.value})|from_entries')
+OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
+ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.section == "grpc_server" and .key == "endpoint"))|map({key:"grpc_server_endpoint", value:.value})|from_entries')
+OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 
+${TSURUGI_HOME}/bin/tgha mode show --conf ${CONFFILE} --monitor ${OUTFILE}
+# key=mode
+# key=master.replication_status
+# key=replica.replication_status
+# key=replica.upstream
+# key=standby.replication_status
+
+MODE=$(cat $OUTFILE | jq -s -r '.[]|select(.key == "mode")|.value')
+OUT_JSON=$(echo $OUT_JSON | jq ".|= .+{mode: \"$MODE\"}")
+
+if [ ${MODE} = "replica" ]; then
+    ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.key | IN("replica.replication_status", "replica.upstream")))|from_entries|{mode_status: ."replica.replication_status", follows: ."replica.upstream"}')
+else
+    QUERY=".|map(select(.key | IN(\"${MODE}.replication_status\")))|map({key:.key, value:.value})|from_entries|{mode_status: .\"${MODE}.replication_status\"}"
+    ITEM_JSON=$(cat $OUTFILE | jq -s "${QUERY}")
+fi
+OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
+
+
+${TSURUGI_HOME}/bin/tgha database version --conf ${CONFFILE} --monitor ${OUTFILE}
+ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.key == "version"))|map({key:.key, value:.value})|from_entries|{wal_version: .version}')
+OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
+
+echo $OUT_JSON
+
+exit
+
+# sample
 echo "{ \
        \"instance_id\": \"tsurugidb_t3\", \
        \"mode\": \"replica\", \
        \"status\": \"running\", \
-       \"mode_status\": \"ok", \
+       \"mode_status\": \"ok\", \
        \"wal_version\": \"XXXXXXXX\", \
        \"follows\": \"dns:///master:50051\", \
        \"grpc_server_enabled\": true, \
