@@ -54,6 +54,7 @@ public class EndpointsApiHandler {
       long lastModified = file.lastModified();
       if (this.lastModified < lastModified) {
         this.endpoints = Files.lines(Path.of(file.getAbsolutePath()))
+            .filter(line -> !line.startsWith("#"))
             .map(line -> Arrays.stream(line.split(","))
                 .map(String::trim)
                 .collect(Collectors.toList()))
@@ -63,7 +64,12 @@ public class EndpointsApiHandler {
 
         this.lastModified = lastModified;
       }
-      result = new Endpoints(this.endpoints);
+
+      if (this.endpoints.length == 0) {
+        result = new Endpoints(getDefaultEndpoint(req));
+      } else {
+        result = new Endpoints(this.endpoints);
+      }
 
     } catch (IOException ex) {
       log.warn("error occurred while reading a config file. " + configPath, ex);
@@ -74,7 +80,7 @@ public class EndpointsApiHandler {
   }
 
   private String[] getDefaultEndpoint(ServerRequest req) {
-    
-    return new String[] {req.uri().toString().split("/api")[0]};
+
+    return new String[] { req.uri().toString().split("/api")[0] };
   }
 }
