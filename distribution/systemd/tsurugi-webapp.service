@@ -3,8 +3,8 @@ Description=Tsurugi WebApp
 
 [Service]
 Type=simple
-Environment=TSURUGI_HOME=/usr/lib/tsurugi
-ExecStart=/usr/lib/tsurugi-webapp-#VERSION#/bin/start_server.sh
+Environment=CONF_FOLDER=##BELAYER_INSTALL_DIR##/config/tsurugi-belayer.conf
+ExecStart=##BELAYER_INSTALL_DIR##/jar/tsurugi-belayer.jar
 Restart=no
 
 [Install]

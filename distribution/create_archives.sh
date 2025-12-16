@@ -33,14 +33,17 @@ if [ $? -ne 0 ]; then
 fi
 
 # scripts and replace version.
+mkdir -p $DIST_TEMP_DIR/bin
+mkdir -p $DIST_TEMP_DIR/config
 mkdir -p $DIST_TEMP_DIR/systemd
-cp -p server_script/*.sh $DIST_TEMP_DIR/
-cp -p systemd/tsurugi-webapp.service $DIST_TEMP_DIR/systemd/tsurugi-webapp.service
-cp -p systemd/add_service.sh $DIST_TEMP_DIR/systemd/add_service.sh
+
+cp -p install.sh $DIST_TEMP_DIR/
+cp -p server_script/*.sh $DIST_TEMP_DIR/bin/
+cp -p systemd/* $DIST_TEMP_DIR/systemd/
+cp -p config/* $DIST_TEMP_DIR/config/
 sed -i "s/#VERSION#/$VERSION/g" $DIST_TEMP_DIR/install.sh
-sed -i "s/#VERSION#/$VERSION/g" $DIST_TEMP_DIR/start_server.sh
-sed -i "s/#VERSION#/$VERSION/g" $DIST_TEMP_DIR/systemd/tsurugi-webapp.service
-sed -i "s/#VERSION#/$VERSION/g" $DIST_TEMP_DIR/systemd/add_service.sh
+chmod u+x $DIST_TEMP_DIR/install.sh
+chmod u+x $DIST_TEMP_DIR/bin/*.sh
 
 # to tar.gz
 tar zcf $DIST_DIR/$DIST_ARCV_NAME $DIST_TEMP_DIR

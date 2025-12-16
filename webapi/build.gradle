@@ -98,6 +98,11 @@ jar {
 	enabled = false
 }
 
+bootJar {
+	archiveFileName = 'tsurugi-belayer.jar'
+    launchScript()
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

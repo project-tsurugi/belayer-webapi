@@ -3,7 +3,7 @@
 cd `dirname $0`
 VERSION=#VERSION#
 REQUIRE_JAVA_MAJOR_VERSION=11
-JAR_NAME_PREFIX=tsurugi-webapp-
+JAR_NAME=tsurugi-belayer
 
 echo "start install."
 
@@ -21,7 +21,7 @@ done
 if [ "${_INSTALL_PREFIX}" = "" ]; then
     _INSTALL_PREFIX="/usr/lib"
 fi
-INSTALL_DIR=${_INSTALL_PREFIX}/tsurugi-webapp-$VERSION
+INSTALL_DIR=${_INSTALL_PREFIX}/tsurugi-belayer-$VERSION
 
 # check java path and version
 _JAVA_PATH=$(which java)
@@ -38,17 +38,30 @@ echo Java Version: $_JAVA_FULL_VERSION
 echo Java MajorVersion: $_JAVA_MAJOR_VERSION
 echo Java Path: $_JAVA_PATH
 
-if [ $_JAVA_MAJOR_VERSION -lt "11" ]; then
+if [ $_JAVA_MAJOR_VERSION -lt "${REQUIRE_JAVA_MAJOR_VERSION}" ]; then
     echo ""
-    echo "requires Java 11 or newer."
+    echo "requires Java ${REQUIRE_JAVA_MAJOR_VERSION} or newer."
     exit -1
 fi
 
-mkdir -p ${INSTALL_DIR}/bin/
-mkdir -p ${INSTALL_DIR}/jar/
+# check TSURUGI_HOME
+if [ -z $TSURUGI_HOME ]; then
+    echo ""
+    echo "TSURUGI_HOME is not set"
+    exit -1
+fi
 
-/bin/cp *.sh $INSTALL_DIR/bin/
-/bin/cp app/${JAR_NAME_PREFIX}*.jar $INSTALL_DIR/jar/
+mkdir -p ${INSTALL_DIR}/bin
+mkdir -p ${INSTALL_DIR}/jar
+mkdir -p ${INSTALL_DIR}/config
+
+cp bin/*.sh $INSTALL_DIR/bin/
+cp app/${JAR_NAME} $INSTALL_DIR/jar/
+cp config/* $INSTALL_DIR/config/
+
+sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/systemd/tsurugi-belayer.service
+sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/config/tsurugi-belayer.conf
+sed -i "s|##TSURUGI_HOME##|${TSURUGI_HOME}|g" $INSTALL_DIR/config/tsurugi-belayer.conf
 
 chmod u+x $INSTALL_DIR/bin/*.sh
 
