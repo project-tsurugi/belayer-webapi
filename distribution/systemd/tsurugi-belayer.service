@@ -1,5 +1,5 @@
 [Unit]
-Description=Tsurugi WebApp
+Description=Tsurugi Belayer
 
 [Service]
 Type=simple

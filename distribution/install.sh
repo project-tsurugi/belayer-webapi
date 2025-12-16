@@ -3,7 +3,6 @@
 cd `dirname $0`
 VERSION=#VERSION#
 REQUIRE_JAVA_MAJOR_VERSION=11
-JAR_NAME=tsurugi-belayer
 
 echo "start install."
 
@@ -54,10 +53,12 @@ fi
 mkdir -p ${INSTALL_DIR}/bin
 mkdir -p ${INSTALL_DIR}/jar
 mkdir -p ${INSTALL_DIR}/config
+mkdir -p ${INSTALL_DIR}/systemd
 
 cp bin/*.sh $INSTALL_DIR/bin/
-cp app/${JAR_NAME} $INSTALL_DIR/jar/
+cp app/*.jar $INSTALL_DIR/jar/
 cp config/* $INSTALL_DIR/config/
+cp systemd/* $INSTALL_DIR/systemd/
 
 sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/systemd/tsurugi-belayer.service
 sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/config/tsurugi-belayer.conf
