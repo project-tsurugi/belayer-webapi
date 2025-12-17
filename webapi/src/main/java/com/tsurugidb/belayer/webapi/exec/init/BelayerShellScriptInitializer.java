@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -44,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Initializer for JAR contained shell scripts.
  */
+@Profile({ "default", "production" })
 @Component
 @Slf4j
 public class BelayerShellScriptInitializer {

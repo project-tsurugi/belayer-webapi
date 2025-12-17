@@ -41,7 +41,7 @@ import com.tsurugidb.belayer.webapi.dto.TableNames;
 import com.tsurugidb.belayer.webapi.service.DbControlService;
 import com.tsurugidb.belayer.webapi.service.TsubakuroService;
 
-@ActiveProfiles("ut")
+@ActiveProfiles({"common", "ut"})
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = "webapi.db.mock.tablenames=demo,foo,bar")
 public class DbControlApiHandlerTest {

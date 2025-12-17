@@ -64,7 +64,7 @@ import com.tsurugidb.belayer.webapi.service.tsubakuro.TsubakuroServiceStub;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@ActiveProfiles("ut")
+@ActiveProfiles({"common", "ut"})
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = "webapi.storage.root=./test_tmp")
 public class StatefulApiHandlerTest {
