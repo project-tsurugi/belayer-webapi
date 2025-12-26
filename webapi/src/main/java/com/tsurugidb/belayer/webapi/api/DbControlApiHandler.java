@@ -111,7 +111,8 @@ public class DbControlApiHandler {
                                 
                                 if (mode == null) {
                                     throw new BadRequestException("mode is not specified", "mode is not specified");
-                                } else if (mode.equals("replica") && from == null) {
+                                }
+                                if (mode.equals("replica") && from == null) {
                                     throw new BadRequestException("replicaFrom is not specified","replicaFrom is not specified");
                                 }
 

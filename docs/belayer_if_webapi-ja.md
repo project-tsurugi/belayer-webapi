@@ -1928,9 +1928,9 @@
     * メソッド: POST
     * パス: /api/db/changemode
     * パラメータ: なし
-    * ボディ: 任意
+    * ボディ:
         * mode: モード指定
-            * `standalone`: スタンドアローンモード（デフォルト）
+            * `standalone`: スタンドアローンモード
             * `master`: マスターモード
             * `replica`: レプリカモード
             * `standby`: スタンバイモード
