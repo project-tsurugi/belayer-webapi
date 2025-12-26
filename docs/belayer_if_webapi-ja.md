@@ -60,16 +60,16 @@
 
 * 概要: ユーザID,パスワードを使ってユーザ認証を行い、認証成功時はアクセストークンを返却する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/auth
-    * パラメータ:なし
+    * パラメータ: なし
     * Content-Type: application/x-www-form-urlencoded
     * ボディ:
         * uid: ユーザID(必須)
         * pw: パスワード(必須)
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             * userId: User ID
@@ -84,13 +84,13 @@
             ```
             {
               "userId": "user1",
-              "refreshToken":"[REFRESH_TOKEN_VALUE]",
-              "refreshExpirationTime":"2022-12-09T10:05:40Z",
-              "accessToken":"[ACCESS_TOKEN_VALUE]",
-              "accessExpirationTime":"2022-12-09T10:05:40Z",
+              "refreshToken": "[REFRESH_TOKEN_VALUE]",
+              "refreshExpirationTime": "2022-12-09T10:05:40Z",
+              "accessToken": "[ACCESS_TOKEN_VALUE]",
+              "accessExpirationTime": "2022-12-09T10:05:40Z",
               "roles": ["ROLE_ADMIN", "ROLE_USER"],
-              "authorities" ["P_FILE_CTL", "P_BACKUP", "P_RESTORE"],
-              "errorMessage":null
+              "authorities": ["P_FILE_CTL", "P_BACKUP", "P_RESTORE"],
+              "errorMessage": null
             }
             ```
 
@@ -122,15 +122,15 @@
 
 * 概要: リフレッシュトークンを使って新しいアクセストークンを生成する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/refresh
-    * パラメータ:なし
+    * パラメータ: なし
     * Content-Type: application/x-www-form-urlencoded
     * ボディ:
         * rt: リフレッシュトークン(必須)
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             * userId: User ID
@@ -143,11 +143,11 @@
             ```
             {
               "userId": "user1",
-              "refreshToken":"[REFRESH_TOKEN_VALUE]",
-              "refreshExpirationTime":"2022-12-09T10:05:40Z",
-              "accessToken":"[ACCESS_TOKEN_VALUE]",
-              "accessExpirationTime":"2022-12-09T10:05:40Z",
-              "errorMessage":null
+              "refreshToken": "[REFRESH_TOKEN_VALUE]",
+              "refreshExpirationTime": "2022-12-09T10:05:40Z",
+              "accessToken": "[ACCESS_TOKEN_VALUE]",
+              "accessExpirationTime": "2022-12-09T10:05:40Z",
+              "errorMessage": null
             }
             ```
 
@@ -179,7 +179,7 @@
 
 * 概要: ファイルを受け取り、指定のファイルパスに保存する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/upload
     * パラメータ: なし
     * Content-Type: multipart/form-data
@@ -207,12 +207,12 @@
                     * "true"を指定した場合、サーバの同ディレクトリに同盟ファイルが存在した場合に上書きする。
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             ```
             {
-              "fileNames":[
+              "fileNames": [
                 "path/to/filename1.parquet",
                 "path/to/filename2.parquet"
               ]
@@ -222,7 +222,7 @@
         * 条件
             * ディレクトリ名/ファイル名が不正の場合
         * ステータスコード: 400
-        * ボディ: ```{"errorMessage":"Invalid destination dir:{destDir}"}```
+        * ボディ: ```{"errorMessage": "Invalid destination dir:{destDir}"}```
     * 異常(アップロードファイルなし)
         * 条件
             * アップロード対象が未指定の場合
@@ -251,17 +251,17 @@
 
 * 概要: パスを指定し、1ファイルをダウンロードする。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/download/{path_to_file}
     * パラメータ:
         * path_to_file(PATHパラメータ): ダウンロードするファイルパス。STORAGE_DIR/[uid]からの相対パス。
            * パス表現はURLエンコーディングが必須。（「/」は%2Fで表現する）
         * csv(クエリパラメータ): trueを指定し、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換してダウンロードする。
             * 変換後のCSVのファイル名は「<変換元ファイルのベース名>_yyyyMMddHHmmssSSS.csv」とする。
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/octet-stream もしくは ファイルに合わせたMIME Type。
         * Content-Disposition: attachment; filename="<対象のファイル名>"
         * ボディ: MIMEエンコードしたファイルコンテンツ
@@ -276,7 +276,7 @@
             * 指定したディレクトリ指定が不正な場合
         * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage": "Invalid file path. path:{path_to_file}"}```
+        * ボディ: ```{"errorMessage": "Invalid file path. path:{path_to_file}"}```
     * 異常(ファイル読み込みエラー)
         * 条件
             * 何らかの理由でファイル読み込みに失敗した場合
@@ -289,7 +289,7 @@
     * １つのディレクトリに指定したパスのリストに対応するファイル群をフラットに配置したZipを返す。
     * Zipのファイル名は「belayer_download_yyyyMMddHHmmssSSS.zip」とする。yyyyMMddHHmmssSSSはサーバが処理した時点のUTC時刻（年月日時分秒+ミリ秒)
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/downloadzip
     * パラメータ:
         * csv(クエリパラメータ): trueを指定し、ダウンロード対象のファイルの拡張子が「.parquet」の場合、parquetからCSVに変換したファイルをZipに格納し、ダウンロードする。
@@ -307,7 +307,7 @@
             ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Disposition: attachment; filename="<belayer_download_yyyyMMddHHmmssSSS>.zip"
         * Content-Type: application/zip
         * ボディ: MIMEエンコードしたファイルコンテンツ
@@ -323,7 +323,7 @@
             * 指定したディレクトリ指定が不正な場合
         * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage": "Invalid file path. path:{path_to_file}"}```
+        * ボディ: ```{"errorMessage": "Invalid file path. path:{path_to_file}"}```
     * 異常(ファイル読み込みエラー)
         * 条件
             * 何らかの理由でファイル読み込みに失敗した場合
@@ -334,15 +334,15 @@
 
 * 概要: パスを指定し、1ファイルを削除する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/delete/file
-    * パラメータ:なし
+    * パラメータ: なし
     * Content-Type: application/json
     * ボディ:
         * path: 削除するファイルパス。STORAGE_DIR/[uid]からの相対パス。
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             ```
@@ -370,9 +370,9 @@
 
 * 概要: パスを複数指定し、ファイルを削除する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/delete/files
-    * パラメータ:なし
+    * パラメータ: なし
     * Content-Type: application/json
     * ボディ:
         * pathList: 削除対象のパスのリスト
@@ -387,7 +387,7 @@
             ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             ```
@@ -421,16 +421,16 @@
 
 * 概要: パスを指定し、1ディレクトリを削除する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/delete/dir
-    * パラメータ:なし
+    * パラメータ: なし
     * Content-Type: application/json
     * ボディ:
         * path: 削除するディレクトリパス。STORAGE_DIR/[uid]からの相対パス。(必須)
         * force: trueの場合、ディレクトリ内のファイルごと削除する。デフォルトはfalse。(任意)
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             ```
@@ -464,7 +464,7 @@
 
 * 概要: サーバ上のディレクトリ名を指定し、配下のディレクトリ/ファイル群を表示する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/dirlist/{dir_path}
     * パラメータ:
         * dir_path(PATHパラメータ): サーバ上のディレクトリ名。STORAGE_DIR/[uid]からの相対パス。
@@ -474,15 +474,15 @@
             * hide_dir(クエリパラメータ): trueを指定した場合、ディレクトリは含まず、ファイル一覧のみ返却する。
             * hide_file(クエリパラメータ): trueを指定した場合、ファイルは含まず、ディレクトリ一覧のみ返却する。
             * どちらも指定しない場合は、ディレクトリとファイルの一覧を返却する。
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
-            * filepath:ファイルパスの配列。STORAGE_DIR/[uid]/[dir_path]配下のファイルをすべて返す。
+            * filepath: ファイルパスの配列。STORAGE_DIR/[uid]/[dir_path]配下のファイルをすべて返す。
                 * ディレクトリは末尾に"/"を付加して表現する。
-            * message:ディレクトリ、ファイル数が上限（デフォルト値:500）を超過した場合のメッセージ。正常時はnull。
+            * message: ディレクトリ、ファイル数が上限（デフォルト値:500）を超過した場合のメッセージ。正常時はnull。
 
                 ```
                 {
@@ -512,16 +512,16 @@
 * 概要: バックアップファイルを保存するディレクトリを指定し、バックアップ取得を指示する。
     * バックアップ指示が成功した段階でレスポンスを返却する。（バックアップ処理完了ではない。）
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/backup
-    * パラメータ:なし
-    * Content-Type：application/json
+    * パラメータ: なし
+    * Content-Type: application/json
     * ボディ
         * dirPath: バックアップファイル(Zip)を格納するディレクトリパス。
             * STORAGE_DIR/[uid]/[dirPath]/[jobId]にバックアップファイルが保存される。
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             * jobId: バックアップ処理の状態を取得する際に使用するジョブID
@@ -539,7 +539,7 @@
             * バックアップファイルを保存するディレクトリのパスが不正の場合
         * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ: ```{"errorMessage": "<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 * Note:
     * API内部でTsurugi DBのオフライン状態をチェックし、バックアップ方法を自動選択する。
         * Tsurugi DBがオンラインの場合は、Tsubakuro経由でバックアップ実行する。
@@ -551,16 +551,16 @@
 * 概要: バックアップファイルを格納しているディレクトリを指定し、リストア実行を指示する。
     * リストア指示が成功した段階でレスポンスを返却する。（リストア処理完了ではない。）
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/restore
-    * パラメータ:なし
+    * パラメータ: なし
     * Content-Type: application/json
     * ボディ:
         * zipFilePath: バックアップファイル(Zip)の格納パス。
             * STORAGE_DIR/[uid]/[zip_file_path]にバックアップファイルが保存されている前提。
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             * jobId: リストア処理の状態を取得する際に使用するジョブID
@@ -574,7 +574,7 @@
             }
             ```
     * 異常（該当ファイルなし）
-        * ステータスコード:404
+        * ステータスコード: 404
         * Content-Type: application/json
         * ボディ:
             ```{"errorMessage": "Invalid path. path:<ファイルパス>"}```
@@ -585,16 +585,16 @@
 
 * 概要: 自分が指示したバックアップ／リストアの実行状況を一覧で取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/br/list/{type}
     * パラメータ:
         * type(PATHパラメータ): "backup","restore"のいずれか
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
-        * ボディ:バックアップの場合
+        * ボディ: バックアップの場合
             * type: "backup"
             * jobId: バックアップを識別するジョブID
             * uid: バックアップ処理を実行したユーザID
@@ -664,7 +664,7 @@
                 ]
             }
             ```
-        * ボディ:リストアの場合
+        * ボディ: リストアの場合
             * type: "restore"
             * jobId: リストアを識別するジョブID
             * uid: リストア処理を実行したユーザID
@@ -730,23 +730,23 @@
             }
             ```
     * 異常(type不正)
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 
 ## バックアップ／リストア実行ステータス取得API
 
 * 概要: バックアップ／リストアの実行ステータスを取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/br/status/{type}/{jobId}
     * パラメータ:
         * type(PATHパラメータ): "backup","restore"のいずれか
         * jobId(PATHパラメータ): バックアップ/リストアを識別するジョブID。
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: typeにbackupを指定、実行中の場合
             * type: "backup"
@@ -961,25 +961,25 @@
             * 指定したジョブが存在しない場合
         * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
     * 異常(type不正)
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 
 ## バックアップ／リストアキャンセルAPI
 
 * 概要: バックアップ／リストアの実行を中止する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/br/cancel/{type}/{jobId}
     * パラメータ:
         * type(PATHパラメータ): "backup","restore"のいずれか
         * jobId(PATHパラメータ): バックアップ/リストアを識別するジョブID。
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: typeにbackupを指定、ジョブが実行中の場合
             * type: "backup"
@@ -1046,17 +1046,17 @@
         * ステータスコード: 400
         * Content-Type: application/json
         * ボディ:
-            ```{"errorMessage":"Can't cancel job. status=<ステータス>"}```
+            ```{"errorMessage": "Can't cancel job. status=<ステータス>"}```
     * 異常(type不正)
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 
 ## ダンプ取得API
 
 * 概要: ダンプファイルを保存するディレクトリを指定し、オフラインでダンプ取得を指示する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/dump/{table_name}
     * Content-Type: application/json
     * パラメータ:
@@ -1069,12 +1069,12 @@
         * waitUntilDone: trueを値に指定した場合、完了（正常or異常）までレスポンスを返さない。デフォルトはfalse。(任意)
 * レスポンス
     * 正常(wait_until_done指定なしの場合)
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: ```{"jobId": "[jobId]"}```
             * jobId: ダンプ処理の状態を取得する際に使用するジョブID
     * 正常(wait_until_done指定ありの場合)
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             * jobId: ダンプ／ロードを識別するジョブID
@@ -1113,19 +1113,19 @@
             * パラメータのフォーマット不正
         * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラーメッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
     * 異常(オフライン時)
         * 条件
             * DBがオフラインの場合
         * ステータスコード: 406
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラーメッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
     * 異常(ダンプ指示失敗)
         * 条件
             * 何らかの理由でダンプ指示が失敗した場合
         * ステータスコード: 500
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラーメッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 * Note:
     * ダンプ指示が成功した段階でレスポンスを返却する。
         * wait_until_doneパラメータを指定した場合、ダンプが完了するまでレスポンスを返さない。
@@ -1135,7 +1135,7 @@
 
 * 概要: サーバ上のに格納しているデータファイルを指定し、ロード実行を指示する。ロード対象と同一のプリマリーキーのデータが存在する場合は、当該レーコードはロードデータで上書きされる。ロード先テーブルの既存データは前述の上書きされるケースを除き維持される。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/load/{table_name}
     * パラメータ:
         * table_name(PATHパラメータ): ロード先のテーブル名
@@ -1177,7 +1177,7 @@
 
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: ```{"jobId": "[jobId]"}```
             * jobId: ロード処理の状態を取得する際に使用するジョブID
@@ -1186,13 +1186,13 @@
             * DBがオフラインの場合
         * ステータスコード: 406
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
     * 異常(該当ファイルなし)
         * 条件
             * データファイルパスが誤っている
         * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage": "Invalid path. path:<ファイルパス>"}```
+        * ボディ: ```{"errorMessage": "Invalid path. path:<ファイルパス>"}```
     * 異常(パラメータ不正)
         * 条件
             * データファイルパスが指定されていない
@@ -1200,14 +1200,14 @@
         * ステータスコード: 400
         * Content-Type: application/json
         * ボディ:
-            * ```{"errorMessage":"No dump file is specified."}```
-            * ```{"errorMessage":"Invalid mapping definition. [target|source] column:<value>"}```
+            * ```{"errorMessage": "No dump file is specified."}```
+            * ```{"errorMessage": "Invalid mapping definition. [target|source] column:<value>"}```
     * 異常(ロード指示失敗)
         * 条件
             * 何らかの理由でロード指示が失敗した場合
         * ステータスコード: 500
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 * Note:
     * ロード指示が成功した段階でレスポンスを返却する。ロードの稼働状況はダンプ／ロード実行ステータス取得APIで確認する。
         * wait_until_doneパラメータを指定した場合、ロードが完了するまでレスポンスを返さない。
@@ -1217,14 +1217,14 @@
 
 * 概要: 自分が指示したダンプ／ロードの実行状況を一覧で取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/dumpload/list/{type}
     * パラメータ:
         * type(PATHパラメータ): "dump","load"のいずれか
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 実行中の場合
             * jobId: ダンプ／ロードを識別するジョブID
@@ -1278,15 +1278,15 @@
 
 * 概要: ダンプ／ロードの実行ステータスを取得する。
 * リクエスト
-    * メソッド:GET
-    * パス: /api/dumpload/status/[type]/{jobId}
+    * メソッド: GET
+    * パス: /api/dumpload/status/{type}/{jobId}
     * パラメータ:
         * type(PATHパラメータ): "dump","load"のいずれか
         * jobId(PATHパラメータ): ダンプ/ロードを識別するジョブID。
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 実行中の場合
             * type: "dump","load"のいずれか
@@ -1423,22 +1423,22 @@
             * 指定したジョブが存在しない場合
         * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 
 
 ## ダンプ／ロードキャンセルAPI
 
 * 概要: ダンプ／ロードの実行を中止する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/dumpload/cancel/{type}/{jobId}
     * パラメータ:
         * type(PATHパラメータ): "dump","load"のいずれか
         * jobId(PATHパラメータ): ダンプ/ロードを識別するジョブID。
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ
             * type: "dump","load"のいずれか
@@ -1475,24 +1475,24 @@
     * 異常(該当なし)
         * 条件
             * トランザクションIDに該当するものが存在しない。
-        * ステータスコード:404
+        * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
     * 異常(ステータス異常)
         * 条件
             * 既に正常終了、失敗、キャンセル済みの場合。
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
 
 ## トランザクション開始API
 
 * 概要: トランザクションを開始する。
     * Note: トランザクションを開始して待機する期間中は、内部処理にて定期的にタイムアウトを延長する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/transaction/begin
-    * パラメータ:なし
+    * パラメータ: なし
     * Content-Type: application/json
     * ボディ:
         * type: "read_write","read_only"のいずれか(必須)
@@ -1500,7 +1500,7 @@
         * tables: トランザクション内で書き込みを行うテーブル名の配列(typeがread_writeの場合は必須)
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 実行中の場合
             * transactionId: トランザクションを識別するトランザクションID
@@ -1527,15 +1527,15 @@
     * トランザクションのステータスが`AVAILABLE`の場合のみコミット可能
     * トランザクションのステータスが`AVAILABLE`もしくは`IN_USE`の場合のみロールバック可能
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/transaction/{type}/{transaction_id}
     * パラメータ:
         * type(PATHパラメータ): "commit","rollback"のいずれか
         * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * transactionId: トランザクションを識別するトランザクションID
@@ -1559,39 +1559,39 @@
     * 異常（該当なし）
         * 条件
             * トランザクションIDに該当するものが存在しない。
-        * ステータスコード:404
+        * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"<エラー メッセージ>"}```
+        * ボディ: ```{"errorMessage": "<エラーメッセージ>"}```
     * 異常（トランザクションのステータスがコミット/ロールバック不可）
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
         * ボディ: コミット/ロールバック失敗の場合
 
             ```
-            {"errorMessage":"<エラー メッセージ>"}
+            {"errorMessage": "<エラーメッセージ>"}
             ```
 
     * 異常（コミット/ロールバック失敗）
-        * ステータスコード:500
+        * ステータスコード: 500
         * Content-Type: application/json
         * ボディ: コミット/ロールバック失敗の場合
 
             ```
-            {"errorMessage":"<エラー メッセージ>"}
+            {"errorMessage": "<エラーメッセージ>"}
             ```
 
 ## トランザクション確認API
 
 * 概要: トランザクションの状態を返却する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/transaction/status/{transaction_id}
     * パラメータ:
         * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * transactionId: トランザクションを識別するトランザクションID
@@ -1620,9 +1620,9 @@
     * 異常（該当なし）
         * 条件
             * トランザクションIDに該当するものが存在しない。
-        * ステータスコード:404
+        * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"Specified transaction is not found. transactionId:{transactionId}"}```
+        * ボディ: ```{"errorMessage": "Specified transaction is not found. transactionId:{transactionId}"}```
 
 ## ストリームデータダンプAPI
 
@@ -1630,7 +1630,7 @@
     * トランザクションのステータスが`AVAILABLE`もしくは`IN_USE`の場合のみ実行可能
     * STORAGE_DIR/[uid]/[transaction_id]にダンプファイルを書き出し、レスポンスでダウンロードパスを返す。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/transaction/dump/{transaction_id}/{table_name}
     * パラメータ:
         * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
@@ -1644,7 +1644,7 @@
             * sse: 生成したダンプファイルのダウンロードパスを1ファイル単位でServer-Sent Eventsで受け取る。
 * レスポンス
     * 正常（mode=normalの場合）
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * transactionId: トランザクションを識別するトランザクションID
@@ -1665,7 +1665,7 @@
                 ```
 
     * 正常（mode=sseの場合）
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: text/event-stream
         * ボディ:
             * ダンプ完了時にdata:行を返す。終了時はレスポンスがクローズされる。
@@ -1687,9 +1687,9 @@
     * 異常（該当なし）
         * 条件
             * トランザクションIDに該当するものが存在しない。
-        * ステータスコード:404
+        * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"Specified transaction is not found. transactionId:{transactionId}"}```
+        * ボディ: ```{"errorMessage": "Specified transaction is not found. transactionId:{transactionId}"}```
 
 ## ストリームデータロードAPI
 
@@ -1698,7 +1698,7 @@
     * トランザクションのステータスが`AVAILABLE`もしくは`IN_USE`の場合のみ実行可能
     * STORAGE_DIR/[uid]/[transaction_id]にデータファイルをアップロードし、ロードする。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/transaction/load/{transaction_id}/{table}
     * パラメータ:
         * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
@@ -1735,7 +1735,7 @@
                         * FormFieldPart省略時は、csv/parquet/zipを拡張子によって自動判別する`detect_by_ext`とみなす。判別ができない場合は、Parquet形式とみなして処理する。
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * transactionId: トランザクションを識別するトランザクションID
@@ -1760,9 +1760,9 @@
     * 異常（該当なし）
         * 条件
             * トランザクションIDに該当するものが存在しない。
-        * ステータスコード:404
+        * ステータスコード: 404
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"Specified transaction is not found. transactionId:{transactionId}"}```
+        * ボディ: ```{"errorMessage": "Specified transaction is not found. transactionId:{transactionId}"}```
     * 異常(不正パラメータ)
         * 条件
             * リクエストがMultipartではなかった場合
@@ -1771,28 +1771,28 @@
     * 異常（ファイル指定なし）
         * 条件
             * マルチパートでファイルコンテンツが指定されていない。
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"No dump file is specified."}```
+        * ボディ: ```{"errorMessage": "No dump file is specified."}```
     * 異常（カラムマッピング不正）
         * 条件
             * カラム指定のフォーマットが正しくない。
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":"Invalid mapping definition. [target|source] column:xxx}"}```
+        * ボディ: ```{"errorMessage": "Invalid mapping definition. [target|source] column:xxx}"}```
 
 ## セッションステータス確認API
 
 * 概要: セッションの稼働状態を取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/session/status/{session_id}
     * パラメータ
         * session_id(PATHパラメータ): セッションID
-    * ボディ:なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * status: 稼働状態
@@ -1806,8 +1806,8 @@
 
 * 概要: セッションに変数を設定する。
 * リクエスト
-    * メソッド:POST
-    * パス: /api/session/set
+    * メソッド: POST
+    * パス: /api/session/set/{session_id}
     * パラメータ
         * session_id(PATHパラメータ): セッションID
     * Content-Type: application/json
@@ -1816,11 +1816,11 @@
         * var_name: 変数名
         * var_value: 変数の値
         ```
-        {"session_id": "<session_id>", "var_name":"<variable_name>", "var_value" : "<valieable_value>"}
+        {"session_id": "<session_id>", "var_name": "<variable_name>", "var_value": "<valieable_value>"}
         ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * sessionId: セッションID 
@@ -1829,37 +1829,37 @@
             {"session_id": "<session_id>", "var_name": "<variable_name>"}
             ```
     * 異常(パラメータ不正：セッションIDなし)
-        * ステータスコード:400
+        * ステータスコード: 400
         * ボディ: ```{"errorMessage": "invalid parameters."}```
     * 異常（セッション変数設定失敗）
         * 条件
             * 何らかの理由によりセッションに変数が設定できなかった場合。（セッションが利用不能の場合を含む）
-        * ステータスコード:400
+        * ステータスコード: 400
         * Content-Type: application/json
-        * ボディ:```{"errorMessage":""unable to set variable to session :<sessionId>. (name:<variable_name>, value:<variable_value>)"}```
+        * ボディ: ```{"errorMessage": "unable to set variable to session :<sessionId>. (name:<variable_name>, value:<variable_value>)"}```
 
 ## セッション停止API
 
 * 概要: 指定したセッションをkillする。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/session/kill
     * パラメータ: なし
     * Content-Type: application/json
     * ボディ:
         * session_id: セッションID
         ```
-        {"session_id":"<session_id>"}
+        {"session_id": "<session_id>"}
         ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * ボディ: なし
     * 異常(kill失敗)
-        * ステータスコード:400
+        * ステータスコード: 400
         * ボディ: ```{"errorMessage": "failed to kill session."}```
     * 異常(パラメータ不正：セッションIDなし)
-        * ステータスコード:400
+        * ステータスコード: 400
         * ボディ: ```{"errorMessage": "sessionId is not specified."}```
 
 ## エンドポイント一覧取得API
@@ -1867,13 +1867,13 @@
 * 概要: Belayerに登録されているBelayerエンドポイント一覧を取得する。
     * Note: 環境変数「BELAYER_CONFIG_ROOT」直下のendopoints.csvからエンドポイント一覧を取得し、JSONで返却する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/instance/list
-    * パラメータ:なし
-    * ボディ:なし
+    * パラメータ: なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * endpoints: Belayer接続先の配列
@@ -1893,10 +1893,10 @@
     * DBの起動完了まで待機せずに終了する。1秒以内に起動コマンドのプロセスが異常終了しない場合は正常結果を返す。
     * timeout値はプロパティ`webapi.cli.timeout`値で変更可能
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/db/start
     * パラメータ: なし
-    * ボディ:任意
+    * ボディ: 任意
         * mode: モード指定
             * `standalone`: スタンドアローンモード（デフォルト）
             * `master`: マスターモード
@@ -1906,17 +1906,17 @@
         * autoFetchWal: レプリカ時WALの自動フェッチをするかどうか（mode=replicaの場合のみ、デフォルトはtrue）
         ```
         {
-          "mode":"replica",
+          "mode": "replica",
           "replicateFrom": "dns:///tsurugihost:50051",
           "autoFetchWal": true
         }
         ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * ボディ: なし
     * 異常
-        * ステータスコード:500
+        * ステータスコード: 500
         * ボディ: なし
 
 ## DB起動モード変更API
@@ -1925,10 +1925,10 @@
     * DBの起動完了まで待機せずに終了する。1秒以内に起動コマンドのプロセスが異常終了しない場合は正常結果を返す。
     * timeout値はプロパティ`webapi.cli.timeout`値で変更可能
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/db/changemode
     * パラメータ: なし
-    * ボディ:任意
+    * ボディ: 任意
         * mode: モード指定
             * `standalone`: スタンドアローンモード（デフォルト）
             * `master`: マスターモード
@@ -1938,17 +1938,17 @@
         * autoFetchWal: レプリカ時WALの自動フェッチをするかどうか（mode=replicaの場合のみ、デフォルトはtrue）
         ```
         {
-          "mode":"replica",
+          "mode": "replica",
           "replicateFrom": "dns:///tsurugihost:50051",
           "autoFetchWal": true
         }
         ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * ボディ: なし
     * 異常
-        * ステータスコード:500
+        * ステータスコード: 500
         * ボディ: なし
 
 ## DB停止API
@@ -1957,26 +1957,26 @@
     * DBの停止完了まで待機せずに終了する。1秒以内に停止コマンドのプロセスが異常終了しない場合は正常結果を返す。
     * timeout値は内部プロパティ`webapi.cli.timeout`値で変更可能
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/db/shutdown
-    * パラメータ:なし
-    * ボディ:なし
+    * パラメータ: なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * ボディ: なし
 
 ## DBステータス確認API
 
 * 概要: DBの稼働状態を取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/db/status
-    * パラメータ:なし
-    * ボディ:なし
+    * パラメータ: なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ:
             * instance_id: TsurugiDBインスタンスID
@@ -2013,10 +2013,10 @@
 
 * 概要: DBに対し、WALの同期を指示する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/db/sync
     * パラメータ: なし
-    * ボディ:任意
+    * ボディ: 任意
         * from: 連携元の接続先
         ```
         {
@@ -2025,23 +2025,23 @@
         ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * ボディ: なし
     * 異常
-        * ステータスコード:500
+        * ステータスコード: 500
         * ボディ: なし
 
 ## テーブル名一覧取得API
 
 * 概要: DBに存在するアクセス可能なテーブルの一覧を取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/db/tablenames
-    * パラメータ:なし
-    * ボディ:なし
+    * パラメータ: なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * tableNames: テーブル名のリスト
@@ -2060,13 +2060,13 @@
 
 * 概要: Belayerサーバに登録されているロール・権限のマッピング情報を取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/list/roles
-    * パラメータ:なし
-    * ボディ:なし
+    * パラメータ: なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * ロールとそのロールに付与された権限リストの定義
@@ -2090,13 +2090,13 @@
 
 * 概要: Belayerサーバに登録されているロール・ユーザマッピング情報を取得する。
 * リクエスト
-    * メソッド:GET
+    * メソッド: GET
     * パス: /api/show/roleuser
-    * パラメータ:なし
-    * ボディ:なし
+    * パラメータ: なし
+    * ボディ: なし
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * Content-Type: application/json
         * ボディ: 処理成功の場合
             * ロールに対応するユーザIDのマッチングエントリ
@@ -2113,10 +2113,10 @@
 
 * 概要: Belayerサーバに登録されているロール・ユーザマッピング情報をパラメータで渡したJSONで更新する。
 * リクエスト
-    * メソッド:POST
+    * メソッド: POST
     * パス: /api/update/roleuser
-    * パラメータ:なし
-    * ボディ:ロール・ユーザマッピング情報
+    * パラメータ: なし
+    * ボディ: ロール・ユーザマッピング情報
         ```
         {
           "ROLE_ADMIN": [
@@ -2129,13 +2129,13 @@
         ```
 * レスポンス
     * 正常
-        * ステータスコード:200
+        * ステータスコード: 200
         * ボディ: 
             ```
             Success
             ```
     * 異常(JSONフォーマットエラー)
-        * ステータスコード:400
+        * ステータスコード: 400
         * ボディ: ```{"errorMessage": "Bad request format."}```
 
 # ファイルフォーマット
