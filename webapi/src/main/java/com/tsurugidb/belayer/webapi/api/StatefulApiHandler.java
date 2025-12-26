@@ -212,7 +212,7 @@ public class StatefulApiHandler {
         var param = new TransactionApiParameter();
         param.setUid(auth.getName());
         param.setCredentials(auth.getCredentials().toString());
-        param.setTransactionId(req.pathVariable("transactionid"));
+        param.setTransactionId(req.pathVariable("transaction_id"));
 
         String type = "status";
         if (finishTransaction) {
@@ -278,7 +278,7 @@ public class StatefulApiHandler {
                     param.setCredentials(auth.getCredentials());
 
                     param.setDirPath("./");
-                    param.setJobId(req.pathVariable("transactionid"));
+                    param.setJobId(req.pathVariable("transaction_id"));
                     param.setTable(req.pathVariable("table_name"));
                     var format = body.getFormat();
                     if (format != null && format.equals(DumpRequestParam.FORMAT_CSV)) {
@@ -296,7 +296,7 @@ public class StatefulApiHandler {
         var result = new DumpResult();
         result.setDownloadPathList(list);
         result.setTable(req.pathVariable("table_name"));
-        result.setTransactionId(req.pathVariable("transactionid"));
+        result.setTransactionId(req.pathVariable("transaction_id"));
         result.setFormat(format);
 
         return ServerResponse.ok().body(BodyInserters.fromValue(result));
@@ -304,7 +304,7 @@ public class StatefulApiHandler {
 
     private Mono<ServerResponse> createSseRespose(Flux<String> downloadPathList, ServerRequest req, String format) {
         Flux<String> params = Flux.just("table_name=" + req.pathVariable("table_name"),
-                "transactionid=" + req.pathVariable("transactionid"),
+                "transaction_id=" + req.pathVariable("transaction_id"),
                 "format=" + format);
         Flux<String> dlPath = downloadPathList
                 .map(downloadPath -> "download_path=" + downloadPath.replace("/", "%2F"));
@@ -322,7 +322,7 @@ public class StatefulApiHandler {
      * @return Response
      */
     public Mono<ServerResponse> loadDumpFiles(ServerRequest req) {
-        String transactionId = req.pathVariable("transactionid");
+        String transactionId = req.pathVariable("transaction_id");
 
         var param = new LoadParameter();
         // use transactionId as directry name

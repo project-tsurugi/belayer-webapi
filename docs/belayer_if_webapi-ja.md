@@ -1528,10 +1528,10 @@
     * トランザクションのステータスが`AVAILABLE`もしくは`IN_USE`の場合のみロールバック可能
 * リクエスト
     * メソッド:POST
-    * パス: /api/transaction/{type}/{transactionId}
+    * パス: /api/transaction/{type}/{transaction_id}
     * パラメータ:
         * type(PATHパラメータ): "commit","rollback"のいずれか
-        * transactionId(PATHパラメータ): トランザクションを識別するトランザクションID
+        * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
     * ボディ:なし
 * レスポンス
     * 正常
@@ -1585,9 +1585,9 @@
 * 概要: トランザクションの状態を返却する。
 * リクエスト
     * メソッド:GET
-    * パス: /api/transaction/status/{transactionId}
+    * パス: /api/transaction/status/{transaction_id}
     * パラメータ:
-        * transactionId(PATHパラメータ): トランザクションを識別するトランザクションID
+        * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
     * ボディ:なし
 * レスポンス
     * 正常
@@ -1631,9 +1631,9 @@
     * STORAGE_DIR/[uid]/[transaction_id]にダンプファイルを書き出し、レスポンスでダウンロードパスを返す。
 * リクエスト
     * メソッド:POST
-    * パス: /api/transaction/dump/{transactionId}/{table_name}
+    * パス: /api/transaction/dump/{transaction_id}/{table_name}
     * パラメータ:
-        * transactionId(PATHパラメータ): トランザクションを識別するトランザクションID
+        * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
         * table_name(PATHパラメータ): ダンプするテーブル名
     * Content-Type: application/json
     * ボディ:
@@ -1673,7 +1673,7 @@
                 ```
                 data:table_name=FOO_TBL
 
-                data:transactionid=IZb1gY3I
+                data:transaction_id=IZb1gY3I
 
                 data:format=parquet
 
@@ -1699,9 +1699,9 @@
     * STORAGE_DIR/[uid]/[transaction_id]にデータファイルをアップロードし、ロードする。
 * リクエスト
     * メソッド:POST
-    * パス: /api/transaction/load/{transactionId}/{table}
+    * パス: /api/transaction/load/{transaction_id}/{table}
     * パラメータ:
-        * transactionId(PATHパラメータ): トランザクションを識別するトランザクションID
+        * transaction_id(PATHパラメータ): トランザクションを識別するトランザクションID
         * table(PATHパラメータ): ロードするテーブル名
     * Content-Type: multipart/form-data
     * ボディ:
