@@ -57,8 +57,10 @@ See the env var table below.
 |BELAYER_HOME|Installed directory.|`/usr/lib/tsurugi-belayer`|
 |BELAYER_LOG_LEVEL|Log level for belaer WebAPI Server.|`WARN`|
 |BELAYER_CONFIG_ROOT|The directory path to place Belayer config files.|`/opt/belayer`|
-|BELAYER_ALLOW_ORIGINS|The CORS setting for allowd origins. comma sparated strings.|`*`|
-|BELAYER_ALLOW_METHOD|The CORS setting for allowd methods. comma sparated strings.|`*`|
+|BELAYER_ALLOWED_ORIGINS|The CORS setting for allowed origins. comma sparated strings.|``(means not permit CORS)|
+|BELAYER_ALLOWED_METHODS|The CORS setting for allowed methods. comma sparated strings.|``(means not specify Methods)|
+|BELAYER_ALLOWED_HEADERS|The CORS setting for allowed headers. comma sparated strings.|``(means not specify Headers)|
+|BELAYER_ALLOW_CREDENTIALS|The CORS setting for allow credentials. (true or false) |`false`|
 |BELAYER_STORAGE_ROOT|The directory path to use as Belayer storage.|`/opt/belayer/storage`|
 |TSURUGI_URL|URL to connect Tsurugi database.|`ipc:tsurugi`|
 |TSURUGI_CONNECT_TIMEOUT_SEC|connect timeout seconds for Tsurugi database.|`5`|

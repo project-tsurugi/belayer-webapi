@@ -15,7 +15,6 @@
  */
 package com.tsurugidb.belayer.webapi.security;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,11 +55,17 @@ public class SecurityConfig {
   @Value("${management.endpoints.web.base-path}")
   String managementPath;
 
-  @Value("${webapi.config.allow_origins}")
-  String allowOrigins;
+  @Value("${webapi.config.allowed_origins}")
+  List<String> allowedOrigins;
 
-  @Value("${webapi.config.allow_methods}")
-  String allowMethods;
+  @Value("${webapi.config.allowed_methods}")
+  List<String> allowedMethods;
+
+  @Value("${webapi.config.allowed_headers}")
+  List<String> allowedHeaders;
+
+  @Value("${webapi.config.allow_credentials}")
+  boolean allowCredentials;
 
   @Autowired
   PermissionConfig permissionConfig;
@@ -126,9 +131,19 @@ public class SecurityConfig {
 
     CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedOrigins(toList(allowOrigins));
-    configuration.setAllowedMethods(toList(allowMethods));
-    // configuration.setAllowedHeaders(Arrays.asList("X-Custom-Header"));
+    if (allowedOrigins.size() != 0) {
+      configuration.setAllowedOrigins(allowedOrigins);
+    }
+
+    if (allowedMethods.size() != 0) {
+      configuration.setAllowedMethods(allowedMethods);
+    }
+
+    if (allowedHeaders.size() != 0) {
+     configuration.setAllowedHeaders(allowedHeaders);
+    }
+
+    configuration.setAllowCredentials(allowCredentials);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
@@ -161,13 +176,6 @@ public class SecurityConfig {
     public Mono<Authentication> authenticate(Authentication authentication) {
       return Mono.just(authentication);
     }
-  }
-
-  private List<String> toList(String commaString) {
-    return Arrays.stream(commaString.split(","))
-        .map(String::trim)
-        .collect(Collectors.toList());
-
   }
 
 }
