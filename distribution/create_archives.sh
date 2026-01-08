@@ -7,7 +7,7 @@ VERSION=$(cat ../VERSION)
 DIST_DIR=dist
 DIST_TEMP_DIR=tsurugi-webapp-${VERSION}
 DIST_ARCV_NAME=${DIST_TEMP_DIR}.tar.gz
-JAR_NAME=tsurugi-webapp-${VERSION}.jar
+JAR_NAME=tsurugi-belayer.jar
 
 echo "generate server distribution start...."
 echo "version: $VERSION"
@@ -24,7 +24,7 @@ mkdir -p $DIST_TEMP_DIR
 mkdir -p $DIST_TEMP_DIR/app \
   && cd ../webapi \
   && sh gradlew build -x test \
-  && cp ./build/libs/belayer-webapi-${VERSION}.jar ../distribution/$DIST_TEMP_DIR/app/${JAR_NAME} \
+  && cp ./build/libs/${JAR_NAME} ../distribution/$DIST_TEMP_DIR/app/${JAR_NAME} \
   && cd $THIS_DIR
 
 if [ $? -ne 0 ]; then
