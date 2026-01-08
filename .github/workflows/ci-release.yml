@@ -20,13 +20,13 @@ jobs:
 
     steps:
       - name: Setup_Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '11'
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Create_Archives
         run: |
@@ -37,7 +37,7 @@ jobs:
           sh create_archives.sh
 
       - name: Upload_Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: belayer-webapi-dists
           path: distribution/dist/*
@@ -63,7 +63,7 @@ jobs:
           rm -fr work
 
       - name: Download_Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: belayer-webapi-dists
           path: work
