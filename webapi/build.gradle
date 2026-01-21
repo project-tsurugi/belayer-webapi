@@ -78,7 +78,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.8.0'
-	implementation 'ch.qos.logback:logback-classic:1.5.24'
+	implementation 'ch.qos.logback:logback-classic:1.5.25'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.20.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.20'
