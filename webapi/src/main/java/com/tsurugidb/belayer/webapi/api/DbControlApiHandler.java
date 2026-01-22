@@ -61,15 +61,18 @@ public class DbControlApiHandler {
                                 String mode = param.getMode();
                                 String replicateFrom = param.getReplicateFrom();
                                 String autoFetchWalStr = param.getAutoFetchWal();
-                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true : Boolean.parseBoolean(autoFetchWalStr);
-                                
+                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true
+                                        : Boolean.parseBoolean(autoFetchWalStr);
+
                                 if (mode == null) {
                                     mode = "standalone";
                                 } else if (mode.equals("replica") && replicateFrom == null) {
-                                    throw new BadRequestException("replicaFrom is not specified","replicaFrom is not specified");
+                                    throw new BadRequestException("replicaFrom is not specified",
+                                            "replicaFrom is not specified");
                                 }
                                 log.debug("db launch mode:" + mode);
-                                dbControlService.startDatabase("start", (String) auth.getCredentials(), mode, replicateFrom, autoFetchWal);
+                                dbControlService.startDatabase("start", (String) auth.getCredentials(), mode,
+                                        replicateFrom, autoFetchWal);
                                 return ServerResponse.ok().build();
                             });
                 });
@@ -107,16 +110,19 @@ public class DbControlApiHandler {
                                 String mode = param.getMode();
                                 String from = param.getReplicateFrom();
                                 String autoFetchWalStr = param.getAutoFetchWal();
-                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true : Boolean.parseBoolean(autoFetchWalStr);
-                                
+                                boolean autoFetchWal = StringUtil.isNullOrEmpty(autoFetchWalStr) ? true
+                                        : Boolean.parseBoolean(autoFetchWalStr);
+
                                 if (mode == null) {
                                     throw new BadRequestException("mode is not specified", "mode is not specified");
                                 }
                                 if (mode.equals("replica") && from == null) {
-                                    throw new BadRequestException("replicaFrom is not specified","replicaFrom is not specified");
+                                    throw new BadRequestException("replicaFrom is not specified",
+                                            "replicaFrom is not specified");
                                 }
 
-                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode, from, autoFetchWal);
+                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode,
+                                        from, autoFetchWal);
                                 return ServerResponse.ok().build();
                             });
                 });
@@ -139,7 +145,8 @@ public class DbControlApiHandler {
                                 if (fromHost == null) {
                                     throw new BadRequestException("from is not specified.", "from is not specified.");
                                 }
-                                dbControlService.synchronizeTransactionLog("change_mode", (String) auth.getCredentials(), fromHost);
+                                dbControlService.synchronizeTransactionLog("change_mode",
+                                        (String) auth.getCredentials(), fromHost);
                                 return ServerResponse.ok().build();
                             });
                 });
@@ -152,8 +159,12 @@ public class DbControlApiHandler {
      * @return Response
      */
     public Mono<ServerResponse> getStatus(ServerRequest req) {
-        var status = dbControlService.getStatus("status");
-        return ServerResponse.ok().body(BodyInserters.fromValue(status));
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .flatMap(auth -> {
+                    var status = dbControlService.getStatus("status", (String) auth.getCredentials());
+                    return ServerResponse.ok().body(BodyInserters.fromValue(status));
+                });
     }
 
     /**

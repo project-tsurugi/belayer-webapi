@@ -42,10 +42,16 @@ public class DbStatusExec {
   @Value("${webapi.cli.cmd.db-status}")
   String cmdString;
 
+  @Value("${webapi.cli.cmd.tgctl_command}")
+  String tgctl;
+
+  @Value("${webapi.cli.cmd.tgha_command}")
+  String tgha;
+
   @Autowired
   private ObjectMapper mapper;
 
-  public DbStatus getStatus(String jobId) {
+  public DbStatus getStatus(String jobId, String authToken) {
 
     Path filePath = null;
     Path stdOutput = null;
@@ -60,7 +66,7 @@ public class DbStatusExec {
       filePath = tmpDirPath.resolve(String.format("monitoring-%s.log", id));
       stdOutput = tmpDirPath.resolve(String.format("stdout-%s.log", id));
 
-      var result = runProcess(filePath.toString(), stdOutput.toString());
+      var result = runProcess(filePath.toString(), stdOutput.toString(), authToken);
 
       return result;
     } catch (IOException ex) {
@@ -81,8 +87,8 @@ public class DbStatusExec {
     }
   }
 
-  public DbStatus runProcess(String monitoringFile, String outFile) {
-    String argsLine = String.format(cmdString, monitoringFile, conf);
+  public DbStatus runProcess(String monitoringFile, String outFile, String authToken) {
+    String argsLine = String.format(cmdString, tgctl, tgha, monitoringFile, conf, authToken);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);

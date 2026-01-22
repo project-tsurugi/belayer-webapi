@@ -104,7 +104,9 @@ public class BackupRestoreService {
   public Mono<BackupJob> startBackup(BackupRestoreRequestParam param) {
 
     // determine online or offline and call each service
-    if (dbControlService.isOnline(param.getJobId())) {
+    boolean isOnline = dbControlService.isOnline(param.getJobId(), (String)param.getCredentials());
+    log.debug("online? :" + isOnline);
+    if (isOnline) {
       return backupOnline(param);
     }
 
@@ -252,7 +254,7 @@ public class BackupRestoreService {
     log.debug("register job :" + param.toString());
 
     // determine online or offline and call each service
-    if (dbControlService.isOnline(param.getJobId())) {
+    if (dbControlService.isOnline(param.getJobId(), (String)param.getCredentials())) {
       var msg = "DB is online.";
       throw new BadRequestException(msg, msg);
     }

@@ -96,7 +96,7 @@ public class DbControlApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void getStatus() {
 
-    when(dbControlService.getStatus(anyString())).thenReturn(DbStatus.builder().status(ExecStatus.STATUS_RUNNING).build());
+    when(dbControlService.getStatus(anyString(), anyString())).thenReturn(DbStatus.builder().status(ExecStatus.STATUS_RUNNING).build());
 
     var expect = DbStatus.builder().status("running").build();
     client.get()

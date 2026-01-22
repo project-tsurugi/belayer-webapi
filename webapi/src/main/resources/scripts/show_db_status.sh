@@ -1,19 +1,22 @@
 #!/bin/bash
+TSURUGI_TGCTL_COMMAND=$1
+TSURUGI_TGHA_COMMAND=$2
+OUTFILE=$3
+CONFFILE=$4
+AUTH_TOKEN=$5
 
-OUTFILE=$1
-CONFFILE=$2
-
-${TSURUGI_HOME}/bin/tgctl status --conf ${CONFFILE} --monitor ${OUTFILE}
+${TSURUGI_TGCTL_COMMAND} status --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
 # kind=data status=<value>  key=status
 OUT_JSON=$(cat $OUTFILE | jq -s '.[]|select(.format == "status")|{status: .status}')
 STATUS=$(echo $OUT_JSON | jq -r ".status")
 
 if [ "$STATUS" != "running" ]; then
   echo $OUT_JSON
+  echo $OUT_JOSN >> show_db_status_out.log
   exit
 fi
 
-${TSURUGI_HOME}/bin/tgctl config --conf ${CONFFILE} --monitor ${OUTFILE}
+${TSURUGI_TGCTL_COMMAND} config --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
 # section=system key=instance_id value=<value> item_name=instance_id
 # section=grpc_server key=enabled value=<value>  item_name=grpc_server_enabled
 # section=grpc_server key=endpoint value=<value>  item_name=grpc_server_endpoint
@@ -24,7 +27,7 @@ OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.section == "grpc_server" and .key == "endpoint"))|map({key:"grpc_server_endpoint", value:.value})|from_entries')
 OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 
-${TSURUGI_HOME}/bin/tgha mode show --conf ${CONFFILE} --monitor ${OUTFILE}
+${TSURUGI_TGHA_COMMAND} mode show --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
 # key=mode
 # key=master.replication_status
 # key=replica.replication_status
@@ -45,10 +48,11 @@ else
     OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 fi
 
-${TSURUGI_HOME}/bin/tgha database version --conf ${CONFFILE} --monitor ${OUTFILE}
+${TSURUGI_TGHA_COMMAND} database version --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
 ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.key == "version"))|map({key:.key, value:.value})|from_entries|{wal_version: .version}')
 OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 
+echo $OUT_JOSN >> show_db_status_out.log
 echo $OUT_JSON
 
 exit

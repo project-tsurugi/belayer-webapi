@@ -143,7 +143,7 @@ public class BackupRestoreServiceTest {
         expectJob.setProgress(100);
         expectJob.setProgressNumerator(4);
 
-        when(dbControlService.isOnline(jobId)).thenReturn(true);
+        when(dbControlService.isOnline(any(), any())).thenReturn(true);
         for (BackupContext backupCtx : backupFiles) {
             Files.write(backupCtx.getTargetFilePath(), "test".getBytes());
         }
@@ -187,7 +187,7 @@ public class BackupRestoreServiceTest {
 
         var errorMessage = "test error";
 
-        when(dbControlService.isOnline(jobId)).thenReturn(true);
+        when(dbControlService.isOnline(any(), any())).thenReturn(true);
 
         var pathList = new ArrayList<Path>();
         pathList.add(Path.of("./src/test/files/backup_restore/file1.txt"));
@@ -242,7 +242,7 @@ public class BackupRestoreServiceTest {
     @Test
     public void test_startBackup_offline() throws Exception {
 
-        when(dbControlService.isOnline(jobId)).thenReturn(false);
+        when(dbControlService.isOnline(any(), any())).thenReturn(false);
 
         doNothing().when(dbQuiesceExec).callQuiesce(any());
 
@@ -309,7 +309,7 @@ public class BackupRestoreServiceTest {
         job.setJobId(jobId);
         job.setUid(uid);
 
-        when(dbControlService.isOnline(jobId)).thenReturn(false);
+        when(dbControlService.isOnline(any(), any())).thenReturn(false);
 
         when(fileSystemService.createTempDirectory(any())).thenAnswer(new Answer<Path>() {
             @Override
@@ -357,7 +357,7 @@ public class BackupRestoreServiceTest {
     @Test
     public void test_startRestore_in_online() throws Exception {
 
-        when(dbControlService.isOnline(jobId)).thenReturn(true);
+        when(dbControlService.isOnline(any(), any())).thenReturn(true);
 
         var uid = "test_user";
         var zipFilePath = "bk1/backup.zip";
@@ -404,7 +404,7 @@ public class BackupRestoreServiceTest {
         var uid = "test_user";
         var dirPath = "bk1";
 
-        when(dbControlService.isOnline(jobId)).thenReturn(true);
+        when(dbControlService.isOnline(any(), any())).thenReturn(true);
 
         var pathList = new ArrayList<Path>();
         pathList.add(Path.of("./src/test/files/backup_restore/file1.txt"));

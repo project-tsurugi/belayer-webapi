@@ -99,9 +99,9 @@ public class DbControlService {
    * @param jobId Job ID
    * @return DB status
    */
-  public DbStatus getStatus(String jobId) {
+  public DbStatus getStatus(String jobId, String token) {
 
-    DbStatus dbStatus = dbStatusExec.getStatus(jobId);
+    DbStatus dbStatus = dbStatusExec.getStatus(jobId, token);
     InstanceInfo instanceInfo = instanceInfoService.getInstanceInfo();
 
     dbStatus.setInstanceName(instanceInfo.getInstanceName());
@@ -114,11 +114,12 @@ public class DbControlService {
    * determine Tsurugi DB is running
    * 
    * @param jobId Job ID
+   * @param token auth token
    * @return true if Tsurugi DB is running
    */
-  public boolean isOnline(String jobId) {
+  public boolean isOnline(String jobId, String token) {
 
-    var status = getStatus(jobId);
+    var status = getStatus(jobId, token);
     return ExecStatus.STATUS_RUNNING.equals(status.getStatus());
   }
 

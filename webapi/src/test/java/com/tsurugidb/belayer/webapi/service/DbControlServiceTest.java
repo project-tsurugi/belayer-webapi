@@ -53,10 +53,10 @@ public class DbControlServiceTest {
     public void test_getStatus() throws Exception {
         InstanceInfo iInfo = new InstanceInfo("ins001", List.of("tag1", "tag2"));
         var status = DbStatus.builder().status(ExecStatus.STATUS_RUNNING).instanceName(iInfo.getInstanceName()).tags(iInfo.getTags()).build();
-        when(dbStatusExec.getStatus(anyString())).thenReturn(status);
+        when(dbStatusExec.getStatus(anyString(), anyString())).thenReturn(status);
         when(instanceInfoService.getInstanceInfo()).thenReturn(iInfo);
 
-        var result = dbControlService.getStatus("test");
+        var result = dbControlService.getStatus("test", "dummy");
 
         assertEquals(status, result);
     }
