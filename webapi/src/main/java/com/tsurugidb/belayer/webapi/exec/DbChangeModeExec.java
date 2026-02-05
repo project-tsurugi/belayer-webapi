@@ -95,7 +95,7 @@ public class DbChangeModeExec {
     if ("replica".equals(mode) && autoFetchWal) {
       modeAndOptions += " --auto-fetch-wal";
     }
-    String argsLine = String.format(cmdString, monitoringFile, conf, token, modeAndOptions);
+    String argsLine = String.format(cmdString, modeAndOptions, monitoringFile, conf, token);
     String[] args = argsLine.split(" ");
 
     var pb = new ProcessBuilder(args);
