@@ -56,7 +56,8 @@ public class BelayerShellScriptInitializer {
     Path scriptDir;
 
     /**
-     * This initialization method is to extract shell scripts into temporary directory.
+     * This initialization method is to extract shell scripts into temporary
+     * directory.
      * 
      * @throws IOException
      */
@@ -80,13 +81,11 @@ public class BelayerShellScriptInitializer {
             }
 
             // add permission
-            if (!System.getProperty("os.name").toLowerCase().startsWith("win")) {
-                Set<PosixFilePermission> perms = new HashSet<>();
-                perms.add(PosixFilePermission.OWNER_READ);
-                perms.add(PosixFilePermission.OWNER_WRITE);
-                perms.add(PosixFilePermission.OWNER_EXECUTE);
-                Files.setPosixFilePermissions(tempScript.toPath(), perms);
-            }
+            Set<PosixFilePermission> perms = new HashSet<>();
+            perms.add(PosixFilePermission.OWNER_READ);
+            perms.add(PosixFilePermission.OWNER_WRITE);
+            perms.add(PosixFilePermission.OWNER_EXECUTE);
+            Files.setPosixFilePermissions(tempScript.toPath(), perms);
         }
     }
 
