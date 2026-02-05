@@ -5,18 +5,14 @@ OUTFILE=$3
 CONFFILE=$4
 AUTH_TOKEN=$5
 
+echo "$@" >> /tmp/show_db_status_out.log
+
 ${TSURUGI_TGCTL_COMMAND} status --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
 # kind=data status=<value>  key=status
 OUT_JSON=$(cat $OUTFILE | jq -s '.[]|select(.format == "status")|{status: .status}')
 STATUS=$(echo $OUT_JSON | jq -r ".status")
 
-if [ "$STATUS" != "running" ]; then
-  echo $OUT_JSON
-  echo $OUT_JOSN >> show_db_status_out.log
-  exit
-fi
-
-${TSURUGI_TGCTL_COMMAND} config --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
+${TSURUGI_TGCTL_COMMAND} config -q --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN} >& /dev/null 
 # section=system key=instance_id value=<value> item_name=instance_id
 # section=grpc_server key=enabled value=<value>  item_name=grpc_server_enabled
 # section=grpc_server key=endpoint value=<value>  item_name=grpc_server_endpoint
@@ -26,6 +22,11 @@ ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.section == "grpc_server" and .ke
 OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.section == "grpc_server" and .key == "endpoint"))|map({key:"grpc_server_endpoint", value:.value})|from_entries')
 OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
+
+if [ "$STATUS" != "running" ]; then
+  echo $OUT_JSON
+  exit
+fi
 
 ${TSURUGI_TGHA_COMMAND} mode show --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
 # key=mode
@@ -52,7 +53,7 @@ ${TSURUGI_TGHA_COMMAND} database version --conf ${CONFFILE} --monitor ${OUTFILE}
 ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.key == "version"))|map({key:.key, value:.value})|from_entries|{wal_version: .version}')
 OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 
-echo $OUT_JOSN >> show_db_status_out.log
+echo $OUT_JSON >> /tmp/show_db_status_out.log
 echo $OUT_JSON
 
 exit
