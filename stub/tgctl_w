@@ -1,0 +1,75 @@
+#!/usr/bin/python3
+
+import sys
+import argparse
+import os
+
+TSURUGI_HOME = "/usr/lib/tsurugi"
+TGCTL = f"{TSURUGI_HOME}/bin/tgctl"
+
+def main():
+    parser = argparse.ArgumentParser(description='tgctl warrper stub')
+    if len(sys.argv) < 2:
+        out_log("lack of args")
+        out_log(" ".join(sys.argv))
+        exit()
+
+    cmd = " ".join(sys.argv[1:])
+    cmd = TGCTL + " " + cmd
+    out_log(f"command: {cmd}")
+
+    parser.add_argument('command',  type=str, help='monitor file')
+    parser.add_argument('--monitor',  type=str, required=False, help='monitor file')
+    parser.add_argument('-q',  action='store_true', required=False, help='quiet mode')
+    parser.add_argument('--timeout',  type=int, default=1, required=False, help='timeout')
+    parser.add_argument('--auth-token',  type=str, required=False, help='token')
+    parser.add_argument('--conf',  type=str, required=False, help='conf file')
+    parser.add_argument('--mode',  type=str, required=False, help='mode')
+    parser.add_argument('--replicate-from',  type=str, required=False, help='replicate from')
+    parser.add_argument('--auto-fetch-wal',  action='store_true', required=False, help='auto fetch WAL')
+    args = parser.parse_args()
+
+    command = args.command
+    monitor_file = args.monitor
+    conf_file = args.conf
+    timeout = args.timeout
+    auth_token = args.auth_token
+    mode = args.mode
+    replicateFrom = args.replicate_from  
+    autoFetchWal = args.auto_fetch_wal
+
+
+    match command:
+        case "start":
+            rt = start_command(monitor_file, conf_file, timeout, auth_token, mode, replicateFrom, autoFetchWal)
+            exit(rt)
+        case _:
+            out_log(f"other command: {cmd}")
+            rt = os.system(cmd) >> 8
+
+
+def start_command(monitor_file:str, conf_file:str, timeout:int, auth_token:str, mode:str, replicateFrom:str, autoFetchWal:bool):
+
+    cmd = f"{TGCTL} start --monitor {monitor_file} --conf {conf_file} --timeout {timeout} --auth-token {auth_token}"
+    out_log(f"stub for cmd: '{cmd}'")
+    rt = os.system(cmd) >> 8
+    if rt == 0:
+        out_mode(mode)
+
+    return rt
+
+def out_mode(mode:str):
+    with open(f"{TSURUGI_HOME}/bin/mode.txt", mode='w') as fc:
+        fc.write(mode)
+
+def out_log(log:str):
+    with open('/tmp/tgctl_w_history.log', mode='a') as fc:
+        fc.write(f"{log}\n")
+
+
+
+"""
+ Execute main()
+"""
+if __name__ == "__main__":
+    main()
