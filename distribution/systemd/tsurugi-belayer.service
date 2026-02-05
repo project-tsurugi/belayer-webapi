@@ -3,7 +3,7 @@ Description=Tsurugi Belayer
 
 [Service]
 Type=simple
-Environment=CONF_FOLDER=##BELAYER_INSTALL_DIR##/config/tsurugi-belayer.conf
+EnvironmentFile=##BELAYER_INSTALL_DIR##/config/tsurugi-belayer.conf
 ExecStart=##BELAYER_INSTALL_DIR##/jar/tsurugi-belayer.jar
 Restart=no
 
