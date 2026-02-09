@@ -54,9 +54,10 @@ public class DbControlService {
    * @param jobId Job ID
    * @param token authentication token
    * @param mode  launch mode
+   * @return status
    */
-  public void startDatabase(String jobId, String token, String mode, String replicaFrom, boolean autoFetchWal) {
-    dbStartExec.startDatabse(jobId, token, mode, replicaFrom, autoFetchWal);
+  public ExecStatus startDatabase(String jobId, String token, String mode, String replicaFrom, boolean autoFetchWal) {
+    return dbStartExec.startDatabse(jobId, token, mode, replicaFrom, autoFetchWal);
   }
 
   /**
@@ -64,9 +65,10 @@ public class DbControlService {
    * 
    * @param jobId Job ID
    * @param token authentication token
+   * @return status
    */
-  public void shutdownDatabase(String jobId, String token) {
-    dbShutdownExec.shutdownDatabase(jobId, token);
+  public ExecStatus shutdownDatabase(String jobId, String token) {
+    return dbShutdownExec.shutdownDatabase(jobId, token);
   }
 
   /**
@@ -77,9 +79,10 @@ public class DbControlService {
    * @param mode launch mode
    * @param replicateFrom target to replicate
    * @param autoFetchWal if true, fetch required WAL automatically
+   * @return status
    */
-  public void changeDatabaseMode(String jobId, String token, String mode, String replicateFrom, boolean autoFetchWal) {
-    dbChangeModeExec.changeMode(jobId, token, mode, replicateFrom, autoFetchWal);
+  public ExecStatus changeDatabaseMode(String jobId, String token, String mode, String replicateFrom, boolean autoFetchWal) {
+    return dbChangeModeExec.changeMode(jobId, token, mode, replicateFrom, autoFetchWal);
   }
 
   /**
@@ -88,9 +91,10 @@ public class DbControlService {
    * @param jobId      Job ID
    * @param token      authentication token
    * @param sourceHost source database to syncronize log
+   * @return status
    */
-  public void synchronizeTransactionLog(String jobId, String token, String sourceHost) {
-    dbSyncWalExec.synchronizeTransactionLog(jobId, token, sourceHost);
+  public ExecStatus synchronizeTransactionLog(String jobId, String token, String sourceHost) {
+    return  dbSyncWalExec.synchronizeTransactionLog(jobId, token, sourceHost);
   }
 
   /**

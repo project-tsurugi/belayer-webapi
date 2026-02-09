@@ -54,8 +54,9 @@ public class DbStartExec {
    * @param mode launch mode
    * @param replicateFrom grpc endpoint that replicate from
    * @param autoFetchWal if true, fetch required WAL automatically
+   * @return status
    */
-  public void startDatabse(String jobId, String token, String mode, String replicateFrom, boolean autoFetchWal) {
+  public ExecStatus startDatabse(String jobId, String token, String mode, String replicateFrom, boolean autoFetchWal) {
 
     FileWatcher watcher = null;
 
@@ -67,7 +68,7 @@ public class DbStartExec {
       watcher = new FileWatcher(filePath);
       watcher.setCallback(status -> {
         log.debug("file changed:" + status.toString());
-        if (status != null && ExecStatus.KIND_DATA.equals(status.getKind())) {
+        if (status != null && ExecStatus.KIND_FINISH.equals(status.getKind())) {
           status.setFreezed(true);
         }
       });
@@ -77,9 +78,10 @@ public class DbStartExec {
 
       proc.waitFor();
 
-      ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_DATA.equals(s.getKind()));
-
+      ExecStatus status = watcher.waitForExecStatus(s -> s != null && ExecStatus.KIND_FINISH.equals(s.getKind()));
       log.debug("status:" + status);
+      return status;
+
     } catch (IOException | InterruptedException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {

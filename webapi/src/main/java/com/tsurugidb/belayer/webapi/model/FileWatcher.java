@@ -63,7 +63,7 @@ public class FileWatcher {
                 }
             }
             try {
-                Thread.sleep(100L);
+                Thread.sleep(500L);
             } catch (InterruptedException ex) {
                 // ignore
             }

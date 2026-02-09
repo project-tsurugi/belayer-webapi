@@ -24,6 +24,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.ChangeLauchModeParam;
+import com.tsurugidb.belayer.webapi.dto.ErrorResult;
+import com.tsurugidb.belayer.webapi.dto.ExecStatus;
 import com.tsurugidb.belayer.webapi.dto.StartDbParam;
 import com.tsurugidb.belayer.webapi.dto.SyncTransactionLogParam;
 import com.tsurugidb.belayer.webapi.dto.TableNames;
@@ -71,8 +73,11 @@ public class DbControlApiHandler {
                                             "replicaFrom is not specified");
                                 }
                                 log.debug("db launch mode:" + mode);
-                                dbControlService.startDatabase("start", (String) auth.getCredentials(), mode,
-                                        replicateFrom, autoFetchWal);
+                                var status = dbControlService.startDatabase("start", (String) auth.getCredentials(),
+                                        mode, replicateFrom, autoFetchWal);
+                                if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                                    return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+                                }
                                 return ServerResponse.ok().build();
                             });
                 });
@@ -88,7 +93,10 @@ public class DbControlApiHandler {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .flatMap(auth -> {
-                    dbControlService.shutdownDatabase("shutdown", (String) auth.getCredentials());
+                    var status = dbControlService.shutdownDatabase("shutdown", (String) auth.getCredentials());
+                    if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                        return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+                    }
                     return ServerResponse.ok().build();
                 });
 
@@ -121,8 +129,12 @@ public class DbControlApiHandler {
                                             "replicaFrom is not specified");
                                 }
 
-                                dbControlService.changeDatabaseMode("change_mode", (String) auth.getCredentials(), mode,
+                                var status = dbControlService.changeDatabaseMode("change_mode",
+                                        (String) auth.getCredentials(), mode,
                                         from, autoFetchWal);
+                                if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                                    return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+                                }
                                 return ServerResponse.ok().build();
                             });
                 });
@@ -145,8 +157,11 @@ public class DbControlApiHandler {
                                 if (fromHost == null) {
                                     throw new BadRequestException("from is not specified.", "from is not specified.");
                                 }
-                                dbControlService.synchronizeTransactionLog("change_mode",
+                                var status = dbControlService.synchronizeTransactionLog("sync_wal",
                                         (String) auth.getCredentials(), fromHost);
+                                if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                                    return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+                                }
                                 return ServerResponse.ok().build();
                             });
                 });

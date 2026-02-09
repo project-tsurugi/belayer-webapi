@@ -51,6 +51,12 @@ public class DbStatusExec {
   @Autowired
   private ObjectMapper mapper;
 
+  /**
+   * obtains database status
+   * @param jobId
+   * @param authToken
+   * @return status
+   */
   public DbStatus getStatus(String jobId, String authToken) {
 
     Path filePath = null;
