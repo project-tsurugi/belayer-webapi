@@ -38,7 +38,7 @@ public class DbStatus {
     private String status;
     private String modeStatus;
     private String walVersion;
-    private String follows;
+    private String upstream;
     private boolean grpc_server_enabled;
     private String grpc_server_endpoint;
     private List<String> tags;

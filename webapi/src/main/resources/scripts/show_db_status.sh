@@ -41,7 +41,7 @@ OUT_JSON=$(echo $OUT_JSON | jq ".|= .+{mode: \"$MODE\"}")
 if [ "${MODE}" = "" ]; then
    :
 elif [ "${MODE}" = "replica" ]; then
-    ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.key | IN("replica.replication_status", "replica.upstream")))|from_entries|{mode_status: ."replica.replication_status", follows: ."replica.upstream"}')
+    ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.key | IN("replica.replication_status", "replica.upstream")))|from_entries|{mode_status: ."replica.replication_status", upstream: ."replica.upstream"}')
     OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 else
     QUERY=".|map(select(.key | IN(\"${MODE}.replication_status\")))|map({key:.key, value:.value})|from_entries|{mode_status: .\"${MODE}.replication_status\"}"
@@ -65,7 +65,7 @@ echo "{ \
        \"status\": \"running\", \
        \"mode_status\": \"ok\", \
        \"wal_version\": \"XXXXXXXX\", \
-       \"follows\": \"dns:///master:50051\", \
+       \"upstream\": \"dns:///master:50051\", \
        \"grpc_server_enabled\": true, \
        \"grpc_server_endpoint\": \"dns:///tsurugidb:50051\" \
      }"
