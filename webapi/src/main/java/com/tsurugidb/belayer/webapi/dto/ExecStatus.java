@@ -74,9 +74,9 @@ public class ExecStatus {
 
         switch (kind) {
             case KIND_START:
-                return String.format("[%s]%s", toTimestampString(), kind);
+                return String.format("[%s]", toTimestampString(), kind);
             case KIND_FINISH:
-                return String.format("[%s]%s:status:%s,reason=%s,cause=%s,message=%s,code=%s,arguments=%s",
+                return String.format("[%s]status:%s,reason=%s,cause=%s,message=%s,code=%s,arguments=%s",
                         toTimestampString(), kind, status, reason, cause, message, code, arguments);
             case KIND_PROGRESS:
                 return String.format("[%s]%s:%s", toTimestampString(), kind, toPercentage(progress));
@@ -87,7 +87,7 @@ public class ExecStatus {
 
     private String toTimestampString() {
         if (this.timestamp == null) {
-            return "?";
+            return "";
         }
 
         return LocalDateTime.ofEpochSecond(this.timestamp, 0, ZoneOffset.UTC).format(DATE_FORMAT);

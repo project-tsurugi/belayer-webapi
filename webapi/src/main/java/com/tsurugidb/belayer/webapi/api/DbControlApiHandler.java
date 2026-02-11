@@ -75,8 +75,12 @@ public class DbControlApiHandler {
                                 log.debug("db launch mode:" + mode);
                                 var status = dbControlService.startDatabase("start", (String) auth.getCredentials(),
                                         mode, replicateFrom, autoFetchWal);
-                                if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
-                                    return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+
+                                if (status == null || ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                                    var statusString = status != null ? status.toStatusString() : "status unknown";
+                                    var errorMessage = String.format("Failed to execute command. %s", statusString);
+                                    return ServerResponse.badRequest()
+                                            .body(BodyInserters.fromValue(new ErrorResult(errorMessage)));
                                 }
                                 return ServerResponse.ok().build();
                             });
@@ -94,8 +98,10 @@ public class DbControlApiHandler {
                 .map(SecurityContext::getAuthentication)
                 .flatMap(auth -> {
                     var status = dbControlService.shutdownDatabase("shutdown", (String) auth.getCredentials());
-                    if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
-                        return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+                    if (status == null || ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                        var statusString = status != null ? status.toStatusString() : "status unknown";
+                        var errorMessage = String.format("Failed to execute command. %s", statusString);
+                        return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(errorMessage)));
                     }
                     return ServerResponse.ok().build();
                 });
@@ -132,8 +138,11 @@ public class DbControlApiHandler {
                                 var status = dbControlService.changeDatabaseMode("change_mode",
                                         (String) auth.getCredentials(), mode,
                                         from, autoFetchWal);
-                                if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
-                                    return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+                                if (status == null || ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                                    var statusString = status != null ? status.toStatusString() : "status unknown";
+                                    var errorMessage = String.format("Failed to execute command. %s", statusString);
+                                    return ServerResponse.badRequest()
+                                            .body(BodyInserters.fromValue(new ErrorResult(errorMessage)));
                                 }
                                 return ServerResponse.ok().build();
                             });
@@ -159,8 +168,12 @@ public class DbControlApiHandler {
                                 }
                                 var status = dbControlService.synchronizeTransactionLog("sync_wal",
                                         (String) auth.getCredentials(), fromHost);
-                                if (ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
-                                    return ServerResponse.badRequest().body(BodyInserters.fromValue(new ErrorResult(status.toStatusString())));
+
+                                if (status == null || ExecStatus.STATUS_FAILURE.equals(status.getStatus())) {
+                                    var statusString = status != null ? status.toStatusString() : "status unknown";
+                                    var errorMessage = String.format("Failed to execute command. %s", statusString);
+                                    return ServerResponse.badRequest()
+                                            .body(BodyInserters.fromValue(new ErrorResult(errorMessage)));
                                 }
                                 return ServerResponse.ok().build();
                             });
