@@ -24,18 +24,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.server.ServerWebExchange;
 
 import com.tsurugidb.belayer.webapi.config.RouterPath;
 
@@ -78,9 +84,17 @@ public class SecurityConfig {
       ServerHttpBearerAuthenticationConverter bearerAuthenticationConverter) {
 
     http = http.exceptionHandling()
-        .authenticationEntryPoint((swe, e) -> Mono.fromRunnable(() -> {
-          swe.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        }))
+        .authenticationEntryPoint(new ServerAuthenticationEntryPoint() {
+          @Override
+          public Mono<Void> commence(ServerWebExchange swe, AuthenticationException ex) {
+            log.debug("authentication Entry Point error:");
+            var res = swe.getResponse();
+            res.setStatusCode(HttpStatus.UNAUTHORIZED);
+            res.getHeaders().set(HttpHeaders.WWW_AUTHENTICATE, "None");
+            swe.mutate().response(res);
+            return Mono.empty();
+          }
+        })
         .accessDeniedHandler((swe, e) -> Mono.fromRunnable(() -> {
           swe.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
         }))
@@ -140,7 +154,7 @@ public class SecurityConfig {
     }
 
     if (allowedHeaders.size() != 0) {
-     configuration.setAllowedHeaders(allowedHeaders);
+      configuration.setAllowedHeaders(allowedHeaders);
     }
 
     configuration.setAllowCredentials(allowCredentials);
@@ -163,6 +177,18 @@ public class SecurityConfig {
     AuthenticationWebFilter authWebFilter = new AuthenticationWebFilter(authManager);
     authWebFilter.setServerAuthenticationConverter(bearerConverter);
     authWebFilter.setRequiresAuthenticationMatcher(ServerWebExchangeMatchers.pathMatchers("/**"));
+    authWebFilter.setAuthenticationFailureHandler(new ServerAuthenticationFailureHandler() {
+      @Override
+      public Mono<Void> onAuthenticationFailure(WebFilterExchange wfe, AuthenticationException exception) {
+        log.debug("onAuthenticationFailure error:");
+        var res = wfe.getExchange().getResponse();
+        res.setStatusCode(HttpStatus.UNAUTHORIZED);
+        res.getHeaders().set(HttpHeaders.WWW_AUTHENTICATE, "None");
+        wfe.getExchange().mutate().response(res);
+        return Mono.empty();
+      }
+    });
+    
 
     return authWebFilter;
   }
