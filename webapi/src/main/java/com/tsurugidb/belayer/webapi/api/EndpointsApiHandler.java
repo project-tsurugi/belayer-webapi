@@ -55,6 +55,7 @@ public class EndpointsApiHandler {
       if (this.lastModified < lastModified) {
         this.endpoints = Files.lines(Path.of(file.getAbsolutePath()))
             .filter(line -> !line.startsWith("#"))
+            .filter(line -> line.trim().length() != 0)
             .map(line -> Arrays.stream(line.split(","))
                 .map(String::trim)
                 .collect(Collectors.toList()))
