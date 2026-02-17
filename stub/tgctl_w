@@ -49,7 +49,11 @@ def main():
 #            result_dict["section"] = 'system'
 #            result_dict["key"] = 'instance_id'
 #            result_dict["value"] = 'tsurugi-db-1'
-#            result_dict_list = [result_dict]
+#            result_dict2 = {}
+#            result_dict2["section"] = 'grpc_server'
+#            result_dict2["key"] = 'endpoint'
+#            result_dict2["value"] = 'upstream:54323'
+#            result_dict_list = [result_dict, result_dict2]
 #            out_monitor(monitor_file, result_dict_list)
         case _:
             out_log(f"other command: {cmd}")
@@ -58,14 +62,16 @@ def main():
 
 def start_command(monitor_file:str, conf_file:str, timeout:int, auth_token:str, mode:str, replicateFrom:str, autoFetchWal:bool):
     with open(f"{TSURUGI_HOME}/bin/mode.txt", mode='r') as fc:
-        current_mode = fc.read()
-        current_mode = current_mode.strip('\n')
+        current  = fc.read()
+        current = current.strip('\n').split(",")
+        current_mode = current[0]
+        current_upstream = current[1] if len(current) > 1 else ''
 
     cmd = f"{TGCTL} start --monitor {monitor_file} --conf {conf_file} --timeout {timeout} --auth-token {auth_token}"
     out_log(f"stub for cmd: '{cmd}'")
     rt = os.system(cmd) >> 8
     if rt == 0:
-        out_mode(mode)
+        out_mode(mode, replicateFrom, autoFetchWal)
 
     return rt
 
@@ -75,9 +81,9 @@ def out_monitor(monitor_file:str, result_dict_list):
             json.dump(result_dict, fc)
             fc.write('\n')
 
-def out_mode(mode:str):
+def out_mode(mode:str, upstream:str, autoFetchWal):
     with open(f"{TSURUGI_HOME}/bin/mode.txt", mode='w') as fc:
-        fc.write(mode)
+        fc.write(f"{mode},{upstream},{autoFetchWal}")
 
 def out_log(log:str):
     with open('/tmp/tgctl_w_history.log', mode='a') as fc:
