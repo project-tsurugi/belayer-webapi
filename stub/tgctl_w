@@ -19,42 +19,59 @@ def main():
     cmd = TGCTL + " " + cmd
     out_log(f"command: {cmd}")
 
-    parser.add_argument('command',  type=str, help='monitor file')
-    parser.add_argument('--monitor',  type=str, required=False, help='monitor file')
-    parser.add_argument('-q',  action='store_true', required=False, help='quiet mode')
-    parser.add_argument('--timeout',  type=int, default=1, required=False, help='timeout')
-    parser.add_argument('--auth-token',  type=str, required=False, help='token')
-    parser.add_argument('--conf',  type=str, required=False, help='conf file')
-    parser.add_argument('--mode',  type=str, required=False, help='mode')
-    parser.add_argument('--replicate-from',  type=str, required=False, help='replicate from')
-    parser.add_argument('--auto-fetch-wal',  action='store_true', required=False, help='auto fetch WAL')
+    match sys.argv[1]:
+        case "start":
+            print()
+#        case "config":
+#            print()
+        case _:
+            out_log(f"other command: {cmd}")
+            rt = os.system(cmd) >> 8
+            exit()
+
+    subparsers = parser.add_subparsers(dest='subcommand')
+
+    parser_start = subparsers.add_parser('start', help='start db')
+    parser_start.add_argument('--monitor',  type=str, required=False, help='monitor file')
+    parser_start.add_argument('--timeout',  type=int, default=1, required=False, help='timeout')
+    parser_start.add_argument('--auth-token',  type=str, required=False, help='token')
+    parser_start.add_argument('--conf',  type=str, required=False, help='conf file')
+    parser_start.add_argument('--mode',  type=str, required=False, help='mode')
+    parser_start.add_argument('--replicate-from',  type=str, required=False, help='replicate from')
+    parser_start.add_argument('--auto-fetch-wal',  action='store_true', required=False, help='auto fetch WAL')
+
+    parser_config = subparsers.add_parser('config', help='config')
+    parser_config.add_argument('--monitor',  type=str, required=False, help='monitor file')
+    parser_config.add_argument('--conf',  type=str, required=False, help='conf file')
+    parser_config.add_argument('--auth-token',  type=str, required=False, help='token')
+    parser_config.add_argument('-q',  action='store_true', required=False, help='quiet mode')
+
     args = parser.parse_args()
 
-    command = args.command
     monitor_file = args.monitor
     conf_file = args.conf
-    timeout = args.timeout
-    auth_token = args.auth_token
-    mode = args.mode
-    replicateFrom = args.replicate_from  
-    autoFetchWal = args.auto_fetch_wal
 
-    match command:
+    match args.subcommand:
         case "start":
+            timeout = args.timeout
+            auth_token = args.auth_token
+            mode = args.mode
+            replicateFrom = args.replicate_from  
+            autoFetchWal = args.auto_fetch_wal
             rt = start_command(monitor_file, conf_file, timeout, auth_token, mode, replicateFrom, autoFetchWal)
             exit(rt)
 # for local
-#        case "config":
-#            result_dict = {}
-#            result_dict["section"] = 'system'
-#            result_dict["key"] = 'instance_id'
-#            result_dict["value"] = 'tsurugi-db-1'
-#            result_dict2 = {}
-#            result_dict2["section"] = 'grpc_server'
-#            result_dict2["key"] = 'endpoint'
-#            result_dict2["value"] = 'upstream:54323'
-#            result_dict_list = [result_dict, result_dict2]
-#            out_monitor(monitor_file, result_dict_list)
+        case "config":
+            result_dict = {}
+            result_dict["section"] = 'system'
+            result_dict["key"] = 'instance_id'
+            result_dict["value"] = 'tsurugi-db-1'
+            result_dict2 = {}
+            result_dict2["section"] = 'grpc_server'
+            result_dict2["key"] = 'endpoint'
+            result_dict2["value"] = 'upstream:54323'
+            result_dict_list = [result_dict, result_dict2]
+            out_monitor(monitor_file, result_dict_list)
         case _:
             out_log(f"other command: {cmd}")
             rt = os.system(cmd) >> 8
