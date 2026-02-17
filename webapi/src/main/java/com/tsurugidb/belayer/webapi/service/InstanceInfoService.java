@@ -69,7 +69,7 @@ public class InstanceInfoService {
             }
 
         } catch (IOException ex) {
-            log.debug("config error", ex);
+            log.warn("config error", ex);
             this.instanceInfo = new InstanceInfo();
         }
 
