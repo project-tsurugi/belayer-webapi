@@ -15,8 +15,9 @@
  */
 package com.tsurugidb.belayer.webapi.api;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -73,18 +74,22 @@ public class DbControlApiHandlerTest {
   @WithMockUser(username = TEST_USER)
   public void startDatabase() {
 
-    doNothing().when(dbControlService).startDatabase(anyString(), anyString(), anyString(), anyString(), anyBoolean());
+    var mockReturn = new ExecStatus();
+    mockReturn.setStatus("success");
+
+    when(dbControlService.startDatabase(any(), any(), any(), any(), anyBoolean())).thenReturn(mockReturn);
     client.post()
         .uri("/api/db/start")
         .exchange()
-        .expectStatus().isOk();
+        .expectStatus()
+        .isOk();
   }
 
   @Test
   @WithMockUser(username = TEST_USER)
   public void shutdown() {
 
-    doNothing().when(dbControlService).shutdownDatabase(anyString(), anyString());
+    when(dbControlService.shutdownDatabase(anyString(), anyString())).thenReturn(new ExecStatus());
     client.post()
         .uri("/api/db/shutdown")
         .exchange()

@@ -1,8 +1,8 @@
 package com.tsurugidb.belayer.webapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -39,14 +39,18 @@ public class DbControlServiceTest {
 
     @Test
     public void test_startDatabase() throws Exception {
-        doNothing().when(dbStartExec).startDatabse(anyString(), anyString(), anyString(), anyString(), anyBoolean());
-        dbControlService.startDatabase("test", "xxx", "mode", "from", true);
+        var expect = new ExecStatus();
+        when(dbStartExec.startDatabse(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(expect);
+        var actural = dbControlService.startDatabase("test", "xxx", "mode", "from", true);
+        assertEquals(expect, actural);
     }
 
     @Test
     public void test_shutdownDatabase() throws Exception {
-        doNothing().when(dbShutdownExec).shutdownDatabase(anyString(), anyString());
-        dbControlService.shutdownDatabase("test", "xxx");
+        var expect = new ExecStatus();
+        when(dbShutdownExec.shutdownDatabase(anyString(), anyString())).thenReturn(expect);
+        var actural = dbControlService.shutdownDatabase("test", "xxx");
+        assertEquals(expect, actural);
     }
 
     @Test
