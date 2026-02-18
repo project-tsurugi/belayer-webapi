@@ -147,6 +147,7 @@ public class SecurityConfig {
 
     if (allowedOrigins.size() != 0) {
       configuration.setAllowedOrigins(allowedOrigins);
+      configuration.setExposedHeaders(List.of("Content-Disposition"));
     }
 
     if (allowedMethods.size() != 0) {
