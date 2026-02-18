@@ -2250,6 +2250,13 @@
 * ログレベルは環境変数`BELAYER_LOG_LEVEL`で変更可能。ログレベルのデフォルト値は`WARN`。
 * ログの設定については、spring-boot v2.6.6のログ設定方法に従う。
     * https://docs.spring.io/spring-boot/docs/2.6.6/reference/html/howto.html#howto.logging
+* アクセスログを出力する場合は、環境変数`BELAYER_ACCESS_LOG_ENABLED`を`true`に設定する。
+    * アクセスログをファイルに出力する場合は、以下のようにsystemdサービス起動時の環境変数`RUN_ARGS`に設定するか、Java起動時のコマンドライン引数でJettyのログ設定を追加する。
+        * 以下は日時のローテーションで指定したパスにファイルを出力する例
+        ```
+        RUN_ARGS="--server.jetty.accesslog.filename=/var/log/belayer_access_yyyy_MM_dd.log --server.jetty.accesslog.file-date-format=yyyy_MM_dd --server.jetty.accesslog.format=EXTENDED_NCSA"
+        ```
+* 認証・認可のエラーをログに出力する場合は、環境変数`BELAYER_AUTH_ERROR_LOG_LEVEL`を`WARN`に設定する。
 
 ## ジョブ情報の永続化
 

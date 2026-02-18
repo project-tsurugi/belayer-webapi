@@ -174,7 +174,7 @@ public class AuthService {
     Ticket ticket = null;
     try {
       ticket = ticketProvider.restore(token);
-    } catch (IllegalArgumentException ex) {
+    } catch (RuntimeException ex) {
       throw new UnauthenticatedException("Invalid token.");
     }
     var accessExpirationTime = ticket.getAccessExpirationTime();

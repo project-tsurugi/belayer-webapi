@@ -30,8 +30,10 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.service.AuthService;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class AuthHandler {
 
@@ -40,10 +42,10 @@ public class AuthHandler {
 
   public Mono<ServerResponse> auth(ServerRequest req) {
     Mono<MultiValueMap<String, String>> authReq = req.body(BodyExtractors.toFormData());
-
     return authReq.flatMap(this::verifyAuthParam)
         .flatMap(result -> {
           if (result.getErrorMessage() != null) {
+            log.warn("authentication error: from={}, userId={}, message={}", req.remoteAddress().orElseGet(null), result.getUserId() ,result.getErrorMessage());
             return ServerResponse.status(HttpStatus.BAD_REQUEST)
                 .bodyValue(result);
           }
