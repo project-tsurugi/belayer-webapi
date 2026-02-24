@@ -15,6 +15,8 @@
  */
 package com.tsurugidb.belayer.webapi.api;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -40,6 +42,8 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class DbControlApiHandler {
+
+    private static Set<String> MODE_NAMES = Set.of("standalone", "master", "replica", "standby");
 
     @Autowired
     DbControlService dbControlService;
@@ -71,6 +75,9 @@ public class DbControlApiHandler {
                                 } else if (mode.equals("replica") && replicateFrom == null) {
                                     throw new BadRequestException("replicaFrom is not specified",
                                             "replicaFrom is not specified");
+                                } else if (!isValidMode(mode)) {
+                                    return ServerResponse.badRequest()
+                                            .body(BodyInserters.fromValue(new ErrorResult("invalid mode")));
                                 }
                                 log.debug("db launch mode:" + mode);
                                 var status = dbControlService.startDatabase("start", (String) auth.getCredentials(),
@@ -134,6 +141,10 @@ public class DbControlApiHandler {
                                     throw new BadRequestException("replicaFrom is not specified",
                                             "replicaFrom is not specified");
                                 }
+                                if (!isValidMode(mode)) {
+                                    return ServerResponse.badRequest()
+                                            .body(BodyInserters.fromValue(new ErrorResult("invalid mode")));
+                                }
 
                                 var status = dbControlService.changeDatabaseMode("change_mode",
                                         (String) auth.getCredentials(), mode,
@@ -166,6 +177,11 @@ public class DbControlApiHandler {
                                 if (fromHost == null) {
                                     throw new BadRequestException("from is not specified.", "from is not specified.");
                                 }
+                                if (fromHost.contains("\"") || fromHost.matches(".*\\s.*$")) {
+                                    return ServerResponse.badRequest()
+                                            .body(BodyInserters.fromValue(new ErrorResult("invalid from")));
+                                }
+
                                 var status = dbControlService.synchronizeTransactionLog("sync_wal",
                                         (String) auth.getCredentials(), fromHost);
 
@@ -210,5 +226,9 @@ public class DbControlApiHandler {
 
         return ServerResponse.ok().body(
                 BodyInserters.fromProducer(result, TableNames.class));
+    }
+
+    private boolean isValidMode(String mode) {
+        return MODE_NAMES.contains(mode);
     }
 }
