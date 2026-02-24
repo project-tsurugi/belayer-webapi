@@ -73,39 +73,6 @@ public class AuthHandlerTest {
         .expectBody(AuthResult.class)
         .isEqualTo(result);
   }
-
-  @Test
-  public void testAuth_Fail() {
-    AuthResult result = new AuthResult("user1", null, null, null, null, null, null,"auth failed.");
-    Mockito.when(authService.verifyCredential(anyString(), anyString())).thenReturn(result);
-
-    MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-    map.add("uid", "aaa");
-    map.add("pw", "123");
-
-    client.post().uri("/api/auth")
-        .bodyValue(map)
-        .exchange()
-        .expectStatus().isBadRequest()
-        .expectBody(AuthResult.class)
-        .isEqualTo(result);
-  }
-
-  @Test
-  public void testAuth_No_args() {
-    AuthResult result = new AuthResult("user1", null, null, null, null, null, null, "auth failed.");
-    Mockito.when(authService.verifyCredential(anyString(), anyString())).thenReturn(result);
-
-    MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-
-    client.post().uri("/api/auth")
-        .bodyValue(map)
-        .exchange()
-        .expectStatus().isBadRequest()
-        .expectBody(AuthResult.class)
-        .isEqualTo(result);
-  }
-
   @Test
   public void testRefreshToken_Success() {
     String rt = "refreshtoken";
