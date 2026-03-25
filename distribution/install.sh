@@ -59,6 +59,7 @@ cp bin/*.sh $INSTALL_DIR/bin/
 cp app/*.jar $INSTALL_DIR/jar/
 cp config/* $INSTALL_DIR/config/
 cp systemd/* $INSTALL_DIR/systemd/
+cp script/* $TSURUGI_HOME/bin/
 
 sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/systemd/tsurugi-belayer.service
 sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/config/tsurugi-belayer.conf
@@ -67,6 +68,7 @@ sed -i "s|##TSURUGI_HOME##|${TSURUGI_HOME}|g" $INSTALL_DIR/config/tsurugi-belaye
 chmod u+x $INSTALL_DIR/jar/*.jar
 chmod u+x $INSTALL_DIR/bin/*.sh
 chmod u+x $INSTALL_DIR/systemd/*.sh
+chmod u+x $TSURUGI_HOME/bin/*_w
 
 echo "install dir: $INSTALL_DIR"
 echo "installed."
