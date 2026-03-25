@@ -18,6 +18,7 @@ package com.tsurugidb.belayer.webapi.api;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
@@ -43,7 +44,8 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class DbControlApiHandler {
 
-    private static Set<String> MODE_NAMES = Set.of("standalone", "master", "replica", "standby");
+    @Value("${webapi.tsurugi.supported.modes}")
+    Set<String> modeNames;
 
     @Autowired
     DbControlService dbControlService;
@@ -229,6 +231,6 @@ public class DbControlApiHandler {
     }
 
     private boolean isValidMode(String mode) {
-        return MODE_NAMES.contains(mode);
+        return modeNames.contains(mode);
     }
 }
