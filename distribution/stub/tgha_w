@@ -4,6 +4,7 @@ import sys
 import argparse
 import json
 import time
+import os
 
 TSURUGI_HOME='/usr/lib/tsurugi'
 
@@ -41,11 +42,15 @@ def main():
 
     cmd = " ".join(sys.argv)
     out_log(cmd)
-    with open(f"{TSURUGI_HOME}/bin/mode.txt", mode='r') as fc:
-        current  = fc.read()
-        current = current.strip('\n').split(",")
-        current_mode = current[0]
-        current_upstream = current[1] if len(current) > 1 else ''
+    mode_file = f"{TSURUGI_HOME}/bin/mode.txt"
+    current_mode = 'stop'
+    current_upstream = ''
+    if os.path.isfile(mode_file):
+        with open(mode_file, mode='r') as fc:
+            current  = fc.read()
+            current = current.strip('\n').split(",")
+            current_mode = current[0]
+            current_upstream = current[1] if len(current) > 1 else ''
 
     match command:
         case "mode":
