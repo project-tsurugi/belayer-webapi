@@ -78,12 +78,6 @@ def main():
 
 
 def start_command(monitor_file:str, conf_file:str, timeout:int, auth_token:str, mode:str, replicateFrom:str, autoFetchWal:bool):
-    with open(f"{TSURUGI_HOME}/bin/mode.txt", mode='r') as fc:
-        current  = fc.read()
-        current = current.strip('\n').split(",")
-        current_mode = current[0]
-        current_upstream = current[1] if len(current) > 1 else ''
-
     cmd = f"{TGCTL} start --monitor {monitor_file} --conf {conf_file} --timeout {timeout} --auth-token {auth_token}"
     out_log(f"stub for cmd: '{cmd}'")
     rt = os.system(cmd) >> 8
