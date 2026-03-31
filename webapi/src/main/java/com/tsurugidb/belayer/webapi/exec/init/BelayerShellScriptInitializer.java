@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Initializer for JAR contained shell scripts.
  */
-@Profile({ "default", "production" })
+@Profile({ "default", "authmock", "production" })
 @Component
 @Slf4j
 public class BelayerShellScriptInitializer {

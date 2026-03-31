@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Initializer for belayer.
  */
-@Profile({ "default", "production" })
+@Profile({ "default", "authmock", "production" })
 @Component
 @Slf4j
 public class BelayerInitializer {
