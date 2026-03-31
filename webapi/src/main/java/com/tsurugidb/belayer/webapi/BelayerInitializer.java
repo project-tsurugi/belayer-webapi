@@ -16,12 +16,16 @@
 package com.tsurugidb.belayer.webapi;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +44,20 @@ public class BelayerInitializer {
     @Value("${webapi.required.commands}")
     List<String> requiredCommands;
 
+    @Autowired
+    Environment environment;
+
     /**
      * This initialization method is to check the required conditions.
      */
     @PostConstruct
     private void init() {
+
+        // skip if it is under the unit test
+        if (Arrays.stream(environment.getActiveProfiles()).filter(profile -> Objects.equals(profile, "test-group")).findFirst().isPresent()) {
+            return;
+        };
+
         log.info("check required environments.");
 
         // Java version
