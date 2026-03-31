@@ -12,6 +12,7 @@
 ### Requirement
 
 * Java11
+* jq
 
 ### How to build
 
