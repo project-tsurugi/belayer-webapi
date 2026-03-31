@@ -26,13 +26,16 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -55,6 +58,9 @@ public class BelayerShellScriptInitializer {
     @Value("${webapi.cli.cmd.scriptdir}")
     Path scriptDir;
 
+    @Autowired
+    Environment environment;
+
     /**
      * This initialization method is to extract shell scripts into temporary
      * directory.
@@ -63,6 +69,12 @@ public class BelayerShellScriptInitializer {
      */
     @PostConstruct
     private void init() throws IOException {
+
+        // skip if it is under the unit test
+        if (Arrays.stream(environment.getActiveProfiles()).filter(profile -> Objects.equals(profile, "test-group")).findFirst().isPresent()) {
+            return;
+        };
+        
         log.info("Initialization process for extract shell scripts starts.");
 
         // create dir for shell script
