@@ -31,6 +31,7 @@
   - [セッション停止API](#セッション停止api)
   - [エンドポイント一覧取得API](#エンドポイント一覧取得api)
   - [DB起動API](#db起動api)
+  - [DB起動モード変更API](#db起動モード変更api)
   - [DB停止API](#db停止api)
   - [DBステータス確認API](#dbステータス確認api)
   - [DB同期API](#db同期api)
@@ -1998,7 +1999,7 @@
         * Content-Type: application/json
         * ボディ:
             * instance_id: TsurugiDBインスタンスID
-            * instance_name: TsurugiDB名称（Belayerで保持するラベル）
+            * instance_name: TsurugiDB名称（Belayerが${BELAYER_HOME}/config/instance_info.jsonに保持するラベル）
             * mode: モード種別（standalone, master, replica, standby）
             * status: 稼働状態
                 * stop: 未稼働状態
@@ -2009,7 +2010,7 @@
             * mode_status: モード状態(modeがmaster, replica, standbyのどれでもない場合は空文字)
             * wal_version: 同期済みWALバージョン
             * upstream: 同期元（mode=replicaの場合のみ）
-            * tags: タグの一覧(配列)
+            * tags: タグの一覧(配列)　（Belayerが${BELAYER_HOME}/config/instance_info.jsonに保持するタグ一覧）
             ```
             {
               "instance_id": "tsurugidb_t3",

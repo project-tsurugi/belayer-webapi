@@ -13,6 +13,7 @@
 
 * Java11
 * jq
+* python3
 
 ### How to build
 
