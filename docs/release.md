@@ -9,6 +9,7 @@
 ### Bug fixes
 
 * fix Belayerinitilizer and BelayerShellScriptInitializer in spcified profiles such as authmock, test-group.
+* fix stub to use TSURUGI_HOME env variable.
 
 ### Full Changelog
 
