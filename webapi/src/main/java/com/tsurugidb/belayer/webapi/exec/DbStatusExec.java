@@ -17,6 +17,7 @@ package com.tsurugidb.belayer.webapi.exec;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -24,6 +25,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -100,16 +102,17 @@ public class DbStatusExec {
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
-
+    String result = null;
     try {
       var proc = pb.start();
       InputStream is = proc.getInputStream();
+      result = StreamUtils.copyToString(is, StandardCharsets.UTF_8);
 
-      return mapper.readValue(is, new TypeReference<DbStatus>() {
+      return mapper.readValue(result, new TypeReference<DbStatus>() {
       });
 
     } catch (IOException ex) {
-      throw new ProcessExecException("Process execution error caused.", ex);
+      throw new ProcessExecException("Process execution error caused. out:[" + result + "]", ex);
     }
 
   }
