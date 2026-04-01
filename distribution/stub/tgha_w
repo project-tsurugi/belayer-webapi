@@ -6,7 +6,7 @@ import json
 import time
 import os
 
-TSURUGI_HOME='/usr/lib/tsurugi'
+TSURUGI_HOME = os.environ['TSURUGI_HOME']
 
 def main():
     parser = argparse.ArgumentParser(description='tgha stub')

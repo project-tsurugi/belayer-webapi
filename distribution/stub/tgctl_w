@@ -5,7 +5,7 @@ import argparse
 import os
 import json
 
-TSURUGI_HOME = "/usr/lib/tsurugi"
+TSURUGI_HOME = os.environ['TSURUGI_HOME']
 TGCTL = f"{TSURUGI_HOME}/bin/tgctl"
 
 def main():
