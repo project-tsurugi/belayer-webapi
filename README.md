@@ -60,7 +60,7 @@ See the env var table below.
 |BELAYER_LOG_LEVEL|Log level for belaer WebAPI Server.|`WARN`|
 |BELAYER_AUTH_ERROR_LOG_LEVEL|Log level for authentication/authorization error. Set WARN if you want to output logs when A&A error caused.|`ERROR`|
 |BELAYER_ACCESS_LOG_ENABLED|Set `true` to out Jetty Access Log.|`false`|
-|BELAYER_CONFIG_ROOT|The directory path to place Belayer config files.|`/opt/belayer`|
+|BELAYER_CONFIG_ROOT|The directory path to place Belayer config files.|`${BELAYER_HOME}/config`|
 |BELAYER_ALLOWED_ORIGINS|The CORS setting for allowed origins. comma sparated strings.|``(means not permit CORS)|
 |BELAYER_ALLOWED_METHODS|The CORS setting for allowed methods. comma sparated strings.|``(means not specify Methods)|
 |BELAYER_ALLOWED_HEADERS|The CORS setting for allowed headers. comma sparated strings.|``(means not specify Headers)|

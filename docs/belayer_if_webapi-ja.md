@@ -41,6 +41,8 @@
   - [ロール・ユーザマッピング更新API](#ロールユーザマッピング更新api)
 - [ファイルフォーマット](#ファイルフォーマット)
   - [ダンプファイルCSVフォーマット](#ダンプファイルcsvフォーマット)
+  - [エンドポイント一覧CSVフォーマット](#エンドポイント一覧csvフォーマット)
+  - [インスタンス情報JSONフォーマット](#インスタンス情報jsonフォーマット)
 - [補足事項](#補足事項)
   - [認可制御](#認可制御)
   - [ログ出力](#ログ出力)
@@ -1866,7 +1868,10 @@
 ## エンドポイント一覧取得API
 
 * 概要: Belayerに登録されているBelayerエンドポイント一覧を取得する。
-    * Note: 環境変数「BELAYER_CONFIG_ROOT」直下のendopoints.csvからエンドポイント一覧を取得し、JSONで返却する。
+* Note
+    * 環境変数「BELAYER_CONFIG_ROOT」直下の[endopoints.csv](#エンドポイント一覧csvフォーマット)からエンドポイント一覧を取得し、JSONで返却する。
+    * endpoint.csvが存在しない場合、デフォルトとして自エンドポイントの情報(リクエストされたホスト・ポート)のみを返却する。
+    * endpoint.csvを変更・削除した場合、再起動なしに最新状態が返却される。
 * リクエスト
     * メソッド: GET
     * パス: /api/instance/list
@@ -1988,6 +1993,9 @@
 ## DBステータス確認API
 
 * 概要: DBの稼働状態を取得する。
+* Note
+    * instace_name, tagsについては、[インスタンス情報json(instance_info.json)](#インスタンス情報jsonフォーマット) で定義した値を返す。
+    * instance_info.jsonを変更・削除した場合、再起動なしに最新状態が返却される。
 * リクエスト
     * メソッド: GET
     * パス: /api/db/status
@@ -1999,7 +2007,7 @@
         * Content-Type: application/json
         * ボディ:
             * instance_id: TsurugiDBインスタンスID
-            * instance_name: TsurugiDB名称（Belayerが${BELAYER_HOME}/config/instance_info.jsonに保持するラベル）
+            * instance_name: Belayerインスタンス名（Belayerが${BELAYER_CONFIG_ROOT}/instance_info.jsonに保持するラベル）
             * mode: モード種別（standalone, master, replica, standby）
             * status: 稼働状態
                 * stop: 未稼働状態
@@ -2010,7 +2018,7 @@
             * mode_status: モード状態(modeがmaster, replica, standbyのどれでもない場合は空文字)
             * wal_version: 同期済みWALバージョン
             * upstream: 同期元（mode=replicaの場合のみ）
-            * tags: タグの一覧(配列)　（Belayerが${BELAYER_HOME}/config/instance_info.jsonに保持するタグ一覧）
+            * tags: タグの一覧(配列)　（Belayerが${BELAYER_CONFIG_ROOT}/instance_info.jsonに保持するタグ一覧）
             ```
             {
               "instance_id": "tsurugidb_t3",
@@ -2226,7 +2234,7 @@
     * CSV形式のエンドポイント一覧ファイルのフォーマットを以下に定義する。
 * 詳細
     * Belayerのインスタンス群の全量のエンドポイント一覧を定義する。
-    * ファイルは環境変数「BELAYER_CONFIG_ROOT」直下の「endopoints.csv」を参照する。
+    * 環境変数「BELAYER_CONFIG_ROOT」直下の「endopoints.csv」を参照する。
     * カンマ区切りかつ複数列でエンドポイントを定義する。(定義値の前後の空白はトリムされる)
         * 例1）
         ```
@@ -2238,6 +2246,26 @@
         192.168.0.11:8080
         192.168.0.12:8080
         ```
+
+## インスタンス情報JSONフォーマット
+
+* 概要
+    * Belayerエンドポイントのメタデータとして、インスタンス情報を定義する。
+* 詳細
+    * 環境変数「BELAYER_CONFIG_ROOT」直下の「instance_info.json」を参照する。
+    * 項目
+        * instance_name: Belayerのインスタンス名
+        * tags: タグ名の配列
+    * 例）
+    ```
+    {
+        "instance_name": "belayer-001",
+        "tags": [
+            "tag-1",
+            "tag-2"
+        ]
+    }
+    ```
 
 # Web API 補足事項
 
