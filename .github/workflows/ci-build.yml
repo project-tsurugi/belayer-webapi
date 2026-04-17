@@ -37,7 +37,7 @@ jobs:
           ./gradlew -i check
 
       - name: Verify
-        uses: project-tsurugi/tsurugi-annotations-action@v1
+        uses: project-tsurugi/tsurugi-annotations-action@v2
         if: always()
         with:
           junit_input: |
