@@ -9,7 +9,7 @@ plugins {
 group = 'com.tsurugidb.belayer'
 def versionString = file('../VERSION').text.trim()
 version = versionString
-def tsubarkuro_version = '1.14.0'
+def tsubarkuro_version = '1.16.0'
 
 def resolvedTsubakuroVersion = project.hasProperty('com.tsurugidb.tsubakuro.version')
 	? project.getProperty('com.tsurugidb.tsubakuro.version')
@@ -76,7 +76,6 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-webflux-ui:1.8.0'
 	implementation 'ch.qos.logback:logback-classic:1.2.13'
 	implementation 'ch.qos.logback:logback-core:1.2.13'
-	implementation 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.20.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.20'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.1'
@@ -89,6 +88,7 @@ dependencies {
 	implementation "com.tsurugidb.tsubakuro:tsubakuro-connector:${resolvedTsubakuroVersion}"
 	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-http:${resolvedTsubakuroVersion}"
 	implementation "com.tsurugidb.tsubakuro:tsubakuro-auth-mock:${resolvedTsubakuroVersion}"
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
