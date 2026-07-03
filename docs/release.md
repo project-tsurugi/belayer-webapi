@@ -1,5 +1,11 @@
 # Change Log
 
+## ver 1.5.2 (Since ver 1.5.1)
+
+### Misc changes
+
+* update tsubakuro dependencies to version 1.16.0.
+
 ## ver 1.5.1 (Since ver 1.5.0)
 
 ### Misc changes
