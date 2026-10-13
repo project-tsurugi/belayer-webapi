@@ -30,10 +30,29 @@ configurations {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
     withSourcesJar()
     withJavadocJar()
+}
+
+// The toolchain is the JDK this is built with; the release is what the
+// result has to run on. Tsurugi supports Java 11 through 17 at run time, so
+// the bytecode targets 11 while the build itself uses 17 - the same split
+// tsubakuro makes in buildSrc/src/main/groovy/tsubakuro.java-base.gradle.
+//
+// options.release rather than sourceCompatibility: it points the compiler at
+// the Java 11 API as well as the Java 11 language level, so a method added
+// after 11 fails to compile here instead of throwing NoSuchMethodError on a
+// Java 11 runtime.
+tasks.withType(JavaCompile) {
+    options.release = 11
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+    options.links 'https://docs.oracle.com/en/java/javase/11/docs/api/'
 }
 
 javadoc.failOnError = false
