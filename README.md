@@ -28,7 +28,7 @@ $ ./gradlew clean build -x test
 
 ```console
 $ cd webapi
-$ java -jar build/libs/belayer-webapi-x.x.x.jar
+$ java -jar build/libs/tsurugi-belayer.jar
 ```
 
 Ctrl-C to shutdown.
@@ -73,7 +73,7 @@ See the env var table below.
 |TSURUGI_CONF|Tsurugi configuration file path.|`${TSURUGI_HOME}/var/etc/tsurugi.ini`|
 |TSURUGI_AUTH_URL|URL for authentication server "harinoki".|`http://localhost:8080/harinoki`|
 |TSURUGI_AUTH_AT_EXPIRATION_MIN|The expiration minutes for Access Token.|`10`|
-|BELAYER_DEFAULT_ROLE_USER_MAPPING|Initial role-user mapping(JSON String) *1|`{"ROLE_ADMIN": ["tsurugi"]}`|
+|BELAYER_DEFAULT_ROLE_USER_MAPPING|Initial role-user mapping(JSON String) *1 *2|`{"ROLE_ADMIN": [".*"]}`|
 |BELAYER_MAX_FILE_LIST_SIZE|Max size to list the files.|`500`|
 |BELAYER_JOB_EXPIRATION_DAYS|Epiration days for the job history data.|`3`|
 |BELAYER_DL_ZIP_COMPRESS_LEVEL|Zip compress level to download the all file contents in the specified directory.<br/>(0-9 or -1 as default)|`-1`(default compress level)|
@@ -83,6 +83,8 @@ See the env var table below.
 |BELAYER_WEBADMIN_LOCATION|Path to WebAdmin Contents.(optional, not supported as default)|`file://dev/null`|
 
 * *1: See [Belayer Authorizaion](./docs/belayer_authorization.md#ロールを持つユーザの指定例) document.
+* *2: The user IDs are specified as regular expressions. The default value `{"ROLE_ADMIN": [".*"]}` therefore grants `ROLE_ADMIN` to **every authenticated user**. Be sure to set this variable explicitly for production use.
+    * This value is used only when the role-user mapping file (`${BELAYER_STORAGE_ROOT}/belayer_role_users.json`) does not exist. Once the mapping has been updated via the `/api/update/roleuser` API, the file takes precedence and changing this variable has no effect.
 
 ### How to use mock Authentication for development
 
