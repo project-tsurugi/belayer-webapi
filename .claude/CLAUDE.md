@@ -44,6 +44,10 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
 - **起動時に検査するのは `jq` と `${TSURUGI_HOME}/bin/tgctl` の2つだけ**
   （`webapi.required.commands`）。実際に呼ぶのは `tgctl_w` / `tgha_w` のほうで、
   これらは未検査。配置漏れでも**起動は通り、DB 操作だけ全部失敗する。**
+    - **これは意図的に現状のままとする。** `tgctl_w` / `tgha_w` は、TsurugiDB 側の
+      HA コマンドが実装されるまでの暫定ラッパーである。検査対象に加えると、
+      `TSURUGI_TGCTL_COMMAND` / `TSURUGI_TGHA_COMMAND` で正式なコマンドに
+      差し替えた環境で不要な起動失敗を招く。`python3` の検査を足さないのも同じ理由。
 - **スタブは Python 3 製**（`distribution/stub/{tgctl_w,tgha_w}`、shebang は `/usr/bin/python3`）。
   python3 の存在は `install.sh` でも起動時検査でも確認していない。README には要件として書いてある。
 - `tgctl_w` は本物の `tgctl` を呼ぶ**ラッパー**、`tgha_w` は外部コマンドを一切呼ばない**純粋なスタブ**。
