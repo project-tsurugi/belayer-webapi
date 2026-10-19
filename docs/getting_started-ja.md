@@ -2,8 +2,8 @@
 
 ## インストール
 
-* README.mdの[5.Create Distributions](../README.md#5-create-distributions)を参照し、Belayerの配布物を作成する。
-* README.mdの[6.Installing Distributions](../README.md#6-installing-distributions)を参照し、Belayerをインストールする。
+* README.mdの[3.Create Distributions](../README.md#3-create-distributions)を参照し、Belayerの配布物を作成する。
+* README.mdの[4.Installing Distributions](../README.md#4-installing-distributions)を参照し、Belayerをインストールする。
     * Belayer WebAPI ServerをTsurugiDBと同じマシンにインストールする。
         * TsurugiDBとBelayerは同一のファイルシステムを共有し、互いに出力したファイルにアクセスするため。
 
