@@ -33,7 +33,7 @@ public enum RouterPath {
     LIST_BACKUP_STATUS_API("/api/br/list/{type}",
             "/api/br/list/*", P_BACKUP, P_RESTORE),
     CANCEL_BACKUP_RESTORE_API("/api/br/cancel/{type}/{jobid}",
-            "/api/br/cancel/**", P_RESTORE),
+            "/api/br/cancel/**", P_BACKUP, P_RESTORE),
     DUMP_START_API("/api/dump/{table}",
             "/api/dump/*", P_DUMP),
     LOAD_START_API("/api/load/{table}",
