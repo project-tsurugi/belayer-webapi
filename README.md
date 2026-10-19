@@ -2,6 +2,7 @@
 # Belayer
 
 1. Web API
+1. Belayer Server Docker Image
 1. Create Distributions
 1. Installing Distributions
 
@@ -98,7 +99,25 @@ See the env var table below.
 * You can use dummy users defined as uid=password in `webapi/src/main/resources/application-authmock.properties`
 
 
-## 2. Create Distributions
+## 2. Belayer Server Docker Image
+
+
+### How to build Belayer Server Docker Image
+
+1. pull Tsurugi Docker image
+
+```console
+$ sudo docker pull ghcr.io/project-tsurugi/tsurugidb:latest
+```
+
+2. Start Server and Step in Docker Container.
+
+```console
+$ docker-compose up -d
+$ docker-compose exec server bash
+```
+
+## 3. Create Distributions
 
 ### Requirement
 
@@ -125,7 +144,7 @@ tsurugi-webapp-x.x.x.tar.gz
 * tsurugi-webapp-x.x.x.tar.gz
     * WebAPI Server(without WebAdmin Page), installation scripts, etc.
 
-## 3. Installing Distributions
+## 4. Installing Distributions
 
 ### WebAPI
 
