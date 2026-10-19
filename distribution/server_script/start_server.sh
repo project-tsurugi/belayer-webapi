@@ -13,7 +13,7 @@ fi
 JAR=`ls ${PARENT_DIR}/jar/${JAR_NAME}`
 
 # specify environment variables and parameters in config/tsurugi-belayer.conf
-CONF_FOLDER=${PARENT_DIR}/config
+export CONF_FOLDER=${PARENT_DIR}/config
 
 # execute full executable jar
 ${JAR}
