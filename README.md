@@ -11,7 +11,9 @@
 
 ### Requirement
 
-* Java11
+* Java 17 to build
+    * The compiler targets Java 11 (`options.release = 11` in `webapi/build.gradle`),
+      so Java 11 or later is enough to run the server.
 * jq
 * python3
 
