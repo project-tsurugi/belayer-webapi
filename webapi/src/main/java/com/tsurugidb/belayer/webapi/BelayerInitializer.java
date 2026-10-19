@@ -38,8 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BelayerInitializer {
 
-    @Value("${webapi.required.java_majar_version}")
-    int requiredJavaMajarVersion;
+    @Value("${webapi.required.java_major_version}")
+    int requiredJavaMajorVersion;
 
     @Value("${webapi.required.commands}")
     List<String> requiredCommands;
@@ -61,9 +61,9 @@ public class BelayerInitializer {
         log.info("check required environments.");
 
         // Java version
-        var majarVer = Runtime.version().feature();
-        if (majarVer < requiredJavaMajarVersion) {
-            throw new IllegalStateException(String.format("Belayer requires Java%s or later.", requiredJavaMajarVersion));
+        var majorVer = Runtime.version().feature();
+        if (majorVer < requiredJavaMajorVersion) {
+            throw new IllegalStateException(String.format("Belayer requires Java%s or later.", requiredJavaMajorVersion));
         }
 
         // external commands

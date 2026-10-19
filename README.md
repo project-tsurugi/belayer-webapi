@@ -71,6 +71,7 @@ See the env var table below.
 |TSURUGI_CONNECT_TIMEOUT_SEC|connect timeout seconds for Tsurugi database.|`5`|
 |TSURUGI_SESSION_TIMEOUT_MIN|session timeout minutes for Tsurugi database.|`15`|
 |TSURUGI_HOME|Tsurugi HOME directory.|`/usr/lib/tsurugi`|
+|BELAYER_REQUIRED_JAVA_MAJOR_VERSION|Minimum Java major version the server checks for at startup.|`11`|
 |TSURUGI_CONF|Tsurugi configuration file path.|`${TSURUGI_HOME}/var/etc/tsurugi.ini`|
 |TSURUGI_TGCTL_COMMAND|Command used to start, stop and inspect Tsurugi database. *3|`${TSURUGI_HOME}/bin/tgctl_w`|
 |TSURUGI_TGHA_COMMAND|Command used for the HA operations (mode switch, database apply). *3|`${TSURUGI_HOME}/bin/tgha_w`|
