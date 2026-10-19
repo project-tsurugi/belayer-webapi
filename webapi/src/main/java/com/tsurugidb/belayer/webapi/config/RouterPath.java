@@ -47,7 +47,7 @@ public enum RouterPath {
     START_TRANSACTION_API("/api/transaction/begin",
             "/api/transaction/begin", P_STREAM_API),
     FINISH_TRANSACTION_API("/api/transaction/{type}/{transaction_id}",
-            "/api/transaction/**", P_STREAM_API),
+            "/api/transaction/*/*", P_STREAM_API),
     SHOW_TRANSACTION_STATUS_API("/api/transaction/status/{transaction_id}",
             "/api/transaction/status/*", P_STREAM_API),
     STREAM_DUMP_API("/api/transaction/dump/{transaction_id}/{table_name}",
