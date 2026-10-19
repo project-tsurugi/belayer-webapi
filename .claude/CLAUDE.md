@@ -57,7 +57,11 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
   別ポートなので、ファイアウォールの設定時に見落としやすい。何を公開するかは
   `application-common.properties` を参照。swagger-ui / openapi もこちら側に出る
   （`springdoc.use-management-port=true`）。
-- `docker/` と `docker-compose.yml` は**使用不可**（JAR 名の改名に追従していない。最終更新 2023-10）。
+- **`docker/` と `docker-compose.yml` はメンテナンスを止めている。別タイミングで見直す
+  予定なので、それまで手を付けないこと。** `docker/Dockerfile` が
+  `build/libs/belayer-webapi-<version>.jar` を移動しようとするが、成果物は
+  `tsurugi-belayer.jar` に改名されており、builder 段で失敗する（最終更新 2023-10）。
+  `test_work/e2e/` もこの compose に依存しているので同じ扱い。
 - `distribution/` は `belayer/distribution/` と同名ファイルが重複している。
   **OSS 単体配布（`tsurugi-webapp-<ver>.tar.gz`）に入るのはこちら側。**
 - CI（`ci-build.yml`）は `./gradlew check` を実行する（ユニットテストを含む）。
