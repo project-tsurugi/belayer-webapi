@@ -73,6 +73,8 @@ See the env var table below.
 |TSURUGI_SESSION_TIMEOUT_MIN|session timeout minutes for Tsurugi database.|`15`|
 |TSURUGI_HOME|Tsurugi HOME directory.|`/usr/lib/tsurugi`|
 |TSURUGI_CONF|Tsurugi configuration file path.|`${TSURUGI_HOME}/var/etc/tsurugi.ini`|
+|TSURUGI_TGCTL_COMMAND|Command used to start, stop and inspect Tsurugi database. *3|`${TSURUGI_HOME}/bin/tgctl_w`|
+|TSURUGI_TGHA_COMMAND|Command used for the HA operations (mode switch, database apply). *3|`${TSURUGI_HOME}/bin/tgha_w`|
 |TSURUGI_AUTH_URL|URL for authentication server "harinoki".|`http://localhost:8080/harinoki`|
 |TSURUGI_AUTH_AT_EXPIRATION_MIN|The expiration minutes for Access Token.|`10`|
 |BELAYER_DEFAULT_ROLE_USER_MAPPING|Initial role-user mapping(JSON String) *1 *2|`{"ROLE_ADMIN": [".*"]}`|
@@ -86,6 +88,7 @@ See the env var table below.
 
 * *1: See [Belayer Authorizaion](./docs/belayer_authorization.md#ロールを持つユーザの指定例) document.
 * *2: The user IDs are specified as regular expressions. The default value `{"ROLE_ADMIN": [".*"]}` therefore grants `ROLE_ADMIN` to **every authenticated user**. Be sure to set this variable explicitly for production use.
+* *3: `tgctl_w` and `tgha_w` are the wrapper/stub scripts shipped in `distribution/stub/` and installed into `$TSURUGI_HOME/bin/` by `install.sh`. Point these variables at the official commands once they are available.
     * This value is used only when the role-user mapping file (`${BELAYER_STORAGE_ROOT}/belayer_role_users.json`) does not exist. Once the mapping has been updated via the `/api/update/roleuser` API, the file takes precedence and changing this variable has no effect.
 
 ### How to use mock Authentication for development
