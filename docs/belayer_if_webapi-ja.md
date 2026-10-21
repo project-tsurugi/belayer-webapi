@@ -1908,6 +1908,7 @@
             * `master`: マスターモード
             * `replica`: レプリカモード
             * `standby`: スタンバイモード
+            * **現在の Tsurugi は `standalone` のみをサポートするため、受け付けるのは `standalone` だけ**（`webapi.tsurugi.supported.modes=standalone` で固定。環境変数などで変える手段は設けていない）。`master` / `replica` / `standby` を指定すると 400（`invalid mode`）を返す。これらの値は、Tsurugi が HA 構成に対応したときのためのもの
         * replicateFrom: レプリカモードの場合の同期元GRPCエンドポイント（mode=replicaの時は必須）
         * autoFetchWal: レプリカ時WALの自動フェッチをするかどうか（mode=replicaの場合のみ、デフォルトはtrue）
         ```
@@ -1945,6 +1946,7 @@
             * `master`: マスターモード
             * `replica`: レプリカモード
             * `standby`: スタンバイモード
+            * **現在の Tsurugi は `standalone` のみをサポートするため、受け付けるのは `standalone` だけ**（DB起動APIと同じ。`master` / `replica` / `standby` は 400（`invalid mode`））
         * replicateFrom: レプリカモードの場合の同期元GRPCエンドポイント（mode=replicaの時は必須）
         * autoFetchWal: レプリカ時WALの自動フェッチをするかどうか（mode=replicaの場合のみ、デフォルトはtrue）
         ```
