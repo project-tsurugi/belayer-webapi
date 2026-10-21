@@ -5,7 +5,17 @@ OUTFILE=$3
 CONFFILE=$4
 AUTH_TOKEN=$5
 
-echo "$@" >> /tmp/show_db_status_out.log
+# Debug log. Written only when Belayer logs at DEBUG, in which case
+# DbStatusExec sets BELAYER_SCRIPT_DEBUG=true. The auth token is never
+# written, and a new log file is readable by its owner only.
+DEBUG_LOG=/tmp/show_db_status_out.log
+debug_log() {
+  if [ "${BELAYER_SCRIPT_DEBUG}" = "true" ]; then
+    (umask 077; echo "$*" >> "${DEBUG_LOG}")
+  fi
+}
+
+debug_log "${TSURUGI_TGCTL_COMMAND} ${TSURUGI_TGHA_COMMAND} ${OUTFILE} ${CONFFILE} ********"
 
 ${TSURUGI_TGCTL_COMMAND} status --conf ${CONFFILE} --monitor ${OUTFILE} --auth-token ${AUTH_TOKEN}
 # kind=data status=<value>  key=status
@@ -53,7 +63,7 @@ ${TSURUGI_TGHA_COMMAND} database version --conf ${CONFFILE} --monitor ${OUTFILE}
 ITEM_JSON=$(cat $OUTFILE | jq -s '.|map(select(.key == "version"))|map({key:.key, value:.value})|from_entries|{wal_version: .version}')
 OUT_JSON=$(echo $OUT_JSON | jq ".|= .+$ITEM_JSON")
 
-echo $OUT_JSON >> /tmp/show_db_status_out.log
+debug_log "${OUT_JSON}"
 echo $OUT_JSON
 
 exit
