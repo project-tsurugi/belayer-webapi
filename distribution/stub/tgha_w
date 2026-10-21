@@ -5,6 +5,7 @@ import argparse
 import json
 import time
 import os
+import re
 
 TSURUGI_HOME = os.environ['TSURUGI_HOME']
 
@@ -149,7 +150,12 @@ def out_mode(mode:str, upstream:str, autoFetchWal:bool):
 
 
 def out_log(log:str):
-    with open('/tmp/tgha_w_history.log', mode='a') as fc:
+    # Write the history only while Belayer logs at DEBUG, and never the token.
+    if os.environ.get('BELAYER_SCRIPT_DEBUG') != 'true':
+        return
+    log = re.sub(r"(--auth-token[ =])[^\s']+", r'\1********', log)
+    fd = os.open('/tmp/tgha_w_history.log', os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    with os.fdopen(fd, mode='a') as fc:
         fc.write(f"{log}\n")
 
 
