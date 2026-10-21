@@ -80,8 +80,9 @@ Javadoc のエラーでビルドが止まる。公開 API を足したら Javado
 
 ## テスト
 
-`gradlew test` で `FileSystemApiHandlerTest.testDownloadZipFile_to_csv_file` が
-**たまに落ちる。これはタイミング問題で、Java 17 化とは無関係。**
-`@AutoConfigureWebTestClient` の既定 5 秒に対し、parquet 2本の CSV 変換が 5.08 秒かかっている
-（WSL の `/mnt/c` 上だと parquet の細かい読み取りが遅い）。
-**現時点では、再実行で対処する方針とする。**
+`gradlew test` で `FileSystemApiHandlerTest.testDownloadZipFile_to_csv_file` と
+`testDownloadZipFile_csv_parquet_conv_file` が **WSL の `/mnt/c` 上では落ちる。タイミング問題で、
+コードとは無関係。** `@AutoConfigureWebTestClient` の既定 5 秒に対し、parquet の CSV 変換が
+5.07〜5.09 秒かかっている（`/mnt/c` は parquet の細かい読み取りが遅い）。2026-10-21 には
+再実行しても2件とも落ちたが、同じコミットを WSL 側のディスクに展開して流すと 2.8 秒で全件通った。
+**`/mnt/c` で落ちたら WSL 側にコピーして確かめる。**
