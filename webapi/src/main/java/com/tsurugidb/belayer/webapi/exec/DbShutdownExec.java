@@ -108,6 +108,7 @@ public class DbShutdownExec {
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
+    ScriptDebug.apply(pb, log);
     // stdout -> file
     pb.redirectOutput(new File(outFile));
     log.debug("exec cmd: {}", Arrays.asList(args));

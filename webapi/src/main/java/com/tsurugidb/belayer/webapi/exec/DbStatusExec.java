@@ -41,12 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class DbStatusExec {
 
-  /**
-   * Environment variable that makes the status script write its debug log.
-   * Set to "true" only while this class logs at DEBUG.
-   */
-  static final String SCRIPT_DEBUG_ENV = "BELAYER_SCRIPT_DEBUG";
-
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
@@ -120,11 +114,7 @@ public class DbStatusExec {
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
-    // The script writes its debug log only when told to, so that the log
-    // follows the log level of this server rather than being always on.
-    if (log.isDebugEnabled()) {
-      pb.environment().put(SCRIPT_DEBUG_ENV, "true");
-    }
+    ScriptDebug.apply(pb, log);
     String result = null;
     try {
       var proc = pb.start();

@@ -36,7 +36,7 @@ public class DbStatusExecTest {
         // environment as the status.
         Path script = tempDir.resolve("status.sh");
         Files.writeString(script,
-                "#!/bin/bash\necho \"{\\\"status\\\": \\\"${" + DbStatusExec.SCRIPT_DEBUG_ENV + ":-unset}\\\"}\"\n");
+                "#!/bin/bash\necho \"{\\\"status\\\": \\\"${" + ScriptDebug.ENV + ":-unset}\\\"}\"\n");
         script.toFile().setExecutable(true);
 
         exec = new DbStatusExec();

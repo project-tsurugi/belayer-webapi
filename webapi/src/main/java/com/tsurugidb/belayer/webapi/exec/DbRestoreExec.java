@@ -136,6 +136,7 @@ public class DbRestoreExec {
     var pb = new ProcessBuilder(argList);
     // stderr -> stdout
     pb.redirectErrorStream(true);
+    ScriptDebug.apply(pb, log);
     // stdout -> file
     pb.redirectOutput(new File(outFile.toString()));
     log.debug("exec cmd: {}", argList);
