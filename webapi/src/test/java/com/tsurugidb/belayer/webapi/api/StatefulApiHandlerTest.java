@@ -205,4 +205,17 @@ public class StatefulApiHandlerTest {
 
     }
 
+    @Test
+    @WithMockUser(username = TEST_USER)
+    public void testPostStatusIsRejected() {
+        // POST /api/transaction/status/{id} reaches the finish API, which takes
+        // only commit and rollback.
+        var now = Instant.parse("2022-06-30T12:00:00.000Z");
+        when(systemTime.now()).thenReturn(now);
+
+        client.post().uri(RouterPath.FINISH_TRANSACTION_API.getPath(), "status", "TESTJOBID")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
 }

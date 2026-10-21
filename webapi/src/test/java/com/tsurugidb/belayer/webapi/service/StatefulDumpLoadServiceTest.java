@@ -22,6 +22,7 @@ import com.tsurugidb.belayer.webapi.dto.TransactionApiParameter;
 import com.tsurugidb.belayer.webapi.dto.TransactionFinishType;
 import com.tsurugidb.belayer.webapi.dto.TsurugiTransaction;
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
+import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.model.JobManager;
 import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
@@ -95,5 +96,30 @@ public class StatefulDumpLoadServiceTest {
 
         verify(transaction, never()).rollback();
         verify(jobManager, never()).updateJobStatus(any(), any(), any());
+    }
+
+    private TransactionApiParameter statusParam() {
+        var param = new TransactionApiParameter();
+        param.setUid(UID);
+        param.setTransactionId(TRANSACTION_ID);
+        return param;
+    }
+
+    @Test
+    public void test_get_transaction() throws Exception {
+        var job = registerJob(JobStatus.AVAILABLE);
+
+        var result = service.getTransaction(statusParam()).block();
+
+        assertSame(job, result);
+        verify(transaction, never()).rollback();
+        verify(jobManager, never()).updateJobStatus(any(), any(), any());
+    }
+
+    @Test
+    public void test_get_transaction_not_found() throws Exception {
+        when(jobManager.getJob(Job.TYPE_TRANSACTION, UID, TRANSACTION_ID)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> service.getTransaction(statusParam()));
     }
 }
