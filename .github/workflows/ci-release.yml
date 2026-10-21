@@ -70,15 +70,21 @@ jobs:
 
       - name: Create_Release
         run: |
-          if [[ "${BELAYER_VERSION}" == "SNAPSHOT" || "${BELAYER_VERSION}" =~ ".*-SNAPSHOT" ]]; then
+          # Only the rolling SNAPSHOT tag is recreated; a pushed version tag must stay where it is.
+          if [[ "${BELAYER_VERSION}" == "SNAPSHOT" ]]; then
             _DELETE_OPTION=--cleanup-tag
           fi
-          if [[ "${BELAYER_VERSION}" =~ ".*-BETA" || "${BELAYER_VERSION}" =~ ".*-SNAPSHOT" || "${BELAYER_VERSION}" == "SNAPSHOT" ]]; then
+          # Tags such as 1.5.4-snapshot, 1.5.4-SNAPSHOT and 1.6.0-BETA1 are prereleases and never "Latest".
+          _VERSION_LC="${BELAYER_VERSION,,}"
+          if [[ "${BELAYER_VERSION}" == "SNAPSHOT" || "${_VERSION_LC}" =~ -snapshot$ || "${_VERSION_LC}" =~ -beta ]]; then
             _PRERELEASE_OPTION=--prerelease
+            _LATEST_OPTION=--latest=false
+          else
+            _LATEST_OPTION=--latest
           fi
           set -x
           gh release delete ${BELAYER_VERSION} -y ${_DELETE_OPTION} --repo project-tsurugi/belayer-webapi || true
-          gh release create ${BELAYER_VERSION} work/* --title ${BELAYER_VERSION} ${_PRERELEASE_OPTION} --latest --repo project-tsurugi/belayer-webapi
+          gh release create ${BELAYER_VERSION} work/* --title ${BELAYER_VERSION} ${_PRERELEASE_OPTION} ${_LATEST_OPTION} --repo project-tsurugi/belayer-webapi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BELAYER_VERSION: ${{ (github.ref_type == 'tag' && github.ref_name) || 'SNAPSHOT' }}
