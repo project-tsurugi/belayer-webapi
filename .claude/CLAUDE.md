@@ -74,6 +74,10 @@ tsubakuro と同じ型に統一済み。`toolchain 17` でビルドし、`option
 `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` で上書き可）。1.5.3 で旧名 `java_majar_version` の誤字を
 直したので、旧名で設定していた環境は無言で既定値 11 に戻る。
 
+javadoc は JDK 17 の doclint で**警告もエラーも0件**にしてあり（2026-10-21）、
+`javadoc.failOnError = false` は外した。`build` のたびに javadoc が走るので、
+Javadoc のエラーでビルドが止まる。公開 API を足したら Javadoc も書くこと。
+
 ## テスト
 
 `gradlew test` で `FileSystemApiHandlerTest.testDownloadZipFile_to_csv_file` が
