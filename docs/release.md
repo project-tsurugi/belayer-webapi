@@ -1,5 +1,33 @@
 # Change Log
 
+## ver 1.5.3 (Since ver 1.5.2)
+
+### Breaking changes
+
+* rename the property for the minimum Java major version checked at startup, from `webapi.required.java_majar_version` to `webapi.required.java_major_version`, and add the environment variable `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` to override it.
+    * **A setting given under the old name (e.g. `WEBAPI_REQUIRED_JAVA_MAJAR_VERSION`) is no longer read, and the default `11` applies without any warning.** Use `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` instead.
+
+### Bug fixes
+
+* fix `start_server.sh` to export `CONF_FOLDER`. Without it, the launch script in the JAR could not locate `tsurugi-belayer.conf` and the settings in it were not applied.
+* fix the Backup/Restore Cancel API (`/api/br/cancel`) to accept `P_BACKUP` as well as `P_RESTORE`, as `docs/belayer_authorization.md` states. A user holding only `ROLE_BACKUP` could start a backup job but could not cancel it (403).
+* narrow the path match of the Finish Transaction API from `/api/transaction/**` to `/api/transaction/{type}/{transaction_id}`, so that it does not take over the permission settings of the other APIs under `/api/transaction/`. This does not change the current behavior, since all of them require `P_STREAM_API`.
+
+### Misc changes
+
+* build with JDK 17 (Gradle toolchain) while keeping Java 11 as the target and the runtime requirement. CI also uses JDK 17.
+* update README.md.
+    * state that building requires Java 17 and running requires Java 11 or later.
+    * list `TSURUGI_TGCTL_COMMAND` and `TSURUGI_TGHA_COMMAND` in the environment variable table.
+    * correct the default value of `BELAYER_DEFAULT_ROLE_USER_MAPPING` to `{"ROLE_ADMIN": [".*"]}`, and note that it grants `ROLE_ADMIN` to every authenticated user unless set explicitly.
+    * correct the JAR name to `tsurugi-belayer.jar`.
+* fix the key name in the Instance List API example in the WebAPI document (`endpoinsts` -> `endpoints`).
+* fix the section links in the getting started document.
+
+### Full Changelog
+
+https://github.com/project-tsurugi/belayer-webapi/compare/1.5.2...1.5.3
+
 ## ver 1.5.2 (Since ver 1.5.1)
 
 ### Misc changes
