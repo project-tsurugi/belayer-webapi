@@ -83,6 +83,9 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Implementation of TsubakuroService that connects to Tsurugi DB.
+ */
 @Slf4j
 @Component
 @Profile({ "default", "authmock" })
@@ -227,6 +230,15 @@ public class TsubakuroServiceImpl implements TsubakuroService {
     return job;
   }
 
+  /**
+   * create a session and a SQL client without starting a transaction.
+   *
+   * @param credential credential for authentication.
+   * @param jobId      Job ID
+   * @param timeoutMin session timeout in minutes. the configured value is used if empty.
+   * @param label      label of the session.
+   * @return transaction object holding the session and the SQL client.
+   */
   public TsurugiTransaction createSqlClient(@Nonnull Credential credential, String jobId,
       Optional<Integer> timeoutMin, String label) {
 
@@ -516,6 +528,14 @@ public class TsubakuroServiceImpl implements TsubakuroService {
     }
   }
 
+  /**
+   * get the Load object of the job, creating and caching it in the job on the first call.
+   *
+   * @param job          LoadJob
+   * @param dumpFilePath path of the parquet file to read the schema from.
+   * @param fromCsv      true if the parquet file is converted from CSV.
+   * @return Load object.
+   */
   protected Load getLoad(LoadJob job, Path dumpFilePath, boolean fromCsv) {
     synchronized (job) {
       Load load = job.getLoad();

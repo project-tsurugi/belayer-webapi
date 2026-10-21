@@ -33,6 +33,9 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Definition of a load from a parquet file into a table.
+ */
 @Builder
 @ToString
 @EqualsAndHashCode
@@ -44,6 +47,15 @@ public class LoadStatement {
   private TableMetadata tableMetadata;
   private MessageType schema;
 
+  /**
+   * Return the mappings between table columns and parquet columns.
+   *
+   * If no mapping is specified, each table column is mapped to the parquet column of the same name.
+   * A column in a mapping is specified by name, or by "@" followed by the column index.
+   *
+   * @return list of column mappings.
+   * @throws BadRequestException if a mapping refers to a column that does not exist.
+   */
   public List<LoadColumnMapping> getColMapping() {
 
     // if mapping is not specified

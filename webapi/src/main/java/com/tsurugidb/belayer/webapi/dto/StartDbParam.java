@@ -19,6 +19,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the DB start API ({@code /api/db/start}).
+ *
+ * <ul>
+ * <li>{@code mode}: launch mode, one of {@code standalone} (default), {@code master}, {@code replica}, {@code standby}</li>
+ * <li>{@code replicateFrom}: gRPC endpoint to replicate from (required when {@code mode} is {@code replica})</li>
+ * <li>{@code autoFetchWal}: {@code "true"}/{@code "false"}, whether to fetch WAL automatically;
+ * treated as {@code true} when empty</li>
+ * </ul>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

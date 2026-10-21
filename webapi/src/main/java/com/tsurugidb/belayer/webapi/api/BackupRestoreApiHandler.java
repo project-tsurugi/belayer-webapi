@@ -42,6 +42,9 @@ import com.tsurugidb.belayer.webapi.service.JobIdService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the backup/restore APIs.
+ */
 @Component
 @Slf4j
 public class BackupRestoreApiHandler {

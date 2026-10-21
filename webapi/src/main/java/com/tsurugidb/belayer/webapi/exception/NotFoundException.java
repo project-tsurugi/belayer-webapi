@@ -17,8 +17,18 @@ package com.tsurugidb.belayer.webapi.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Exception that results in HTTP 404 Not Found.
+ */
 public class NotFoundException extends BelayerResponseStatusException {
   
+  /**
+   * Constructor
+   *
+   * @param message message for display
+   * @param reason exception reason to log
+   * @param cause cause of exception
+   */
   public NotFoundException(String message, String reason, Throwable cause) {
     super(HttpStatus.NOT_FOUND, message, reason, cause);
   }

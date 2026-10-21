@@ -17,12 +17,28 @@ package com.tsurugidb.belayer.webapi.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Exception that results in HTTP 400 Bad Request.
+ */
 public class BadRequestException extends BelayerResponseStatusException {
   
+  /**
+   * Constructor
+   *
+   * @param message message for display
+   * @param reason exception reason to log
+   */
   public BadRequestException(String message, String reason) {
     super(HttpStatus.BAD_REQUEST, message, reason, null);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message for display
+   * @param reason exception reason to log
+   * @param cause cause of exception
+   */
   public BadRequestException(String message, String reason, Throwable cause) {
     super(HttpStatus.BAD_REQUEST, message, reason, cause);
   }

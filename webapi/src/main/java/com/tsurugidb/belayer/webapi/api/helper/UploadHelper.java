@@ -30,10 +30,16 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Helper for handling file upload requests.
+ */
 @Component
 @Slf4j
 public class UploadHelper {
 
+    /**
+     * Parameters of an upload request.
+     */
     @Data
     public static class UploadParameter {
         private String destDirPath;
@@ -42,11 +48,22 @@ public class UploadHelper {
         private boolean overwrite;
         private List<FilePart> fileParts = new ArrayList<FilePart>();
 
+        /**
+         * Add a file part to upload.
+         *
+         * @param filePart FilePart.
+         */
         public void addFilePart(FilePart filePart) {
             fileParts.add(filePart);
         }
     }
 
+    /**
+     * Check that the request is a multipart request.
+     *
+     * @param request Request
+     * @throws BadRequestException if the content type of the request is not multipart.
+     */
     public void checkRequestHeader(ServerRequest request) {
         var contentType = request.headers().contentType();
         log.debug("contentType:{}", contentType);

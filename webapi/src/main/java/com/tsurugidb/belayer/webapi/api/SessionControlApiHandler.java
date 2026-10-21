@@ -32,6 +32,9 @@ import com.tsurugidb.belayer.webapi.service.SessionControlService;
 
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the session control APIs.
+ */
 @Component
 public class SessionControlApiHandler {
 

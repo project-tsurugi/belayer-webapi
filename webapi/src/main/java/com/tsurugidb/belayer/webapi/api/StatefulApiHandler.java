@@ -71,6 +71,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+/**
+ * Handler for the stateful APIs (transaction control and dump/load within a transaction).
+ */
 @Component
 @Slf4j
 public class StatefulApiHandler {

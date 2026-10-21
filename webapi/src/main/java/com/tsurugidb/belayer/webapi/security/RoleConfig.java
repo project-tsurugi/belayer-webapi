@@ -70,7 +70,7 @@ public class RoleConfig {
     /**
      * init role-user mapping
      *
-     * @throws IOException
+     * @throws InvalidSettingException the role-user mapping is invalid.
      */
     @PostConstruct
     synchronized public void init() throws InvalidSettingException {
@@ -133,7 +133,7 @@ public class RoleConfig {
      * update user-role mapping from JSON string.
      * 
      * @param jsonString user-role mapping from JSON
-     * @throws JacksonException mapping error
+     * @throws InvalidSettingException the JSON is invalid, contains no roles, or contains an unknown role name.
      */
     public synchronized void applyConfByJson(String jsonString) throws InvalidSettingException {
 

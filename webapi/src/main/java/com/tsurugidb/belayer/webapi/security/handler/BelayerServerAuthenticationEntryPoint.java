@@ -9,6 +9,9 @@ import org.springframework.web.server.ServerWebExchange;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Entry point that responds HTTP 401 Unauthorized when the request is not authenticated.
+ */
 @Slf4j
 public class BelayerServerAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
 

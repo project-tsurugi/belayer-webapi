@@ -19,6 +19,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the stream dump API.
+ *
+ * <p>{@code format} is the output file format ({@code csv}; any other value means {@code parquet}).
+ * {@code mode} is {@code normal} (default) to return the result as a JSON body; any other value
+ * returns it as server-sent events.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

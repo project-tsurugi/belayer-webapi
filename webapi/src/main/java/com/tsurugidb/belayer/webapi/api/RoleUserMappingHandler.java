@@ -27,6 +27,9 @@ import com.tsurugidb.belayer.webapi.security.RoleConfig;
 
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the role definition and role-user mapping APIs.
+ */
 @Component
 public class RoleUserMappingHandler {
 

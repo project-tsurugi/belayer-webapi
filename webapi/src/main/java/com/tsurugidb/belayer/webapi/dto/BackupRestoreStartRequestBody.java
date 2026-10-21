@@ -17,6 +17,12 @@ package com.tsurugidb.belayer.webapi.dto;
 
 import lombok.Data;
 
+/**
+ * Request body of the backup/restore start API.
+ *
+ * <p>{@code dirPath} is the backup output directory and {@code zipFilePath} the backup zip file
+ * to restore from.</p>
+ */
 @Data
 public class BackupRestoreStartRequestBody {
 

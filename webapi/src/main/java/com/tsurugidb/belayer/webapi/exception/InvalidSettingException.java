@@ -15,12 +15,26 @@
  */
 package com.tsurugidb.belayer.webapi.exception;
 
+/**
+ * Exception for invalid settings.
+ */
 public class InvalidSettingException extends Exception {
 
+    /**
+     * Constructor
+     *
+     * @param message exception message
+     */
     public InvalidSettingException(String message) {
         super(message);
     }
 
+    /**
+     * Constructor
+     *
+     * @param message exception message
+     * @param cause caused error
+     */
     public InvalidSettingException(String message, Throwable cause) {
         super(message, cause);
     }

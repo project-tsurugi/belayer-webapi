@@ -24,6 +24,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Contents of {@code instance_info.json}: the Belayer instance name ({@code instance_name},
+ * default {@code "[no name]"}) and its tags ({@code tags}, default empty).
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

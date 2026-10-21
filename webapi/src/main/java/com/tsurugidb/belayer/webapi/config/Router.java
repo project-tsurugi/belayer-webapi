@@ -77,6 +77,9 @@ import com.tsurugidb.belayer.webapi.dto.StreamDumpRequestBody;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import reactor.core.publisher.Mono;
 
+/**
+ * Routing configuration for the APIs and the admin page.
+ */
 @Configuration
 public class Router {
 
@@ -88,6 +91,18 @@ public class Router {
 
   /**
    * Routing definitions for APIs.
+   *
+   * @param authHandler handler for authentication APIs
+   * @param fileSystemApiHandler handler for file system APIs
+   * @param backupRestoreApiHandler handler for backup/restore APIs
+   * @param dumpLoadApiHandler handler for dump/load APIs
+   * @param statefulApiHandler handler for transaction and stream dump/load APIs
+   * @param sessionControlApiHandler handler for session control APIs
+   * @param endpointsApiHandler handler for endpoint list API
+   * @param dbControlHandler handler for database control APIs
+   * @param roleUserMappingHandler handler for role-user mapping APIs
+   * @param helloHandler handler for health check API
+   * @return RouterFunction
    */
   @Bean
   public RouterFunction<ServerResponse> routerFunction(AuthHandler authHandler,
@@ -265,6 +280,11 @@ public class Router {
     return route;
   }
 
+  /**
+   * ErrorAttributes for this app.
+   *
+   * @return ErrorAttributes
+   */
   @Bean
   public ErrorAttributes globalErrorAttributes() {
     return new GlobalErrorAttributes();
@@ -284,6 +304,12 @@ public class Router {
     }
   }
 
+  /**
+   * ObjectMapper for this app.
+   * Instant values are serialized/deserialized in ISO 8601 format in UTC.
+   *
+   * @return ObjectMapper
+   */
   @Bean
   public ObjectMapper defaultMapper() {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -295,6 +321,10 @@ public class Router {
     return objectMapper;
   }
 
+  /**
+   * JSON serializer for Instant.
+   * Format: {@code yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx} in UTC.
+   */
   public class Iso8601WithoutMillisInstantSerializer extends JsonSerializer<Instant> {
     private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
         .withZone(ZoneOffset.UTC);
@@ -305,6 +335,10 @@ public class Router {
     }
   }
 
+  /**
+   * JSON deserializer for Instant.
+   * Format: {@code yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx}.
+   */
   public class Iso8601WithoutMillisInstantDeserializer extends JsonDeserializer<Instant> {
     private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
         .withZone(ZoneOffset.UTC);

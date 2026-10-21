@@ -27,12 +27,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public class UserTokenAuthentication extends AbstractAuthenticationToken {
 
+  /** User ID */
   private final String userId;
+  /** access token */
   private final String token;
+  /** token expiration time */
   private final Optional<Instant> tokenExpirationTime;
 
   /**
-   * {@inheritDoc}}
+   * {@inheritDoc}
    */
   @Override
   public Object getCredentials() {
@@ -40,7 +43,7 @@ public class UserTokenAuthentication extends AbstractAuthenticationToken {
   }
 
   /**
-   * {@inheritDoc}}
+   * {@inheritDoc}
    */
   @Override
   public Object getPrincipal() {

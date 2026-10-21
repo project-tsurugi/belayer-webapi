@@ -32,6 +32,9 @@ import com.tsurugidb.belayer.webapi.dto.Endpoints;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the endpoint list API.
+ */
 @Component
 @Slf4j
 public class EndpointsApiHandler {
@@ -42,6 +45,15 @@ public class EndpointsApiHandler {
   private long lastModified = 0;
   private String[] endpoints;
 
+  /**
+   * List Endpoints API.
+   *
+   * Returns the endpoints written in endpoints.csv (re-read when the file is modified).
+   * If the file does not exist, has no endpoints or cannot be read, the base URL of this request is returned instead.
+   *
+   * @param req Request
+   * @return Response
+   */
   public Mono<ServerResponse> listEndpoints(ServerRequest req) {
     Endpoints result;
 

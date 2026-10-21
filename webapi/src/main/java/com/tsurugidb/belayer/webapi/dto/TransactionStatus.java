@@ -19,6 +19,12 @@ import java.time.Instant;
 
 import lombok.Data;
 
+/**
+ * Response body of the transaction APIs.
+ *
+ * <p>{@code type} is {@code read_write} or {@code read_only}; {@code status} is the name of the
+ * job status ({@link Job.JobStatus}); {@code endTime} is {@code null} while the transaction is open.</p>
+ */
 @Data
 public class TransactionStatus {
 

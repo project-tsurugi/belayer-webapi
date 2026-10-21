@@ -26,6 +26,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Resources of a Tsurugi transaction used by a job: the session, the SQL client and the transaction.
+ *
+ * <p>{@link #close()} releases all of them.</p>
+ */
 @Data
 @Builder
 @Slf4j

@@ -19,6 +19,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the dump API.
+ *
+ * <p>{@code dirPath} is the output directory, {@code format} the output file format
+ * (default {@code parquet}) and {@code waitUntilDone} whether the API waits until the dump is done.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

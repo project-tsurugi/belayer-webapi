@@ -19,6 +19,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+/**
+ * Parameters of a stream dump request, adding the response {@code mode} ({@code normal} or SSE)
+ * to the dump parameters.
+ */
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)

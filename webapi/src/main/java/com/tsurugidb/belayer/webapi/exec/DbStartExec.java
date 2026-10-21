@@ -33,6 +33,9 @@ import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Executor of the external command to start Tsurugi DB.
+ */
 @Slf4j
 @Component
 public class DbStartExec {
@@ -91,6 +94,18 @@ public class DbStartExec {
     }
   }
 
+  /**
+   * start the command process.
+   *
+   * @param monitoringFile path of the monitoring file the command writes its status to
+   * @param outFile path of the file to write stdout and stderr of the command
+   * @param token authentication token
+   * @param mode launch mode
+   * @param replicateFrom grpc endpoint that replicate from (used only in replica mode)
+   * @param autoFetchWal if true, fetch required WAL automatically (used only in replica mode)
+   * @return started process
+   * @throws ProcessExecException if failed to start the process
+   */
   protected Process runProcess(String monitoringFile, String outFile, String token, String mode, String replicateFrom, boolean autoFetchWal) {
     String modeAndOptions = !"replica".equals(mode) ? mode : mode + " --replicate-from " + replicateFrom;
     if ("replica".equals(mode) && autoFetchWal) {

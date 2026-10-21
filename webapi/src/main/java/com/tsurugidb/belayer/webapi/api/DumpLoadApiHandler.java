@@ -47,6 +47,9 @@ import com.tsurugidb.belayer.webapi.service.JobIdService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the dump/load APIs.
+ */
 @Slf4j
 @Component
 public class DumpLoadApiHandler {
@@ -119,6 +122,12 @@ public class DumpLoadApiHandler {
         return param;
     }
 
+    /**
+     * Start Load API
+     *
+     * @param req Request
+     * @return Response (400 Bad Request if the request body is empty)
+     */
     public Mono<ServerResponse> requestLoad(ServerRequest req) {
         String jobId = jobIdService.createNewJobId();
 

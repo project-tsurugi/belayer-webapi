@@ -34,6 +34,9 @@ import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Executor of the external command to quiesce Tsurugi DB.
+ */
 @Slf4j
 @Component
 public class DbQuiesceExec {
@@ -93,6 +96,16 @@ public class DbQuiesceExec {
     }
   }
 
+  /**
+   * start the command process.
+   *
+   * @param monitoringFilePath path of the monitoring file the command writes its status to
+   * @param label label passed to the command
+   * @param outFile path of the file to write stdout and stderr of the command
+   * @param token authentication token
+   * @return started process
+   * @throws ProcessExecException if failed to start the process
+   */
   protected Process runProcess(Path monitoringFilePath, String label, Path outFile, String token) {
     String argsLine = String.format(cmdString, monitoringFilePath.toString(), conf, label, token);
     String[] args = argsLine.split(" ");

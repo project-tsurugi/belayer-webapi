@@ -19,9 +19,17 @@ import java.time.Instant;
 
 import org.springframework.stereotype.Component;
 
+/**
+ * Provider of the current time (replaceable in tests).
+ */
 @Component
 public class SystemTime {
 
+  /**
+   * Return the current time.
+   *
+   * @return current instant.
+   */
   public Instant now() {
     return Instant.now();
   }

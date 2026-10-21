@@ -22,11 +22,21 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import reactor.core.publisher.Flux;
 
+/**
+ * Job representing a transaction started by the transaction API, which stream dump/load requests
+ * use until it is committed or rolled back.
+ *
+ * <p>{@code transactionMode} is the transaction type and {@code useCount} the number of requests
+ * currently using the transaction.</p>
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class LongTransactionJob extends TransactionalJob {
 
+    /**
+     * Creates a transaction job with its type set to {@link Job#TYPE_TRANSACTION}.
+     */
     public LongTransactionJob() {
         super();
         setType(TYPE_TRANSACTION);

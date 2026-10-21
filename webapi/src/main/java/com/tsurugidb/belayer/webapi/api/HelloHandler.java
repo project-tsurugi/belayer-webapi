@@ -22,8 +22,17 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the hello API.
+ */
 @Component
 public class HelloHandler {
+  /**
+   * Hello API. Returns the plain text "hello".
+   *
+   * @param req Request
+   * @return Response
+   */
   public Mono<ServerResponse> hello(ServerRequest req) {
     return ServerResponse.ok()
     .contentType(MediaType.TEXT_PLAIN)

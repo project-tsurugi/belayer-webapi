@@ -26,6 +26,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the session variable API, with snake_case keys: sets {@code var_name} to
+ * {@code var_value} on the Tsurugi session {@code session_id}.
+ *
+ * <p>{@code token} is the caller's credential and is never serialized.</p>
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

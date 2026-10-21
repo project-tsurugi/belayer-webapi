@@ -20,6 +20,9 @@ import com.tsurugidb.belayer.webapi.api.helper.UploadHelper.UploadParameter;
 import lombok.Data;
 import reactor.core.publisher.Flux;
 
+/**
+ * Context of a stream load: the request parameters and the flux of saved upload file paths.
+ */
 @Data
 public class UploadContext {
 

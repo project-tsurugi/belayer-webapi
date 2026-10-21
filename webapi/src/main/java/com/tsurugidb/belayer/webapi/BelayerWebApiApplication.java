@@ -18,9 +18,17 @@ package com.tsurugidb.belayer.webapi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Main class of Belayer WebAPI server.
+ */
 @SpringBootApplication
 public class BelayerWebApiApplication {
 
+	/**
+	 * Starts the application.
+	 *
+	 * @param args command line arguments
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(BelayerWebApiApplication.class, args);
 	}

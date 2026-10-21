@@ -23,11 +23,21 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+/**
+ * Job that loads files into a table.
+ *
+ * <p>{@code table} is the target table, {@code format} the input file format, {@code files} the
+ * files to load and {@code mappings} the column mappings. {@code filesFromZip} holds the files
+ * expanded from zip inputs.</p>
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class LoadJob extends TransactionalJob {
 
+  /**
+   * Creates a load job with its type set to {@link Job#TYPE_LOAD}.
+   */
   public LoadJob() {
     super();
     setType(TYPE_LOAD);

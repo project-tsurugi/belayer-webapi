@@ -21,6 +21,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response body of the job list API.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

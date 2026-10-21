@@ -58,6 +58,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+/**
+ * Service for dump and load jobs.
+ */
 @Slf4j
 @Component
 public class DumpLoadService {
@@ -402,6 +405,13 @@ public class DumpLoadService {
         return new LoadFileInfo(parquetFilePath, inFilePath, true);
     }
 
+    /**
+     * Mark the transaction specified in the load parameter as in use, and set it to the parameter.
+     *
+     * @param ctx upload context whose parameter is a LoadParameter.
+     * @return the given upload context.
+     * @throws BadRequestException if the transaction is not found or is not available for use.
+     */
     public UploadContext useTransaction(UploadContext ctx) {
         var param = (LoadParameter) ctx.getParam();
         var job = getTransactionJob(param);
@@ -415,6 +425,13 @@ public class DumpLoadService {
         return ctx;
     }
 
+    /**
+     * Return the transaction job specified in the load parameter.
+     *
+     * @param param Load parameter.
+     * @return transaction job.
+     * @throws BadRequestException if the transaction is not found.
+     */
     public LongTransactionJob getTransactionJob(LoadParameter param) {
         log.debug("get job :" + param.toString());
         Optional<Job> targetJob = jobManager.getJob(Job.TYPE_TRANSACTION, param.getUid(), param.getJobId());
@@ -473,6 +490,15 @@ public class DumpLoadService {
         job.getUseCount().incrementAndGet();
     }
 
+    /**
+     * Release the use of the transaction by a dump or load.
+     *
+     * The transaction becomes available again when no dump or load is using it.
+     *
+     * @param uid   User ID
+     * @param jobId Job ID of the transaction
+     * @throws BadRequestException if the transaction is not found.
+     */
     public void finishDumpOrLoad(String uid, String jobId) {
         Optional<Job> targetJob = jobManager.getJob(Job.TYPE_TRANSACTION, uid, jobId);
         if (targetJob.isEmpty()) {
@@ -493,6 +519,8 @@ public class DumpLoadService {
     /**
      * Return job.
      *
+     * @param type  dump or load
+     * @param uid   User ID
      * @param jobId Job ID
      * @return Job
      */
@@ -515,7 +543,7 @@ public class DumpLoadService {
     /**
      * Return list of jobs.
      *
-     * @param type backup or restore
+     * @param type dump or load
      * @param uid  User ID
      * @return List of Jobs
      */
@@ -563,6 +591,14 @@ public class DumpLoadService {
         return Mono.just(job);
     }
 
+    /**
+     * Roll back the transaction specified in the load parameter and mark it as failed.
+     *
+     * @param param Load parameter.
+     * @param th    cause of the failure.
+     * @return the failed transaction job.
+     * @throws BadRequestException if the transaction is not found.
+     */
     public Mono<TransactionalJob> registerFailedResult(LoadParameter param, Throwable th) {
         var job = getTransactionJob(param);
         return registerFailedResult(job, th);
@@ -580,7 +616,9 @@ public class DumpLoadService {
     /**
      * Cancel Dump/Laod job.
      *
-     * @param jobId
+     * @param type  dump or load
+     * @param uid   User ID
+     * @param jobId Job ID
      * @return Task status
      */
     public Mono<TransactionalJob> cancelJob(String type, String uid, String jobId) {

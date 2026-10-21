@@ -34,6 +34,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Resources of an online backup in progress: the session, the datastore client and the backup object.
+ *
+ * <p>{@link #close()} releases all of them.</p>
+ */
 @Data
 @Builder
 @Slf4j

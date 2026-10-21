@@ -20,6 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import com.tsurugidb.belayer.webapi.exception.InternalServerErrorException;
 
+/**
+ * Utilities for files.
+ */
 public class FileUtil {
 
     /**

@@ -59,6 +59,10 @@ public class PermissionConfig {
     // key: role, value: set of permissions
     private Map<String, Set<String>> rolePermissionMap = new HashMap<>();
 
+    /**
+     * Marker set returned by {@link #getRoles(FunctionPermission)} when no role is assigned to the permission.
+     * Compared by identity.
+     */
     public static Set<String> NOT_ASSIGNED = Set.of("==NOT_ASSIGNED==");
 
     /**
@@ -159,6 +163,12 @@ public class PermissionConfig {
         return roles;
     }
 
+    /**
+     * check if specified permission is referenced by any {@link RouterPath}.
+     *
+     * @param permission permission name
+     * @return true if permission is referenced by a RouterPath
+     */
     public boolean isValidPermission(@Nonnull String permission) {
         ObjectUtil.checkNotNull(permission, "specified role is null.");
         for (RouterPath path : RouterPath.values()) {

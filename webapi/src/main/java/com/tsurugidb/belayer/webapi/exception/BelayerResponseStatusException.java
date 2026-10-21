@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public class BelayerResponseStatusException extends ResponseStatusException {
 
+    /** message for display */
     private String displayMessage;
 
     /**

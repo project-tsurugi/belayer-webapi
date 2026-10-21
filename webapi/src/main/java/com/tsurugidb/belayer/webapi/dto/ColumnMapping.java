@@ -19,6 +19,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Column mapping of a load request: loads the {@code sourceColumn} of the input file into the
+ * {@code targetColumn} of the table.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

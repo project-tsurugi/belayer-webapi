@@ -74,6 +74,10 @@ public class SecurityConfig {
 
   /**
    * SecurityWebFilterChain for this app.
+   *
+   * @param http security settings to build the filter chain from
+   * @param bearerAuthenticationConverter converter that extracts the bearer token from a request
+   * @return SecurityWebFilterChain
    */
   @Bean
   public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,

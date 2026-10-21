@@ -19,6 +19,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request and response body of the file/directory delete APIs.
+ *
+ * <ul>
+ * <li>{@code uid}: user ID, set from the authenticated user</li>
+ * <li>{@code path}: file or directory to delete (single-target APIs)</li>
+ * <li>{@code pathList}: files to delete (multiple-file API)</li>
+ * <li>{@code force}: if {@code true}, a directory is deleted together with its contents</li>
+ * </ul>
+ *
+ * <p>Paths are relative to the user's storage directory.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

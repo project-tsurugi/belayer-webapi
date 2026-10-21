@@ -96,6 +96,11 @@ public class FileSystemApiHandler {
   @Autowired
   private SystemTime systemTime;
 
+  /**
+   * Validate the configured properties.
+   *
+   * @throws IllegalArgumentException if the zip compress level is not between 0 and 9 or -1.
+   */
   @PostConstruct
   public void validateProperties() {
     if (zipCompressLevel < -1 || zipCompressLevel > 9) {

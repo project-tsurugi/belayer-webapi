@@ -28,6 +28,12 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Base class of jobs that run in a Tsurugi transaction (dump, load and transaction jobs).
+ *
+ * <p>Holds the transaction, the {@code Load} object of a running load and a temporary directory.
+ * {@link #close()} closes the {@code Load} object and the transaction.</p>
+ */
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
@@ -44,6 +50,9 @@ public class TransactionalJob extends Job {
     @JsonIgnore
     private Load load;
 
+    /**
+     * Rolls back the transaction, if any. Exceptions are logged and ignored.
+     */
     public void rollback() {
         if (tsurugiTransaction != null) {
             try {

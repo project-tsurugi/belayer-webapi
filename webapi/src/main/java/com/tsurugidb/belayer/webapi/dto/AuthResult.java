@@ -22,6 +22,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Result of authentication or token refresh.
+ *
+ * <p>Holds the issued refresh/access tokens with their expiration times, and the roles and
+ * authorities of the user. On failure, only {@code userId} and {@code errorMessage} are set.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

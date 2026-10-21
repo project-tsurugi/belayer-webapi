@@ -22,6 +22,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Response body of the dump API, adding the dump outcome to {@link JobResult}.
+ *
+ * <p>{@code files}, {@code status} and {@code errorMessage} are set only when the request asked
+ * to wait until the dump is done.</p>
+ */
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)

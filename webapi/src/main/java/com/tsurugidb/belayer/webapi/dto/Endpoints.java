@@ -18,6 +18,10 @@ package com.tsurugidb.belayer.webapi.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * Response body of the endpoint list API: the endpoints listed in {@code endpoints.csv}, or the base
+ * URL of the request when none are configured.
+ */
 @Data
 @AllArgsConstructor
 public class Endpoints {

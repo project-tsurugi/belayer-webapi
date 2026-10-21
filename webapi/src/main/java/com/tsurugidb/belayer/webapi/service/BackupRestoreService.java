@@ -54,6 +54,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+/**
+ * Service for backup and restore jobs.
+ */
 @Slf4j
 @Component
 public class BackupRestoreService {
@@ -88,6 +91,11 @@ public class BackupRestoreService {
   @Value("${webapi.backup.zipcompresslevel}")
   private int zipCompressLevel;
 
+  /**
+   * Validate the configured properties.
+   *
+   * @throws IllegalArgumentException if the zip compress level is not between 0 and 9 or -1.
+   */
   @PostConstruct
   public void validateProperties() {
     if (zipCompressLevel < -1 || zipCompressLevel > 9) {
@@ -303,6 +311,8 @@ public class BackupRestoreService {
   /**
    * Return job.
    *
+   * @param type  backup or restore
+   * @param uid   User ID
    * @param jobId Job ID
    * @return Job
    */
@@ -346,7 +356,9 @@ public class BackupRestoreService {
   /**
    * Cancel Backup/Restore job.
    *
-   * @param jobId
+   * @param type  backup or restore
+   * @param uid   User ID
+   * @param jobId Job ID
    * @return Task status
    */
   public Mono<Job> cancelBackupRestoreJob(String type, String uid, String jobId) {

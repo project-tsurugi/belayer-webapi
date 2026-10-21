@@ -23,11 +23,20 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+/**
+ * Job that backs up the database into a zip file.
+ *
+ * <p>{@code destDir} is the output directory and {@code zipFilePath} the created zip file;
+ * {@code output} holds the latest status reported by the backup command.</p>
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class BackupJob extends Job {
 
+    /**
+     * Creates a backup job with its type set to {@link Job#TYPE_BACKUP}.
+     */
     public BackupJob() {
         super();
         setType(TYPE_BACKUP);

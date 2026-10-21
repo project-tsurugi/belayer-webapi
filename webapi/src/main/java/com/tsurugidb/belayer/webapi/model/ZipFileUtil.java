@@ -36,9 +36,22 @@ import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Utilities for zip files.
+ */
 @Slf4j
 public class ZipFileUtil {
 
+    /**
+     * Return a collector that writes the files of the given paths into a zip file.
+     *
+     * Each entry is named by the path relative to the base path. The collector does not support parallel streams.
+     *
+     * @param basePath      base path to name the zip entries.
+     * @param zipFileName   path of the zip file to create.
+     * @param compressLevel compression level of the zip file.
+     * @return collector that returns the path of the created zip file.
+     */
     public static Collector<String, ?, String> collectAsZipFile(Path basePath, String zipFileName, int compressLevel) {
 
         log.debug("basePath:{}, zipFileName:{}", basePath, zipFileName);
@@ -105,6 +118,13 @@ public class ZipFileUtil {
         }
     }
 
+    /**
+     * Extract a zip file into the destination directory.
+     *
+     * @param destDir     destination directory.
+     * @param zipFilePath path of the zip file.
+     * @throws IORuntimeException if an I/O error occurred, or an entry is outside of the destination directory.
+     */
     public static void extractZipFile(Path destDir, Path zipFilePath) {
         Objects.requireNonNull(destDir, "destDir");
         Objects.requireNonNull(zipFilePath, "zipFilePath");

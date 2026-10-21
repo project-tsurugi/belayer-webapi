@@ -33,6 +33,9 @@ import com.tsurugidb.belayer.webapi.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the authentication APIs (token issue and refresh).
+ */
 @Slf4j
 @Component
 public class AuthHandler {
@@ -40,6 +43,14 @@ public class AuthHandler {
   @Autowired
   AuthService authService;
 
+  /**
+   * Authentication API.
+   *
+   * Verifies the user ID ("uid") and password ("pw") form parameters and issues tokens.
+   *
+   * @param req Request
+   * @return Response (400 Bad Request if the authentication failed)
+   */
   public Mono<ServerResponse> auth(ServerRequest req) {
     Mono<MultiValueMap<String, String>> authReq = req.body(BodyExtractors.toFormData());
     return authReq.flatMap(this::verifyAuthParam)
@@ -56,6 +67,14 @@ public class AuthHandler {
         });
   }
 
+  /**
+   * Token refresh API.
+   *
+   * Issues a new access token from the refresh token given as the "rt" form parameter.
+   *
+   * @param req Request
+   * @return Response (400 Bad Request if the refresh failed)
+   */
   public Mono<ServerResponse> refresh(ServerRequest req) {
     Mono<MultiValueMap<String, String>> authReq = req.body(BodyExtractors.toFormData());
 

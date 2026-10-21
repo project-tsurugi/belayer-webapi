@@ -25,6 +25,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response body of the DB status API ({@code /api/db/status}), serialized with snake_case keys.
+ *
+ * <p>{@code status} is one of {@code stop}, {@code starting}, {@code running}, {@code shutdown},
+ * {@code disconnected}; {@code mode} is one of {@code standalone}, {@code master}, {@code replica},
+ * {@code standby}. {@code instance_name} and {@code tags} come from {@code instance_info.json}.</p>
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

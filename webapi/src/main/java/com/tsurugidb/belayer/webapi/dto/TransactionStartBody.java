@@ -19,6 +19,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the transaction begin API.
+ *
+ * <ul>
+ * <li>{@code type}: {@code read_write} or {@code read_only} (required)</li>
+ * <li>{@code timeoutMin}: transaction timeout in minutes, as a decimal string (required)</li>
+ * <li>{@code tables}: tables to write in the transaction (required for {@code read_write})</li>
+ * </ul>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

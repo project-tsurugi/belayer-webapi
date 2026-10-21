@@ -17,11 +17,27 @@ package com.tsurugidb.belayer.webapi.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Exception that results in HTTP 401 Unauthorized.
+ */
 public class UnauthorizationException extends BelayerResponseStatusException {
+    /**
+     * Constructor
+     *
+     * @param message message for display
+     * @param reason exception reason to log
+     */
     public UnauthorizationException(String message, String reason) {
         super(HttpStatus.UNAUTHORIZED, message, reason, null);
       }
     
+      /**
+       * Constructor
+       *
+       * @param message message for display
+       * @param reason exception reason to log
+       * @param cause cause of exception
+       */
       public UnauthorizationException(String message, String reason, Throwable cause) {
         super(HttpStatus.UNAUTHORIZED, message, reason, cause);
       }

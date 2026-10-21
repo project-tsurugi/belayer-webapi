@@ -15,9 +15,15 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
+/**
+ * Operation requested on an existing transaction, identified by the type name used in the API path.
+ */
 public enum TransactionFinishType {
+    /** Commit the transaction ({@code commit}). */
     COMMIT("commit"),
+    /** Roll back the transaction ({@code rollback}). */
     ROLLBACK("rollback"),
+    /** Only show the transaction status ({@code status}). */
     SHOW_STATUS("status");
 
     private final String typeName;
@@ -26,6 +32,11 @@ public enum TransactionFinishType {
         this.typeName = typeName;
     }
 
+    /**
+     * Returns the type name used in the API path.
+     *
+     * @return type name ({@code commit}, {@code rollback} or {@code status})
+     */
     public String getTypeName() {
         return typeName;
     }
@@ -34,6 +45,12 @@ public enum TransactionFinishType {
         return this.name();
     }
 
+    /**
+     * Returns the constant whose type name matches.
+     *
+     * @param typeName type name ({@code commit}, {@code rollback} or {@code status})
+     * @return the matching constant, or {@code null} if none matches
+     */
     public static TransactionFinishType fromName(String typeName) {
 
         for (TransactionFinishType type : values()) {

@@ -15,8 +15,16 @@
  */
 package com.tsurugidb.belayer.webapi.exception;
 
+/**
+ * Exception for no data.
+ */
 public class NoDataException extends Exception {
 
+    /**
+     * Constructor
+     *
+     * @param message exception message
+     */
     public NoDataException(String message) {
         super(message);
     }

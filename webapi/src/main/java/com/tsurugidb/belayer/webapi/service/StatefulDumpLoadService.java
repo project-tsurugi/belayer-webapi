@@ -38,6 +38,9 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 
 import reactor.core.publisher.Mono;
 
+/**
+ * Service for transactions used by the stateful dump/load APIs.
+ */
 @Component
 public class StatefulDumpLoadService {
 
@@ -47,6 +50,14 @@ public class StatefulDumpLoadService {
     @Autowired
     TsubakuroService tsubakuroService;
 
+    /**
+     * Start a transaction and register it as a transaction job.
+     *
+     * A READ_ONLY mode starts a read-only transaction and a READ_WRITE mode starts a long transaction.
+     *
+     * @param param transaction API parameter.
+     * @return registered transaction job.
+     */
     public Mono<LongTransactionJob> startTransaction(TransactionApiParameter param) {
 
         var job = new LongTransactionJob();
@@ -79,6 +90,15 @@ public class StatefulDumpLoadService {
         return Mono.just(job);
     }
 
+    /**
+     * Finish the transaction by commit or rollback, or just return it to show its status.
+     *
+     * @param param transaction API parameter.
+     * @return transaction job.
+     * @throws NotFoundException if the transaction is not found.
+     * @throws BadRequestException if the status of the transaction does not allow the requested operation.
+     * @throws IllegalArgumentException if the finish type is invalid.
+     */
     public Mono<LongTransactionJob> finishTransaction(TransactionApiParameter param) {
         var targetJob = jobManager.getJob(Job.TYPE_TRANSACTION, param.getUid(), param.getTransactionId());
         if (targetJob.isEmpty()) {
@@ -115,6 +135,12 @@ public class StatefulDumpLoadService {
         return Mono.just(job);
     }
 
+    /**
+     * Commit the transaction and mark the job as committed.
+     *
+     * @param job transaction job.
+     * @throws RuntimeIOException if the commit failed.
+     */
     public void commitTransaction(LongTransactionJob job) {
 
         try {
@@ -126,6 +152,12 @@ public class StatefulDumpLoadService {
         jobManager.updateJobStatus(job, JobStatus.COMMITED, null);
     }
 
+    /**
+     * Roll back the transaction and mark the job as rollback completed.
+     *
+     * @param job transaction job.
+     * @throws RuntimeIOException if the rollback failed.
+     */
     public void rollbackTransaction(LongTransactionJob job) {
 
         try {

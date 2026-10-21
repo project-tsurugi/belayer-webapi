@@ -27,6 +27,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+/**
+ * Parameters of a stream load request (upload files and load them in an existing transaction).
+ *
+ * <p>{@code jobId} is the transaction ID, {@code table} the target table, {@code format} the input
+ * file format, {@code fileParts} the uploaded files, {@code colMap} the column mappings and
+ * {@code tempDir} the temporary working directory.</p>
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -43,6 +50,11 @@ public class LoadParameter extends UploadParameter {
         fileParts.add(filePart);
     }
 
+    /**
+     * Add a column mapping.
+     *
+     * @param colMapping ColumnMapping.
+     */
     public void addColMapping(ColumnMapping colMapping) {
         colMap.add(colMapping);
     }

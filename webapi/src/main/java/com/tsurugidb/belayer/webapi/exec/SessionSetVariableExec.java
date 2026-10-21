@@ -33,6 +33,9 @@ import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Executor of the external command to set a session variable of a Tsurugi session.
+ */
 @Slf4j
 @Component
 public class SessionSetVariableExec {
@@ -50,7 +53,11 @@ public class SessionSetVariableExec {
    * execute the command to set the session variable.
    *
    * @param sessionId Session ID
+   * @param variableName name of the session variable
+   * @param variableValue value to set
    * @param token authentication token
+   * @return true if the command finished successfully
+   * @throws ProcessExecException if the command failed to run or its result is unknown
    */
   public boolean setVariable(String sessionId, String variableName, String variableValue, String token) {
 
@@ -110,6 +117,18 @@ public class SessionSetVariableExec {
     }
   }
 
+  /**
+   * start the command process.
+   *
+   * @param sessionId Session ID
+   * @param variableName name of the session variable
+   * @param variableValue value to set
+   * @param monitoringFile path of the monitoring file the command writes its status to
+   * @param outFile path of the file to write stdout and stderr of the command
+   * @param token authentication token
+   * @return started process
+   * @throws ProcessExecException if failed to start the process
+   */
   protected Process runProcess(String sessionId, String variableName, String variableValue, String monitoringFile,
       String outFile, String token) {
     String argsLine = String.format(cmdString, sessionId, variableName, variableValue, monitoringFile, conf, token);

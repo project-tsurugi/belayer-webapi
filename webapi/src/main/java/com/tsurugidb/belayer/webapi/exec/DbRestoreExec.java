@@ -41,6 +41,9 @@ import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 
+/**
+ * Executor of the external command to restore Tsurugi DB from a backup.
+ */
 @Slf4j
 @Component
 public class DbRestoreExec {
@@ -61,6 +64,8 @@ public class DbRestoreExec {
    * execute the command to restore Database.
    *
    * @param job Job
+   * @return the given job
+   * @throws ProcessExecException if the command failed (unless the job has been canceled)
    */
   public RestoreJob startRestore(RestoreJob job) {
     log.debug("start restore:{}", job);
@@ -112,6 +117,16 @@ public class DbRestoreExec {
     }
   }
 
+  /**
+   * start the command process.
+   *
+   * @param dirPath path of the directory that contains the backup files
+   * @param monitoringFilePath path of the monitoring file the command writes its status to
+   * @param outFile path of the file to write stdout and stderr of the command
+   * @param token authentication token
+   * @return started process
+   * @throws ProcessExecException if failed to start the process
+   */
   protected Process runProcess(String dirPath, Path monitoringFilePath, Path outFile, String token) {
     String argsLine = String.format(cmdString, dirPath, monitoringFilePath.toString(), conf, token);
     String[] args = argsLine.split(" ");
@@ -132,10 +147,18 @@ public class DbRestoreExec {
     }
   }
 
+  /**
+   * Disposable that destroys the process if it is alive.
+   */
   public static class DisposableProcess implements Disposable {
 
     private Process process;
 
+    /**
+     * Constructor.
+     *
+     * @param process process to dispose
+     */
     public DisposableProcess(Process process) {
       this.process = process;
     }

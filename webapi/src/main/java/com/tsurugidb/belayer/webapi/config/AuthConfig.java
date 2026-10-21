@@ -31,6 +31,9 @@ import com.tsurugidb.tsubakuro.auth.http.JwtTicketProvider;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Configuration for authentication using the authentication server.
+ */
 @Slf4j
 @Configuration
 @Profile({ "default", "ut" })
@@ -39,6 +42,12 @@ public class AuthConfig {
     @Value("${webapi.auth.url}")
     String authServerUrl;
 
+    /**
+     * TicketProvider that issues tickets via the authentication server
+     * specified by {@code webapi.auth.url}.
+     *
+     * @return TicketProvider
+     */
     @Bean
     public TicketProvider getTicketProvider() {
         log.debug("auth url:" + authServerUrl);

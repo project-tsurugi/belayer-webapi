@@ -23,6 +23,9 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 
 import com.tsurugidb.belayer.webapi.exception.BelayerResponseStatusException;
 
+/**
+ * ErrorAttributes that adds request information and the display message of the error.
+ */
 public class GlobalErrorAttributes extends DefaultErrorAttributes {
 
     @Override

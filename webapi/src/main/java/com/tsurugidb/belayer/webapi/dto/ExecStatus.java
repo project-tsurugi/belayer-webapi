@@ -29,23 +29,43 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * One record of a monitoring file written by an external command (e.g. {@code tgctl_w} / {@code tgha_w}),
+ * deserialized from a JSON line with snake_case keys.
+ *
+ * <p>{@code kind} tells the record type ({@code KIND_*}); {@code status} is one of the
+ * {@code STATUS_*} values; {@code timestamp} is in epoch seconds; {@code progress} is a ratio
+ * (1 means 100%). The session fields ({@code session_id}, {@code label}, ...) are filled by
+ * {@code data} records of the session status command.</p>
+ */
 @Data
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ExecStatus {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
+    /** Record kind: the command started. */
     public static final String KIND_START = "start";
+    /** Record kind: the command finished; {@code status} holds the result. */
     public static final String KIND_FINISH = "finish";
+    /** Record kind: progress report. */
     public static final String KIND_PROGRESS = "progress";
+    /** Record kind: data output by the command. */
     public static final String KIND_DATA = "data";
 
+    /** Database status: not running. */
     public static final String STATUS_STOP = "stop";
+    /** Database status: starting up. */
     public static final String STATUS_STARTING = "starting";
+    /** Database status: running. */
     public static final String STATUS_RUNNING = "running";
+    /** Database status: shutting down. */
     public static final String STATUS_SHUTDOWN = "shutdown";
+    /** Database status: was running but cannot be connected. */
     public static final String STATUS_DISCONNECTED = "disconnected";
+    /** Command result: succeeded. */
     public static final String STATUS_SUCCESS = "success";
+    /** Command result: failed. */
     public static final String STATUS_FAILURE = "failure";
 
     private Long timestamp;
@@ -70,6 +90,11 @@ public class ExecStatus {
 
     private boolean freezed = false;
 
+    /**
+     * Returns a one-line human-readable summary of this record, used in logs and error messages.
+     *
+     * @return summary string depending on {@code kind}
+     */
     public String toStatusString() {
 
         switch (kind) {

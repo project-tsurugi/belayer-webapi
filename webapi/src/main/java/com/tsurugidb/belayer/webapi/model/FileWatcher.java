@@ -31,6 +31,11 @@ import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Watcher of a single monitoring file.
+ *
+ * Each line appended to the file is parsed as JSON into an ExecStatus.
+ */
 @Data
 @Slf4j
 public class FileWatcher {
@@ -49,10 +54,23 @@ public class FileWatcher {
 
     private MonitoringManager monitoringManager;
 
+    /**
+     * Constructor.
+     *
+     * @param targetFile path of the monitoring file to watch.
+     */
     public FileWatcher(Path targetFile) {
         this.targetFilePath = targetFile;
     }
 
+    /**
+     * Wait until the latest ExecStatus satisfies the condition.
+     *
+     * The status is checked every 500 milliseconds, and the wait gives up after about 5 seconds.
+     *
+     * @param p condition to wait for.
+     * @return the latest ExecStatus (may not satisfy the condition, or may be null, if the wait gave up).
+     */
     public ExecStatus waitForExecStatus(Predicate<ExecStatus> p) {
         int count = 0;
         while (true) {
@@ -71,11 +89,20 @@ public class FileWatcher {
 
     }
 
+    /**
+     * Wait until the first ExecStatus is read.
+     *
+     * @return the latest ExecStatus (may be null if the wait gave up).
+     * @see #waitForExecStatus(Predicate)
+     */
     public ExecStatus waitForExecStatus() {
 
         return waitForExecStatus(status -> status != null);
     }
 
+    /**
+     * Stop watching, and remove this watcher from the monitoring manager.
+     */
     public void close() {
         log.debug("close watcher");
         if (watchKey != null) {

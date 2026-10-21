@@ -23,6 +23,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * Parameters of a load request, read from the request body and completed with the common parameters.
+ *
+ * <p>{@code files} are the files to load, {@code mappings} the column mappings and
+ * {@code transactional} whether the load runs in a transaction (default {@code true}).</p>
+ */
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)

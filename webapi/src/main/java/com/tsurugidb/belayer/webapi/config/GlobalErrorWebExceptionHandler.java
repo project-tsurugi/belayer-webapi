@@ -37,11 +37,22 @@ import com.tsurugidb.belayer.webapi.dto.ErrorResult;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Global error handler that renders errors as JSON responses.
+ */
 @Slf4j
 @Component
 @Order(-2)
 public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHandler {
 
+    /**
+     * Constructor.
+     *
+     * @param g error attributes
+     * @param webProperties web properties
+     * @param applicationContext application context
+     * @param configurer codec configurer that provides message readers and writers
+     */
     public GlobalErrorWebExceptionHandler(ErrorAttributes g, WebProperties webProperties,
             ApplicationContext applicationContext, ServerCodecConfigurer configurer) {
         super(g, webProperties.getResources(), applicationContext);

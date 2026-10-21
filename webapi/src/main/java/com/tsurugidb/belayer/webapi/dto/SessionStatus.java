@@ -26,6 +26,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request/response body of the session control APIs, serialized with snake_case keys; null fields are omitted.
+ *
+ * <p>{@code session_id} is the Tsurugi session ID, {@code status} is {@code available} or
+ * {@code unavailable} (session status API) and {@code var_name} the variable that was set
+ * (session variable API). As the request body of the kill session API, only {@code session_id} is used.
+ * {@code token} is the caller's credential and is never serialized.</p>
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

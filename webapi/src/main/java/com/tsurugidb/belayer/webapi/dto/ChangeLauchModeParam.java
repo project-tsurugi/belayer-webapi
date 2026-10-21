@@ -19,6 +19,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the DB launch mode change API ({@code /api/db/changemode}).
+ *
+ * <ul>
+ * <li>{@code mode}: launch mode, one of {@code standalone}, {@code master}, {@code replica}, {@code standby} (required)</li>
+ * <li>{@code replicateFrom}: gRPC endpoint to replicate from (required when {@code mode} is {@code replica})</li>
+ * <li>{@code autoFetchWal}: {@code "true"}/{@code "false"}, whether to fetch WAL automatically;
+ * treated as {@code true} when empty</li>
+ * </ul>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

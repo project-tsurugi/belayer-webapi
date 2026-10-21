@@ -23,11 +23,20 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+/**
+ * Job that dumps a table into files.
+ *
+ * <p>{@code table} is the table to dump, {@code dirPath} the output directory, {@code format}
+ * the output file format ({@code parquet} or {@code csv}) and {@code files} the created files.</p>
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class DumpJob extends TransactionalJob {
 
+  /**
+   * Creates a dump job with its type set to {@link Job#TYPE_DUMP}.
+   */
   public DumpJob() {
     super();
     setType(TYPE_DUMP);

@@ -29,6 +29,9 @@ import com.tsurugidb.tsubakuro.auth.mock.MockTicketProvider;
 
 import lombok.Getter;
 
+/**
+ * Configuration for mock authentication, used without the authentication server.
+ */
 @Configuration
 @ConfigurationProperties("webapi.auth.mock")
 @Profile({"ft", "authmock"})
@@ -37,6 +40,12 @@ public class AuthMockConfig {
 
     private final Map<String, String> users = new HashMap<>();
 
+    /**
+     * Mock TicketProvider that authenticates the users
+     * defined by {@code webapi.auth.mock.users}.
+     *
+     * @return TicketProvider
+     */
     @Bean
     public TicketProvider getTicketProvider() {
         var mtp = new MockTicketProvider();

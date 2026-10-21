@@ -17,8 +17,16 @@ package com.tsurugidb.belayer.webapi.exception;
 
 import org.springframework.security.core.AuthenticationException;
 
+/**
+ * Exception for authentication failure.
+ */
 public class UnauthenticatedException extends AuthenticationException {
 
+  /**
+   * Constructor
+   *
+   * @param message exception message
+   */
   public UnauthenticatedException(String message) {
     super(message);
   }

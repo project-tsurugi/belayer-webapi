@@ -19,6 +19,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body holding the path of a single file to delete.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

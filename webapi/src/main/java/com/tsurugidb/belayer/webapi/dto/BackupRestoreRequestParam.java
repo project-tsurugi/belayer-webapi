@@ -20,6 +20,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+/**
+ * Parameters of a backup or restore request, combining the request body with the authenticated
+ * user ({@code uid}, {@code credentials}) and the job ID.
+ *
+ * <p>{@code dirPath} is the backup output directory and {@code zipFilePath} the backup zip file
+ * to restore from, both relative to the user's storage.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -73,6 +73,9 @@ import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service for reading, writing and converting parquet files.
+ */
 @Component
 @Slf4j
 public class ParquetService {
@@ -81,6 +84,7 @@ public class ParquetService {
      * get metadata from parquet file.
      *
      * @param parquetFilePath file path of the input parquet file.
+     * @return schema of the parquet file.
      */
     public MessageType getSchemaFromParquet(String parquetFilePath) {
 
@@ -151,6 +155,17 @@ public class ParquetService {
 
     }
 
+    /**
+     * get the value of a field in a record as a CSV string.
+     *
+     * Unsupported types and repeated fields are returned as "?".
+     *
+     * @param simpleGourp record to read.
+     * @param row         row index in the row group (not used).
+     * @param fieldName   name of the field.
+     * @param valueCount  number of values of the field in the record.
+     * @return string value of the field, or null if the field has no value.
+     */
     protected String getValue(SimpleGroup simpleGourp, int row, String fieldName, int valueCount) {
 
         GroupType schema = simpleGourp.getType();

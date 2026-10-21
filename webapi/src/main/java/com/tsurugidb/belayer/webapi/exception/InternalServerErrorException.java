@@ -17,8 +17,17 @@ package com.tsurugidb.belayer.webapi.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Exception that results in HTTP 500 Internal Server Error.
+ */
 public class InternalServerErrorException extends BelayerResponseStatusException {
   
+  /**
+   * Constructor. The message for display is fixed.
+   *
+   * @param reason exception reason to log
+   * @param cause cause of exception
+   */
   public InternalServerErrorException(String reason, Throwable cause) {
     super(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Error caused on the server", reason, cause);
   }

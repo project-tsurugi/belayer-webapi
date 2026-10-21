@@ -39,6 +39,11 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Manager to monitor files with a WatchService.
+ *
+ * When a watched file is created or modified, the consumer of its FileWatcher is called.
+ */
 @Slf4j
 @Component
 public class MonitoringManager {
@@ -52,10 +57,22 @@ public class MonitoringManager {
 
     private AtomicBoolean stopping = new AtomicBoolean(false);
 
+    /**
+     * Constructor.
+     *
+     * @throws IOException if failed to create a WatchService.
+     */
     public MonitoringManager() throws IOException {
         watchService = FileSystems.getDefault().newWatchService();
     }
 
+    /**
+     * Start watching the target file of the FileWatcher.
+     *
+     * @param fileWatcher FileWatcher to add.
+     * @throws IOException if failed to register the directory of the target file.
+     * @throws IllegalArgumentException if the parent of the target file is not a directory.
+     */
     public void addFileWatcher(FileWatcher fileWatcher) throws IOException {
         Objects.requireNonNull(fileWatcher);
 
@@ -84,6 +101,11 @@ public class MonitoringManager {
         log.debug("monitor :{}", fileName);
     }
 
+    /**
+     * Remove the consumer of the FileWatcher from the listeners.
+     *
+     * @param fileWatcher FileWatcher to remove.
+     */
     public void removeFileWatcher(FileWatcher fileWatcher) {
         var consumer = fileWatcher.getConsumer();
         if (consumer != null) {
@@ -91,6 +113,9 @@ public class MonitoringManager {
         }
     }
 
+    /**
+     * Start the monitoring loop in a thread of the thread pool.
+     */
     @PostConstruct
     public void lannch() {
         threadPoolTaskExecutor.execute(() -> launchMonitoring());
@@ -120,6 +145,9 @@ public class MonitoringManager {
         }
     }
 
+    /**
+     * Stop monitoring by closing the WatchService.
+     */
     @PreDestroy
     public void stopMonitoring() {
 
@@ -135,7 +163,15 @@ public class MonitoringManager {
         }
     }
 
+    /**
+     * Listener of watch events. (Not used in the current implementation.)
+     */
     public interface MonitoringListener {
+        /**
+         * Return a watch event.
+         *
+         * @return watch event.
+         */
         WatchEvent<?> listenEvent();
     }
 }

@@ -21,6 +21,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response body of the table list API.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

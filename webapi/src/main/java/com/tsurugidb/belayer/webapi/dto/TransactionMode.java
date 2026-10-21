@@ -15,8 +15,14 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
+/**
+ * Type of a transaction started by the transaction API, identified by the name used in the API
+ * ({@code type} of the request and response bodies).
+ */
 public enum TransactionMode {
+    /** Read-only transaction ({@code read_only}). */
     READ_ONLY("read_only"),
+    /** Read-write transaction ({@code read_write}). */
     READ_WRITE("read_write");
     private final String modeName;
 
@@ -24,6 +30,11 @@ public enum TransactionMode {
         this.modeName = modeName;
     }
 
+    /**
+     * Returns the name used in the API.
+     *
+     * @return {@code read_only} or {@code read_write}
+     */
     public String getTypeName() {
         return modeName;
     }
@@ -32,6 +43,12 @@ public enum TransactionMode {
         return this.name();
     }
 
+    /**
+     * Returns the constant whose name used in the API matches.
+     *
+     * @param typeName {@code read_only} or {@code read_write}
+     * @return the matching constant, or {@code null} if none matches
+     */
     public static TransactionMode fromName(String typeName) {
 
         for (TransactionMode type : values()) {

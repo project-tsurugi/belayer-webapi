@@ -19,6 +19,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the zip download API: {@code pathList} holds the files to put into the zip,
+ * relative to the user's storage directory. {@code uid} is set from the authenticated user.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

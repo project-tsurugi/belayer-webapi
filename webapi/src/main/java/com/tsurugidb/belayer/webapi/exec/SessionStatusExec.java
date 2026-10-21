@@ -33,6 +33,9 @@ import com.tsurugidb.belayer.webapi.model.MonitoringManager;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Executor of the external command to check the status of a Tsurugi session.
+ */
 @Slf4j
 @Component
 public class SessionStatusExec {
@@ -51,6 +54,8 @@ public class SessionStatusExec {
    *
    * @param sessionId Session ID
    * @param token authentication token
+   * @return true if the command output data of the session
+   * @throws ProcessExecException if the command failed to run or its result is unknown
    */
   public boolean existsSession(String sessionId, String token) {
 
@@ -114,6 +119,16 @@ public class SessionStatusExec {
     }
   }
 
+  /**
+   * start the command process.
+   *
+   * @param sessionId Session ID
+   * @param monitoringFile path of the monitoring file the command writes its status to
+   * @param outFile path of the file to write stdout and stderr of the command
+   * @param token authentication token
+   * @return started process
+   * @throws ProcessExecException if failed to start the process
+   */
   protected Process runProcess(String sessionId, String monitoringFile, String outFile, String token) {
     String argsLine = String.format(cmdString, sessionId, monitoringFile, conf, token);
     String[] args = argsLine.split(" ");

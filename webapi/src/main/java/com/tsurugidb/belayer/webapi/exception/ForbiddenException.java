@@ -17,8 +17,18 @@ package com.tsurugidb.belayer.webapi.exception;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Exception that results in HTTP 403 Forbidden.
+ */
 public class ForbiddenException extends BelayerResponseStatusException {
 
+  /**
+   * Constructor
+   *
+   * @param message message for display
+   * @param reason exception reason to log
+   * @param cause cause of exception
+   */
   public ForbiddenException(String message, String reason, Throwable cause) {
     super(HttpStatus.FORBIDDEN, message, reason, cause);
   }

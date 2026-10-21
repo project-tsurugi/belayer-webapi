@@ -62,6 +62,11 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Stub implementation of TsubakuroService for testing ("ut" and "ft" profiles).
+ *
+ * It does not connect to Tsurugi DB, and returns fixed files under the storage root.
+ */
 @Slf4j
 @Component
 @Profile({ "ut", "ft" })
@@ -230,6 +235,9 @@ public class TsubakuroServiceStub implements TsubakuroService {
         return Arrays.stream(tableNames.split(",")).map(name -> name.trim()).collect(Collectors.toList());
     }
 
+    /**
+     * Session stub that does nothing.
+     */
     public static class SessionStub implements Session {
 
         @Override
@@ -285,6 +293,9 @@ public class TsubakuroServiceStub implements TsubakuroService {
         }
     }
 
+    /**
+     * SqlClient stub that does nothing.
+     */
     public class SqlClientStub implements SqlClient {
         @Override
         public void close() throws ServerException, IOException, InterruptedException {
@@ -292,6 +303,9 @@ public class TsubakuroServiceStub implements TsubakuroService {
         }
     }
 
+    /**
+     * Transaction stub whose commit and rollback do nothing.
+     */
     public class TransactionStub implements Transaction {
 
         @Override

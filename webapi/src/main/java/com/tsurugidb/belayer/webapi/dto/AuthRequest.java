@@ -18,6 +18,11 @@ package com.tsurugidb.belayer.webapi.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * Request body of the authentication API, holding the user ID ({@code uid}) and the password ({@code pw}).
+ *
+ * <p>Used only to describe the request schema in the API documentation.</p>
+ */
 @Data
 @AllArgsConstructor
 public class AuthRequest {

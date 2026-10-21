@@ -19,6 +19,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+/**
+ * Parameters of a dump request, adding the output directory ({@code dirPath}) to the common parameters.
+ */
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)

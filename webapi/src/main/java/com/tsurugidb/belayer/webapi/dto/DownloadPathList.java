@@ -21,6 +21,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response body holding a list of file paths ({@code fileNames}), returned by the upload API
+ * (uploaded files) and the directory list API (entries of the directory; directories end with {@code /}).
+ *
+ * <p>{@code message} is set when the directory list was truncated, otherwise {@code null}.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

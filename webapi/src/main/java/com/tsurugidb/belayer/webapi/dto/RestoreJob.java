@@ -23,11 +23,20 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+/**
+ * Job that restores the database from a backup zip file.
+ *
+ * <p>{@code zipFilePath} is the backup zip file, {@code workDir} the directory it is expanded into
+ * and {@code output} the latest status reported by the restore command.</p>
+ */
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper = true)
 public class RestoreJob extends Job {
 
+    /**
+     * Creates a restore job with its type set to {@link Job#TYPE_RESTORE}.
+     */
     public RestoreJob() {
         super();
         setType(TYPE_RESTORE);

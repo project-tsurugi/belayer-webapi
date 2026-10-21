@@ -19,6 +19,10 @@ import java.util.List;
 
 import lombok.Data;
 
+/**
+ * Response body of the stream load API: the target {@code table}, the {@code transactionId},
+ * the {@code format} and the loaded files ({@code dumpFiles}).
+ */
 @Data
 public class LoadResult {
     private String table;

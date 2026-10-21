@@ -17,6 +17,13 @@ package com.tsurugidb.belayer.webapi.dto;
 
 import lombok.Data;
 
+/**
+ * Parameters of the transaction APIs (begin, commit/rollback, status).
+ *
+ * <p>Holds the authenticated user ({@code uid}, {@code credentials}), the {@code transactionId},
+ * and, depending on the API, the {@code transactionMode}, the timeout in minutes ({@code timeoutMin}),
+ * the tables to write ({@code tables}) or the {@code finishType}.</p>
+ */
 @Data
 public class TransactionApiParameter {
 

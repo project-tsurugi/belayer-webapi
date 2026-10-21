@@ -22,6 +22,9 @@ import com.tsurugidb.sql.proto.SqlCommon.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * Resolved column mapping of a load: the table column to load into and the Parquet column to read from.
+ */
 @Data
 @AllArgsConstructor
 public class LoadColumnMapping {

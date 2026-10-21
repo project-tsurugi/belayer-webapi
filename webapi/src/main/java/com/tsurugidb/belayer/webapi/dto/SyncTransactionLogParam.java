@@ -19,6 +19,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request body of the DB sync API ({@code /api/db/sync}).
+ *
+ * <p>{@code from} is the endpoint to synchronize WAL from (required; must not contain
+ * double quotes or whitespace).</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

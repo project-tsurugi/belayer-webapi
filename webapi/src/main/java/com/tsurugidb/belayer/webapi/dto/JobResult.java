@@ -19,6 +19,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response body of the job start APIs: the ID, owner user ID and type ({@code Job.TYPE_*}) of the started job.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

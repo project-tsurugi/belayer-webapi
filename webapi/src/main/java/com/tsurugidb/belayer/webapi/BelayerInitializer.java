@@ -74,6 +74,12 @@ public class BelayerInitializer {
         }
     }
 
+    /**
+     * Checks whether the command is available, by using {@code which}.
+     *
+     * @param command command name or path
+     * @return true if {@code which} finds the command
+     */
     public static boolean isCommandAvailable(String command) {
         ProcessBuilder pb = new ProcessBuilder("which", command);
 

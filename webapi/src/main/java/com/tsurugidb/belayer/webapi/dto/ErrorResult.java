@@ -19,6 +19,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Error response body, serialized as {@code {"errorMessage": "..."}}.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

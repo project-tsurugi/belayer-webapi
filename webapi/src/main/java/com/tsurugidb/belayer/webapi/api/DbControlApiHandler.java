@@ -40,6 +40,9 @@ import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Handler for the database control APIs (start, shutdown, status, mode change, etc.).
+ */
 @Component
 @Slf4j
 public class DbControlApiHandler {

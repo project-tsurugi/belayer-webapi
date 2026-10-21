@@ -44,6 +44,11 @@ import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Manager of jobs.
+ *
+ * Jobs are kept in memory and saved to a JSON file. Jobs older than the configured expiration days are removed.
+ */
 @Slf4j
 @Component
 public class JobManager implements DisposableBean {
@@ -66,6 +71,11 @@ public class JobManager implements DisposableBean {
 
   private LinkedHashMap<String, Job> jobMap = new LinkedHashMap<>();
 
+  /**
+   * Initialize the job list from the JSON file.
+   *
+   * @throws IOException not thrown by the current implementation (a JSON file that cannot be read is deleted instead).
+   */
   @PostConstruct
   public void init() throws IOException {
     jsonFilePath = dumpFileDir + "/" + DUMP_FILE_NAME;
@@ -168,7 +178,8 @@ public class JobManager implements DisposableBean {
 
   /**
    * Return specified Job.
-   * 
+   *
+   * @param type  job type
    * @param uid   User ID
    * @param jobId Job ID
    * @return Job
@@ -217,6 +228,11 @@ public class JobManager implements DisposableBean {
     }
   }
 
+  /**
+   * Read the job list from the JSON file, if it exists.
+   *
+   * If the file cannot be read, it is deleted and the job list is cleared.
+   */
   public void readJobListFromJson() {
     synchronized (this) {
       if (Files.exists(Path.of(jsonFilePath)) && !Files.isDirectory(Path.of(jsonFilePath))) {
@@ -235,6 +251,11 @@ public class JobManager implements DisposableBean {
     }
   }
 
+  /**
+   * Remove expired jobs, then write the job list to the JSON file.
+   *
+   * @throws RuntimeException if an I/O error occurred while writing the file.
+   */
   public void dumpJobListToJson() {
     synchronized (this) {
       cleanUpOldJobs();
@@ -251,6 +272,9 @@ public class JobManager implements DisposableBean {
     }
   }
 
+  /**
+   * Remove jobs started before the configured expiration days.
+   */
   public void cleanUpOldJobs() {
     synchronized (this) {
       LinkedHashMap<String, Job> newJobMap = jobMap.entrySet().stream()

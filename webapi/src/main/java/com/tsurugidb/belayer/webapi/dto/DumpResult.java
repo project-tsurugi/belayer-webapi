@@ -19,6 +19,10 @@ import java.util.List;
 
 import lombok.Data;
 
+/**
+ * Response body of the stream dump API in normal (non-SSE) mode: the dumped {@code table}, the
+ * {@code transactionId}, the {@code format} and the paths of the created files ({@code downloadPathList}).
+ */
 @Data
 public class DumpResult {
     private String table;

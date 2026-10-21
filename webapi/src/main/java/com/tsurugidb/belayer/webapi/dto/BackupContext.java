@@ -22,6 +22,9 @@ import com.tsurugidb.tsubakuro.common.Session;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * A file to be copied by an online backup, paired with the Tsurugi session that keeps the backup open.
+ */
 @Data
 @AllArgsConstructor
 public class BackupContext {

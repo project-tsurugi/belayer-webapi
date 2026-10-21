@@ -34,6 +34,9 @@ import com.tsurugidb.belayer.webapi.exception.ProcessExecException;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Executor of the external command to obtain the status of Tsurugi DB.
+ */
 @Slf4j
 @Component
 public class DbStatusExec {
@@ -55,8 +58,8 @@ public class DbStatusExec {
 
   /**
    * obtains database status
-   * @param jobId
-   * @param authToken
+   * @param jobId Job ID (not used)
+   * @param authToken authentication token
    * @return status
    */
   public DbStatus getStatus(String jobId, String authToken) {
@@ -95,6 +98,15 @@ public class DbStatusExec {
     }
   }
 
+  /**
+   * run the command and parse its output (stdout and stderr) as JSON.
+   *
+   * @param monitoringFile path of the monitoring file passed to the command
+   * @param outFile path of the output file (not used; the output is read from the process directly)
+   * @param authToken authentication token
+   * @return status
+   * @throws ProcessExecException if failed to run the command or to parse its output
+   */
   public DbStatus runProcess(String monitoringFile, String outFile, String authToken) {
     String argsLine = String.format(cmdString, tgctl, tgha, monitoringFile, conf, authToken);
     String[] args = argsLine.split(" ");

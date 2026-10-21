@@ -20,14 +20,26 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+/**
+ * Common parameters of dump and load requests.
+ *
+ * <p>Holds the authenticated user ({@code uid}, {@code credentials}), the target {@code table},
+ * the {@code jobId}, the file {@code format} (one of the {@code FORMAT_*} values, default
+ * {@link #FORMAT_DETECT_BY_EXTENSION}) and whether the API waits until the job is done
+ * ({@code waitUntilDone}).</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class DumpLoadRequestParam {
 
+  /** Format value: determine the file format from the file extension. */
   public static final String FORMAT_DETECT_BY_EXTENSION = "detect_by_ext";
+  /** Format value: CSV. */
   public static final String FORMAT_CSV = "csv";
+  /** Format value: Apache Parquet. */
   public static final String FORMAT_PARQUET = "parquet";
+  /** Format value: zip archive of dump files. */
   public static final String FORMAT_ZIP = "zip";
 
   private String uid;

@@ -101,6 +101,12 @@ public class BelayerShellScriptInitializer {
         }
     }
 
+    /**
+     * List the file names of the shell scripts ("scripts/*.sh") on the classpath.
+     *
+     * @return list of script file names.
+     * @throws IOException if failed to resolve the resources.
+     */
     public List<String> listFilesInJar() throws IOException {
 
         ClassLoader cl = this.getClass().getClassLoader();

@@ -21,6 +21,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
 
+/**
+ * A file to load. {@code filePath} is the Parquet file actually loaded; when the input was CSV
+ * ({@code fromCsv} is {@code true}) it is the converted file and {@code originalFilePath} is the CSV file.
+ */
 @Data
 @AllArgsConstructor
 @ToString

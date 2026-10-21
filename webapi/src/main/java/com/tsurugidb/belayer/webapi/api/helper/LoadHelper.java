@@ -24,6 +24,9 @@ import com.tsurugidb.belayer.webapi.dto.ColumnMapping;
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 import com.tsurugidb.belayer.webapi.service.FileSystemService;
 
+/**
+ * Helper for validating load requests.
+ */
 @Component
 public class LoadHelper {
 
@@ -31,6 +34,13 @@ public class LoadHelper {
     private FileSystemService fileSystemService;
 
 
+    /**
+     * Check that the dump files to load are specified and exist.
+     *
+     * @param uid   UID
+     * @param files paths of the dump files to load.
+     * @throws BadRequestException if no file is specified or a file does not exist.
+     */
     public void checkLoadFiles(String uid, List<String> files) {
 
         // check file exists
@@ -43,6 +53,14 @@ public class LoadHelper {
         }
     }
 
+    /**
+     * Check that the column mappings are valid.
+     *
+     * A column expression must not be empty, and one starting with "@" must be followed by digits only.
+     *
+     * @param mappings column mappings. No check is done if null.
+     * @throws BadRequestException if a mapping has an invalid column expression.
+     */
     public void checkLoadMapping(List<ColumnMapping> mappings) {
 
         // OK if column-mapping is not specified.

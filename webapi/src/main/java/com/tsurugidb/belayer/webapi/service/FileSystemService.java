@@ -113,6 +113,13 @@ public class FileSystemService {
     }
   }
 
+  /**
+   * Create a new temporary directory in the default temporary-file directory.
+   *
+   * @param prefix prefix of the directory name
+   * @return path of created directory.
+   * @throws IORuntimeException I/O Error
+   */
   public Path createTempDirectory(String prefix) {
     try {
       return Files.createTempDirectory(prefix);
@@ -214,6 +221,17 @@ public class FileSystemService {
     return downloadRootPath.relativize(path);
   }
 
+  /**
+   * Return list of paths under the target directory (up to 10 levels deep), sorted in natural order.
+   *
+   * The target directory itself is included unless directories are hidden.
+   *
+   * @param targetDir directory to list
+   * @param hideFile  if true, list directories only
+   * @param hideDir   if true (and hideFile is false), list files only
+   * @return list of normalized paths
+   * @throws IOException I/O Error while walking the directory
+   */
   public List<String> getFileList(Path targetDir, boolean hideFile, boolean hideDir) throws IOException {
 
     List<String> fileList = Files.walk(targetDir, MAX_DEPTH)
@@ -240,6 +258,10 @@ public class FileSystemService {
 
   /**
    * Delete file in user storage.
+   *
+   * @param uid      User ID
+   * @param filePath download path of the file to delete
+   * @throws IORuntimeException I/O Error
    */
   public void deleteFile(String uid, String filePath) {
     try {

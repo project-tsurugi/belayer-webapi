@@ -27,6 +27,9 @@ import com.tsurugidb.belayer.webapi.exec.DbStartExec;
 import com.tsurugidb.belayer.webapi.exec.DbStatusExec;
 import com.tsurugidb.belayer.webapi.exec.DbSyncWalExec;
 
+/**
+ * Service to control Tsurugi DB via external commands.
+ */
 @Component
 public class DbControlService {
 
@@ -54,6 +57,8 @@ public class DbControlService {
    * @param jobId Job ID
    * @param token authentication token
    * @param mode  launch mode
+   * @param replicaFrom target to replicate
+   * @param autoFetchWal if true, fetch required WAL automatically
    * @return status
    */
   public ExecStatus startDatabase(String jobId, String token, String mode, String replicaFrom, boolean autoFetchWal) {
@@ -101,6 +106,7 @@ public class DbControlService {
    * get staus of Tsurugi DB.
    * 
    * @param jobId Job ID
+   * @param token authentication token
    * @return DB status
    */
   public DbStatus getStatus(String jobId, String token) {

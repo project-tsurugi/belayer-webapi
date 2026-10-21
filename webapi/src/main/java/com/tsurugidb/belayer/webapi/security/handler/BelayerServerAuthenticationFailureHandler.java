@@ -9,6 +9,9 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Failure handler that responds HTTP 401 Unauthorized when the authentication fails.
+ */
 @Slf4j
 public class BelayerServerAuthenticationFailureHandler implements ServerAuthenticationFailureHandler {
 

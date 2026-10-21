@@ -18,6 +18,9 @@ package com.tsurugidb.belayer.webapi.service;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 
+/**
+ * Service to create Job IDs.
+ */
 @Component
 public class JobIdService {
 
