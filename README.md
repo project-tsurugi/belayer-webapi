@@ -15,7 +15,8 @@
     * The compiler targets Java 11 (`options.release = 11` in `webapi/build.gradle`),
       so Java 11 or later is enough to run the server.
 * jq
-* python3
+* Python 3.10 or later, as `/usr/bin/python3`
+    * The `tgctl_w` / `tgha_w` scripts in `distribution/stub/` use the `match` statement, which Python 3.10 introduced.
 
 ### How to build
 
