@@ -43,7 +43,7 @@ Ctrl-C to shutdown.
     $ curl http://localhost:8000/api/hello
     ```
 
-* Health Check
+* Health Check (only when the management port is opened with `BELAYER_MANAGEMENT_ENABLED=true`)
 
     ```console
     $ curl http://localhost:18000/management/health
@@ -57,7 +57,8 @@ See the env var table below.
 |Environment Variable|Description|Default Value<br/>(used when variable is not defined)|
 |:----|:----|:----|
 |BELAYER_SERVER_PORT|server port for this web application.|`8000`|
-|BELAYER_MANAGEMENT_PORT|management port for this web application.|`18000`|
+|BELAYER_MANAGEMENT_PORT|management port for this web application. Used only when `BELAYER_MANAGEMENT_ENABLED` is `true`.|`18000`|
+|BELAYER_MANAGEMENT_ENABLED|Set `true` to open the management port. It serves the actuator endpoints (`health`, `info`, `beans`, `env`, `prometheus`), the OpenAPI document and Swagger UI **without authentication**, so keep it unreachable from outside when it is open. When it is not `true`, the port is not opened at all.|`false`|
 |BELAYER_HOME|Installed directory.|`/usr/lib/tsurugi-belayer`|
 |BELAYER_LOG_LEVEL|Log level for belaer WebAPI Server.|`WARN`|
 |BELAYER_AUTH_ERROR_LOG_LEVEL|Log level for authentication/authorization error. Set WARN if you want to output logs when A&A error caused.|`ERROR`|

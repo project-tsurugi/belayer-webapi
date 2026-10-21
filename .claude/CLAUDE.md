@@ -53,10 +53,14 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
 - `tgctl_w` は本物の `tgctl` を呼ぶ**ラッパー**、`tgha_w` は外部コマンドを一切呼ばない**純粋なスタブ**。
   `mode.txt` はスタブ同士の内部状態で **Java 側は参照しない。**
 - `jq` を実際に使うのは JAR 同梱の `resources/scripts/show_db_status.sh` だけ（`/api/db/status` 用）。
-- **management は既定で別ポート 18000**（`BELAYER_MANAGEMENT_PORT`）。アプリ本体（既定 8000）とは
-  別ポートなので、ファイアウォールの設定時に見落としやすい。何を公開するかは
-  `application-common.properties` を参照。swagger-ui / openapi もこちら側に出る
-  （`springdoc.use-management-port=true`）。
+- **management ポートは既定では開かない**（2026-10-21〜）。`BELAYER_MANAGEMENT_ENABLED=true` のときだけ
+  `BELAYER_MANAGEMENT_PORT`（既定 18000）を開く。実装は `config/ManagementPortEnvironmentPostProcessor`
+  （`META-INF/spring.factories` で登録）で、OFF のとき `management.server.port=-1` にする。
+  swagger-ui / openapi もこちら側に出る（`springdoc.use-management-port=true`）ので、**OFF のときは
+  springdoc も止める。止めないと springdoc の Swagger UI 設定が起動時に落ちる。**
+  開いたときの URL は `/management/swagger-ui`（`/management/webjars/swagger-ui/index.html` へ転送）と
+  `/management/openapi/springdocDefault`。`/management/openapi` そのものは 404。
+  management ポートにも Spring Security のフィルタは掛かるが、`/management/**` は `permitAll`。
 - **`docker/` と `docker-compose.yml` はメンテナンスを止めている。別タイミングで見直す
   予定なので、それまで手を付けないこと。** `docker/Dockerfile` が
   `build/libs/belayer-webapi-<version>.jar` を移動しようとするが、成果物は
