@@ -70,7 +70,9 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
 
 tsubakuro と同じ型に統一済み。`toolchain 17` でビルドし、`options.release = 11` で
 言語レベルと API 面の両方を 11 に縛る。CI の `java-version` も 17。
-起動時検査の閾値は 11（`webapi.required.java_majar_version`。`majar` は原文ママの誤字）。
+起動時検査の閾値は 11（`webapi.required.java_major_version`、環境変数
+`BELAYER_REQUIRED_JAVA_MAJOR_VERSION` で上書き可）。1.5.3 で旧名 `java_majar_version` の誤字を
+直したので、旧名で設定していた環境は無言で既定値 11 に戻る。
 
 ## テスト
 
