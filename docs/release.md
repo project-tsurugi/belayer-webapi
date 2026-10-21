@@ -4,14 +4,15 @@
 
 ### Breaking changes
 
-* rename the property for the minimum Java major version checked at startup, from `webapi.required.java_majar_version` to `webapi.required.java_major_version`, and add the environment variable `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` to override it.
+* rename the property for the minimum Java major version checked at startup, from `webapi.required.java_majar_version` to `webapi.required.java_major_version`(maj**a**r -> maj**o**r), and add the environment variable `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` to override it.
     * **A setting given under the old name (e.g. `WEBAPI_REQUIRED_JAVA_MAJAR_VERSION`) is no longer read, and the default `11` applies without any warning.** Use `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` instead.
 
 ### Bug fixes
 
 * fix `start_server.sh` to export `CONF_FOLDER`. Without it, the launch script in the JAR could not locate `tsurugi-belayer.conf` and the settings in it were not applied.
+    * `start_server.sh` is a fallback script to launch manually. 
 * fix the Backup/Restore Cancel API (`/api/br/cancel`) to accept `P_BACKUP` as well as `P_RESTORE`, as `docs/belayer_authorization.md` states. A user holding only `ROLE_BACKUP` could start a backup job but could not cancel it (403).
-* narrow the path match of the Finish Transaction API from `/api/transaction/**` to `/api/transaction/{type}/{transaction_id}`, so that it does not take over the permission settings of the other APIs under `/api/transaction/`. This does not change the current behavior, since all of them require `P_STREAM_API`.
+* narrow the path match of the Finish Transaction API from `/api/transaction/**` to `/api/transaction/{type}/{transaction_id}`, so that it does not take over the permission settings of the other APIs under `/api/transaction/`. <u>This does not change the current behavior</u>, since all of them require `P_STREAM_API`.
 
 ### Misc changes
 
