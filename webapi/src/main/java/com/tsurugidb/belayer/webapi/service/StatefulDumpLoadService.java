@@ -91,7 +91,18 @@ public class StatefulDumpLoadService {
     }
 
     /**
-     * Finish the transaction by commit or rollback, or just return it to show its status.
+     * Return the transaction to show its status.
+     *
+     * @param param transaction API parameter. The finish type is not used.
+     * @return transaction job.
+     * @throws NotFoundException if the transaction is not found.
+     */
+    public Mono<LongTransactionJob> getTransaction(TransactionApiParameter param) {
+        return Mono.just(findTransactionJob(param));
+    }
+
+    /**
+     * Finish the transaction by commit or rollback.
      *
      * @param param transaction API parameter.
      * @return transaction job.
@@ -100,12 +111,7 @@ public class StatefulDumpLoadService {
      * @throws IllegalArgumentException if the finish type is invalid.
      */
     public Mono<LongTransactionJob> finishTransaction(TransactionApiParameter param) {
-        var targetJob = jobManager.getJob(Job.TYPE_TRANSACTION, param.getUid(), param.getTransactionId());
-        if (targetJob.isEmpty()) {
-            var message = "Specified transaction is not found. transactionId:" + param.getTransactionId();
-            throw new NotFoundException(message, message, null);
-        }
-        var job = (LongTransactionJob) targetJob.get();
+        var job = findTransactionJob(param);
 
         var finishType = param.getFinishType();
         if (finishType == TransactionFinishType.COMMIT) {
@@ -126,13 +132,20 @@ public class StatefulDumpLoadService {
                 }
                 rollbackTransaction(job);
             }
-        } else if (finishType == TransactionFinishType.SHOW_STATUS) {
-            // do nothing.
         } else {
             throw new IllegalArgumentException("Invalid finishType. finishType=" + finishType);
         }
 
         return Mono.just(job);
+    }
+
+    private LongTransactionJob findTransactionJob(TransactionApiParameter param) {
+        var targetJob = jobManager.getJob(Job.TYPE_TRANSACTION, param.getUid(), param.getTransactionId());
+        if (targetJob.isEmpty()) {
+            var message = "Specified transaction is not found. transactionId:" + param.getTransactionId();
+            throw new NotFoundException(message, message, null);
+        }
+        return (LongTransactionJob) targetJob.get();
     }
 
     /**

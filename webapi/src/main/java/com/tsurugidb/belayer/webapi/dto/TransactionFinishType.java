@@ -22,9 +22,7 @@ public enum TransactionFinishType {
     /** Commit the transaction ({@code commit}). */
     COMMIT("commit"),
     /** Roll back the transaction ({@code rollback}). */
-    ROLLBACK("rollback"),
-    /** Only show the transaction status ({@code status}). */
-    SHOW_STATUS("status");
+    ROLLBACK("rollback");
 
     private final String typeName;
 
@@ -35,7 +33,7 @@ public enum TransactionFinishType {
     /**
      * Returns the type name used in the API path.
      *
-     * @return type name ({@code commit}, {@code rollback} or {@code status})
+     * @return type name ({@code commit} or {@code rollback})
      */
     public String getTypeName() {
         return typeName;
@@ -48,7 +46,7 @@ public enum TransactionFinishType {
     /**
      * Returns the constant whose type name matches.
      *
-     * @param typeName type name ({@code commit}, {@code rollback} or {@code status})
+     * @param typeName type name ({@code commit} or {@code rollback})
      * @return the matching constant, or {@code null} if none matches
      */
     public static TransactionFinishType fromName(String typeName) {

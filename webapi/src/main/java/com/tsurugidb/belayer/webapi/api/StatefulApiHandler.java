@@ -154,7 +154,7 @@ public class StatefulApiHandler {
         Mono<TransactionStatus> status = ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .map(auth -> this.createParameter(auth, req, false))
-                .flatMap(statefulDumploadService::finishTransaction)
+                .flatMap(statefulDumploadService::getTransaction)
                 .map(this::createTransactionStatus);
 
         return ServerResponse.ok().body(
@@ -217,17 +217,18 @@ public class StatefulApiHandler {
         param.setCredentials(auth.getCredentials().toString());
         param.setTransactionId(req.pathVariable("transaction_id"));
 
-        String type = "status";
+        // Only the finish API has {type}. The status API shares its path shape
+        // (POST /api/transaction/status/{id} reaches the finish API), so
+        // "status" must not be accepted as a type.
         if (finishTransaction) {
-            type = req.pathVariable("type");
+            String type = req.pathVariable("type");
+            var finishType = TransactionFinishType.fromName(type);
+            if (finishType == null) {
+                var msg = "Invalid parameter. Specify commit/rollback. type:" + type;
+                throw new BadRequestException(msg, msg);
+            }
+            param.setFinishType(finishType);
         }
-
-        var finishType = TransactionFinishType.fromName(type);
-        if (finishType == null) {
-            var msg = "Invalid parameter. Specify commit/rollback. type:" + type;
-            throw new BadRequestException(msg, msg);
-        }
-        param.setFinishType(finishType);
 
         return param;
     }
