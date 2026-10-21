@@ -119,7 +119,7 @@ public class StatefulDumpLoadService {
             }
         } else if (finishType == TransactionFinishType.ROLLBACK) {
             synchronized (job) {
-                if (job.getStatus() != JobStatus.AVAILABLE || job.getStatus() != JobStatus.IN_USE) {
+                if (job.getStatus() != JobStatus.AVAILABLE && job.getStatus() != JobStatus.IN_USE) {
                     var msg = String.format("Specified transction in not for use. [transactionId:%s, status:%s]",
                             job.getJobId(), job.getStatus());
                     throw new BadRequestException(msg, msg);
