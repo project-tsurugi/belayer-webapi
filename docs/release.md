@@ -6,6 +6,8 @@
 
 * rename the property for the minimum Java major version checked at startup, from `webapi.required.java_majar_version` to `webapi.required.java_major_version`(maj**a**r -> maj**o**r), and add the environment variable `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` to override it.
     * **A setting given under the old name (e.g. `WEBAPI_REQUIRED_JAVA_MAJAR_VERSION`) is no longer read, and the default `11` applies without any warning.** Use `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` instead.
+* `POST /api/transaction/status/{transaction_id}` now returns 400 (`Invalid parameter. Specify commit/rollback.`). It reached the Finish Transaction API (`POST /api/transaction/{type}/{transaction_id}`), which accepted `status` as `{type}` and returned the transaction status without finishing it. Use the Show Transaction Status API (`GET /api/transaction/status/{transaction_id}`), which is not changed.
+    * WebAdmin and RemoteCLI do not call these APIs.
 
 ### Bug fixes
 
