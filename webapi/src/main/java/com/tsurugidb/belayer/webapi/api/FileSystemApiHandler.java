@@ -223,17 +223,10 @@ public class FileSystemApiHandler {
 
   private Resource getFileResource(String uid, String filePath, boolean convertToCsv, String suffix) {
 
-    Path path = Path.of(storageRootDir, uid, filePath).toAbsolutePath().normalize();
+    // prevent Directory Traversal
+    Path path = fileSystemService.resolveInUserDir(uid, filePath, "Invalid file path. path:");
 
     log.info("download: " + path);
-
-    // prevent Directory Traversal
-    Path userDir = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
-    log.info("userDir: " + userDir);
-    if (!path.startsWith(userDir)) {
-      throw new BadRequestException("Invalid file path. path:" + filePath,
-          "Invalid file path. path:" + path, null);
-    }
 
     // check file is exists.
     if (!Files.exists(path)) {
@@ -434,21 +427,16 @@ public class FileSystemApiHandler {
 
   private List<String> getFileList(String uid, String dirPath, boolean hideFile, boolean hideDir) {
 
-    Path downloadRootPath = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
+    Path downloadRootPath = fileSystemService.getUserDir(uid);
 
     try {
       // avoid lack of user dir.
       Files.createDirectories(downloadRootPath);
 
-      Path targetDir = Path.of(storageRootDir, uid, dirPath).toAbsolutePath().normalize();
+      // prevent directory traversal
+      Path targetDir = fileSystemService.resolveInUserDir(uid, dirPath);
 
       log.debug("root:{}, target:{}", downloadRootPath, targetDir);
-
-      // prevent directory traversal
-      if (!targetDir.startsWith(downloadRootPath)) {
-        throw new BadRequestException("Invalid path. path:" + dirPath,
-            "invalid path. path:" + targetDir, null);
-      }
 
       // check dir exists
       if (!Files.isDirectory(targetDir)) {
@@ -543,8 +531,6 @@ public class FileSystemApiHandler {
   }
 
   private Mono<ServerResponse> deleteFileOrDir(String uid, String[] filePathList, boolean targetIsFile, boolean force) {
-    Path userDir = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
-
     if (!targetIsFile) {
       // delete directory
 
@@ -553,12 +539,9 @@ public class FileSystemApiHandler {
         throw new IllegalArgumentException("dir param is empty.");
       }
 
-      Path absPath = Path.of(storageRootDir, uid, filePathList[0]).toAbsolutePath().normalize();
+      // prevent directory traversal
+      Path absPath = fileSystemService.resolveInUserDir(uid, filePathList[0], "Invalid directory path. path:");
       log.debug("delete dir:" + absPath);
-      if (!absPath.startsWith(userDir)) {
-        throw new BadRequestException("Invalid directory path. path:" + filePathList[0],
-            "Invalid directory path. path:" + absPath, null);
-      }
 
       try {
         var absFile = absPath.toFile();
@@ -590,12 +573,9 @@ public class FileSystemApiHandler {
 
     // delete single file
     for (String filePath : filePathList) {
-      Path absPath = Path.of(storageRootDir, uid, filePath).toAbsolutePath().normalize();
+      // prevent directory traversal
+      Path absPath = fileSystemService.resolveInUserDir(uid, filePath, "Invalid file path. path:");
       log.debug("delete file:" + absPath);
-      if (!absPath.startsWith(userDir)) {
-        throw new BadRequestException("Invalid file path. path:" + filePath,
-            "Invalid file path. path:" + absPath, null);
-      }
 
       try {
         var absFile = absPath.toFile();

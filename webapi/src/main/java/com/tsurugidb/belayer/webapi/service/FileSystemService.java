@@ -85,21 +85,8 @@ public class FileSystemService {
   public Path createDirectory(String uid, String dir) {
     log.debug("create dir: " + uid + "/" + dir);
 
-    Path dirPath = Path.of(storageRootDir, uid, dir).toAbsolutePath().normalize();
-    int storageDirNameCount = Path.of(storageRootDir, uid).getNameCount();
-    int dirFullPathNameCount = dirPath.getNameCount();
-    int dirNameCount = storageDirNameCount < dirFullPathNameCount
-        ? dirPath.subpath(storageDirNameCount, dirFullPathNameCount).getNameCount()
-        : 0;
-
-    log.debug("dir count: " + dirNameCount);
-
     // prevent Dir Traversal
-    Path downloadRoot = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
-    if (!dirPath.startsWith(downloadRoot.toString())) {
-      throw new BadRequestException("Invalid destination dir:" + dir,
-          "invalid destination dir. dir:" + dirPath, null);
-    }
+    Path dirPath = resolveInUserDir(uid, dir, "Invalid destination dir:");
     log.debug("save ok");
 
     // create dir
@@ -140,16 +127,9 @@ public class FileSystemService {
           "Invalid path. path:" + toDir, null);
     }
 
-    Path downlaodRootPath = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
-    Path destDirPath = Path.of(storageRootDir, uid, toDir).toAbsolutePath().normalize();
-
-    log.debug("check dir path. root:{}, dest:{}", downlaodRootPath, destDirPath);
     // prevent directory traversal
-    if (!destDirPath.startsWith(downlaodRootPath)) {
-      throw new BadRequestException("Invalid path. path:" + toDir,
-          "Invalid path. path:" + destDirPath, null);
-    }
-
+    Path destDirPath = resolveInUserDir(uid, toDir);
+    log.debug("check dir path. dest:{}", destDirPath);
   }
 
   /**
@@ -179,7 +159,7 @@ public class FileSystemService {
    * 
    * @param uid      User ID
    * @param filePath directory path
-   * @throws BadRequestException if file is not exists.
+   * @throws BadRequestException if file is not exists, or the path points outside the user's storage area.
    */
   public void checkFileExists(String uid, String filePath) throws BadRequestException {
     if (StringUtil.isEmpty(filePath)) {
@@ -187,7 +167,8 @@ public class FileSystemService {
           "Invalid path. path:" + filePath, null);
     }
 
-    Path fp = Path.of(storageRootDir, uid, filePath).toAbsolutePath().normalize();
+    // prevent directory traversal
+    Path fp = resolveInUserDir(uid, filePath);
 
     log.debug("check file path. dest:{}", fp);
     if (!new File(fp.toString()).isFile()) {
@@ -198,13 +179,64 @@ public class FileSystemService {
 
   /**
    * Convert absolute path form download path.
-   * 
+   *
    * @param uid          User ID
    * @param downloadPath download path
    * @return Absolute Path
+   * @throws BadRequestException if the path points outside the user's storage area.
    */
   public Path convertToAbsolutePath(String uid, String downloadPath) {
-    return Path.of(storageRootDir, uid, downloadPath).toAbsolutePath().normalize();
+    return resolveInUserDir(uid, downloadPath);
+  }
+
+  /**
+   * Return the absolute, normalized path of the user's storage area.
+   *
+   * @param uid User ID
+   * @return the user's storage directory
+   */
+  public Path getUserDir(String uid) {
+    return Path.of(storageRootDir, uid).toAbsolutePath().normalize();
+  }
+
+  /**
+   * Resolve a path given by a client against the user's storage area.
+   *
+   * <p>
+   * The path is normalized, and it must stay inside the user's storage area.
+   * An absolute path is treated as relative to the storage area.
+   * Symbolic links are not resolved.
+   * </p>
+   *
+   * @param uid  User ID
+   * @param path path relative to the user's storage area
+   * @return the absolute, normalized path
+   * @throws BadRequestException if the path points outside the user's storage area.
+   */
+  public Path resolveInUserDir(String uid, String path) throws BadRequestException {
+    return resolveInUserDir(uid, path, "Invalid path. path:");
+  }
+
+  /**
+   * Resolve a path given by a client against the user's storage area.
+   *
+   * <p>
+   * Same as {@link #resolveInUserDir(String, String)}, with the message of the error.
+   * </p>
+   *
+   * @param uid     User ID
+   * @param path    path relative to the user's storage area
+   * @param message prefix of the error message. The path is appended to it.
+   * @return the absolute, normalized path
+   * @throws BadRequestException if the path points outside the user's storage area.
+   */
+  public Path resolveInUserDir(String uid, String path, String message) throws BadRequestException {
+    Path userDir = getUserDir(uid);
+    Path resolved = Path.of(storageRootDir, uid, path).toAbsolutePath().normalize();
+    if (!resolved.startsWith(userDir)) {
+      throw new BadRequestException(message + path, message + resolved, null);
+    }
+    return resolved;
   }
 
   /**
@@ -215,7 +247,7 @@ public class FileSystemService {
    * @return download Path
    */
   public Path convertToDownloadPath(String uid, String absolutePath) {
-    Path downloadRootPath = Path.of(storageRootDir, uid).toAbsolutePath().normalize();
+    Path downloadRootPath = getUserDir(uid);
     Path path = Path.of(absolutePath).toAbsolutePath().normalize();
 
     return downloadRootPath.relativize(path);
@@ -262,6 +294,7 @@ public class FileSystemService {
    * @param uid      User ID
    * @param filePath download path of the file to delete
    * @throws IORuntimeException I/O Error
+   * @throws BadRequestException if the path points outside the user's storage area.
    */
   public void deleteFile(String uid, String filePath) {
     try {
