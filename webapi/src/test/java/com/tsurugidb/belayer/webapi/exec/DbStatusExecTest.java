@@ -1,6 +1,9 @@
 package com.tsurugidb.belayer.webapi.exec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tsurugidb.belayer.webapi.exception.ProcessExecException;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -71,5 +75,45 @@ public class DbStatusExecTest {
         var status = exec.runProcess(tempDir.resolve("mon.log").toString(), "token");
 
         assertEquals("unset", status.getStatus());
+    }
+
+    // BW-9: the monitoring file is removed after each call.
+
+    private void useScript(String body) throws Exception {
+        Path script = tempDir.resolve("status2.sh");
+        Files.writeString(script, "#!/bin/bash\n" + body);
+        script.toFile().setExecutable(true);
+        exec.cmdString = script + " %s %s %s %s %s";
+    }
+
+    @Test
+    public void test_monitoring_file_removed() throws Exception {
+        // the monitoring file is the third argument. report its path as the status.
+        useScript("touch \"$3\"\necho \"{\\\"status\\\": \\\"$3\\\"}\"\n");
+
+        var status = exec.getStatus("job", "token");
+
+        Path monitoringFile = Path.of(status.getStatus());
+        assertTrue(monitoringFile.getFileName().toString().startsWith("monitoring-"));
+        assertFalse(Files.exists(monitoringFile));
+    }
+
+    @Test
+    public void test_monitoring_file_removed_on_failure() throws Exception {
+        Path reported = tempDir.resolve("reported.txt");
+        useScript("touch \"$3\"\necho -n \"$3\" > " + reported + "\necho 'not json'\n");
+
+        assertThrows(ProcessExecException.class, () -> exec.getStatus("job", "token"));
+
+        Path monitoringFile = Path.of(Files.readString(reported));
+        assertFalse(Files.exists(monitoringFile));
+    }
+
+    @Test
+    public void test_monitoring_file_not_made() throws Exception {
+        // the command does not create the monitoring file: nothing to delete, no error
+        useScript("echo '{\"status\": \"running\"}'\n");
+
+        assertEquals("running", exec.getStatus("job", "token").getStatus());
     }
 }
