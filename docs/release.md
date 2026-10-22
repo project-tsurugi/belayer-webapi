@@ -8,8 +8,29 @@
     * **A setting given under the old name (e.g. `WEBAPI_REQUIRED_JAVA_MAJAR_VERSION`) is no longer read, and the default `11` applies without any warning.** Use `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` instead.
 * `POST /api/transaction/status/{transaction_id}` now returns 400 (`Invalid parameter. Specify commit/rollback.`). It reached the Finish Transaction API (`POST /api/transaction/{type}/{transaction_id}`), which accepted `status` as `{type}` and returned the transaction status without finishing it. Use the Show Transaction Status API (`GET /api/transaction/status/{transaction_id}`), which is not changed.
     * WebAdmin and RemoteCLI do not call these APIs.
+* the management port (`BELAYER_MANAGEMENT_PORT`, default 18000) is now closed by default. Set `BELAYER_MANAGEMENT_ENABLED=true` to open it. It served the actuator endpoints (including `env` and `beans`), the OpenAPI document and Swagger UI without authentication. When it is closed, springdoc (OpenAPI document and Swagger UI) is disabled too. When it is open, the URLs are `/management/swagger-ui` and `/management/openapi/springdocDefault`.
 
 ### Bug fixes
+
+* **[Security]** fix the Restore API (`POST /api/restore`, `zipFilePath`) and the Load API (`POST /api/load/{table}`, `files`) to reject a path that points outside the user's storage directory with 400. A path with `../` could restore from any zip file the server can read, load (and then dump) another user's files, and tell whether a file exists. The check is now shared by all file paths given to the APIs.
+* stop writing the authentication token in plain text to files and logs.
+    * `show_db_status.sh` wrote its arguments, including the token, to `/tmp/show_db_status_out.log` on every call. It now writes the log only when Belayer logs at DEBUG, with the token masked, and creates the file with mode 600.
+    * the stubs `tgctl_w` and `tgha_w` wrote every command line, including `--auth-token`, to `/tmp/tgctl_w_history.log` and `/tmp/tgha_w_history.log`. They now write the history only when Belayer logs at DEBUG, with the token masked, and create the files with mode 600.
+    * the command lines of the external commands written to the DEBUG log of Belayer now have the token masked.
+    * Note: `com.tsurugidb` logs at DEBUG unless `BELAYER_LOG_LEVEL` is set.
+* fix the rollback of a stateful transaction (`POST /api/transaction/rollback/{transaction_id}`), which always returned 400 and left the transaction open until it timed out.
+* return 400 instead of 500 for missing items in the requests of the file APIs.
+    * delete file / delete directory without `path`, delete files without `pathList` or with `null` in it (nothing is deleted then), download zip without a body, without `pathList` or with `null` in it.
+    * `destDir` of the Upload API is now optional; without it, the files are saved directly under the user's storage directory (as with `""`).
+* fix the Download Zip API (`POST /api/downloadzip`) failing with 500 for files directly under the user's storage directory (e.g. `a.parquet`), as WebAdmin sends them when such files are selected. Paths such as `./x/a` and `x/b` are now also taken as the same directory.
+* return 400 instead of 200 with no body, doing nothing, when the request body is empty, for the Session Variable Setting API, the Session Kill API and the Role-User Mapping Update API.
+* fix the job list file (`belayer_jobs.json`) handling.
+    * it was rewritten on every read of a job, in place, so a crash while writing it lost the job history at the next start. It is now written in the background when jobs change (and every 5 seconds for progress), and replaced atomically. The format is unchanged.
+    * fix a deadlock between canceling a job and a job finishing at the same time.
+* release resources that were left behind.
+    * restore and offline backup did not stop watching their monitoring file, which kept a file watch and the job in memory, and could overwrite the progress of a finished job.
+    * the DB Status API (also called when a backup or a restore starts) left a file `monitoring-*.log` under `${java.io.tmpdir}/belayer-db-status` on every call.
+    * close file streams that were left open until garbage collection.
 
 * fix `start_server.sh` so that the settings in `tsurugi-belayer.conf` take effect.
     * export `CONF_FOLDER`. Without it, the launch script in the JAR could not locate `tsurugi-belayer.conf`.
@@ -29,6 +50,13 @@
     * correct the JAR name to `tsurugi-belayer.jar`.
 * fix the key name in the Instance List API example in the WebAPI document (`endpoinsts` -> `endpoints`).
 * fix the section links in the getting started document.
+* describe every route in the OpenAPI document (operation, parameters, request body, responses and the required permission), and give it the version of Belayer instead of `unspecified`. The items of the request bodies that the server sets by itself (e.g. `uid`) are no longer shown as inputs.
+* document the requirements and limits.
+    * README: Python 3.10 or later is required by the stubs `tgctl_w` and `tgha_w` (they use the `match` statement).
+    * the WebAPI document: the DB Start API and the DB Change Mode API accept only `standalone` as the mode.
+* update `docs/belayer_authorization.md` to the permissions in the code: `P_STREAM_API` (not `P_STREAM`), `P_LIST_ENDPOINTS`, `P_DB_CHANGE_MODE` and `P_DB_SYNC`, the role x permission table and the `/api/list/roles` example.
+* write the Javadoc of the public API so that the javadoc of JDK 17 reports no warnings or errors, and remove `javadoc.failOnError = false`, so that a Javadoc error now stops the build.
+* clean up the code: remove unused classes and arguments, make constants final, fix names.
 
 ### Full Changelog
 
