@@ -364,18 +364,19 @@ public class Router {
   public ObjectMapper defaultMapper() {
     ObjectMapper objectMapper = new ObjectMapper();
     var module = new JavaTimeModule();
-    module.addSerializer(Instant.class, new Iso8601WithoutMillisInstantSerializer());
-    module.addDeserializer(Instant.class, new Iso8601WithoutMillisInstantDeserializer());
+    module.addSerializer(Instant.class, new Iso8601WithMillisInstantSerializer());
+    module.addDeserializer(Instant.class, new Iso8601WithMillisInstantDeserializer());
     objectMapper.registerModule(module);
     objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     return objectMapper;
   }
 
   /**
-   * JSON serializer for Instant.
-   * Format: {@code yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx} in UTC.
+   * JSON serializer for Instant, with milliseconds.
+   * Format: {@code yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx} in UTC (e.g. {@code 2023-01-02T03:04:05.678+00:00}).
+   * Digits below milliseconds are dropped.
    */
-  public class Iso8601WithoutMillisInstantSerializer extends JsonSerializer<Instant> {
+  public static class Iso8601WithMillisInstantSerializer extends JsonSerializer<Instant> {
     private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
         .withZone(ZoneOffset.UTC);
 
@@ -386,10 +387,12 @@ public class Router {
   }
 
   /**
-   * JSON deserializer for Instant.
-   * Format: {@code yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx}.
+   * JSON deserializer for Instant, with milliseconds.
+   * Accepts only the format {@code yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx}: exactly three digits of milliseconds and
+   * a numeric offset such as {@code +00:00} or {@code +09:00} (e.g. {@code 2023-01-02T03:04:05.678+00:00}).
+   * A value without milliseconds, or with {@code Z} as the offset, is rejected.
    */
-  public class Iso8601WithoutMillisInstantDeserializer extends JsonDeserializer<Instant> {
+  public static class Iso8601WithMillisInstantDeserializer extends JsonDeserializer<Instant> {
     private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxxxx")
         .withZone(ZoneOffset.UTC);
 

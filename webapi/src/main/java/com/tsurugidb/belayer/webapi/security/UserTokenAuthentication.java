@@ -31,8 +31,8 @@ public class UserTokenAuthentication extends AbstractAuthenticationToken {
   private final String userId;
   /** access token */
   private final String token;
-  /** token expiration time */
-  private final Optional<Instant> tokenExpirationTime;
+  /** token expiration time (null if unknown). Not an Optional, since this class is Serializable. */
+  private final Instant tokenExpirationTime;
 
   /**
    * {@inheritDoc}
@@ -53,10 +53,10 @@ public class UserTokenAuthentication extends AbstractAuthenticationToken {
   /**
    * Return token expiration time
    * 
-   * @return token expiration time
+   * @return token expiration time (empty if unknown)
    */
   public Optional<Instant> getTokenExpirationTime() {
-    return tokenExpirationTime;
+    return Optional.ofNullable(tokenExpirationTime);
   }
 
   /**
@@ -86,7 +86,7 @@ public class UserTokenAuthentication extends AbstractAuthenticationToken {
     super(authorities);
     this.userId = userId;
     this.token = token;
-    this.tokenExpirationTime = tokenExpirationTime;
+    this.tokenExpirationTime = tokenExpirationTime == null ? null : tokenExpirationTime.orElse(null);
     super.setAuthenticated(authenticated);
   }
 

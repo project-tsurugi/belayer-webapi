@@ -122,6 +122,10 @@ jar {
 bootJar {
 	archiveFileName = 'tsurugi-belayer.jar'
     launchScript()
+	// read by OpenApiConfig as the version of the API document
+	manifest {
+		attributes 'Implementation-Version': project.version
+	}
 }
 
 tasks.named('test') {

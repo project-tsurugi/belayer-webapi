@@ -301,7 +301,7 @@ public class DumpLoadService {
     }
 
     private LoadJob createTempDir(LoadJob job) {
-        Path tmpDir = fileSystemService.createTempDirectory(Constants.TEMP_DIR_PREFIX_LAOD + job.getJobId());
+        Path tmpDir = fileSystemService.createTempDirectory(Constants.TEMP_DIR_PREFIX_LOAD + job.getJobId());
         log.debug("temp dir:" + tmpDir);
         job.setTempDir(tmpDir);
 
@@ -319,7 +319,7 @@ public class DumpLoadService {
                     log.debug("expandZip:{}", inFilePath);
                     // expand zip for tmp dir
                     Path workDir = fileSystemService
-                            .createTempDirectory(Constants.TEMP_DIR_PREFIX_LAOD_ZIP + job.getJobId());
+                            .createTempDirectory(Constants.TEMP_DIR_PREFIX_LOAD_ZIP + job.getJobId());
                     Path zipFilePath = fileSystemService.convertToAbsolutePath(job.getUid(), inFilePath);
                     ZipFileUtil.extractZipFile(workDir, zipFilePath);
 

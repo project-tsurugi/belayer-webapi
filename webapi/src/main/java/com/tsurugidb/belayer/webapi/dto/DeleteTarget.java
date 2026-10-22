@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeleteTarget {
 
+    // set by the server: returned in the response, ignored in the request.
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private String uid;
     private String path;
     private String[] pathList;

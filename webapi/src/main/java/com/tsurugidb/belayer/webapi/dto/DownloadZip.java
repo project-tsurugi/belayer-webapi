@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DownloadZip {
+    // set by the server, not by the client: hidden from the API document.
+    @Schema(hidden = true)
     private String uid;
     private String[] pathList;
 }

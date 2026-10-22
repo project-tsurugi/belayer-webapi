@@ -144,7 +144,7 @@ public class ParquetService {
                         Type fieldType = type.getType(field);
                         String fieldName = fieldType.getName();
 
-                        printer.print(getValue(simpleGroup, i, fieldName, valueCount));
+                        printer.print(getValue(simpleGroup, fieldName, valueCount));
                     }
                     printer.println();
                 }
@@ -161,12 +161,11 @@ public class ParquetService {
      * Unsupported types and repeated fields are returned as "?".
      *
      * @param simpleGourp record to read.
-     * @param row         row index in the row group (not used).
      * @param fieldName   name of the field.
      * @param valueCount  number of values of the field in the record.
      * @return string value of the field, or null if the field has no value.
      */
-    protected String getValue(SimpleGroup simpleGourp, int row, String fieldName, int valueCount) {
+    protected String getValue(SimpleGroup simpleGourp, String fieldName, int valueCount) {
 
         GroupType schema = simpleGourp.getType();
         int fieldCount = schema.getFieldIndex(fieldName);

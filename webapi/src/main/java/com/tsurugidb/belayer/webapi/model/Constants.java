@@ -24,33 +24,33 @@ public class Constants {
     public static final String EXT_PARQUET = ".parquet";
 
     /** File extension: CSV */
-    public  static final String EXT_CSV = ".csv";
+    public static final String EXT_CSV = ".csv";
 
     /** File extension: ZIP */
-    public  static final String EXT_ZIP = ".zip";
+    public static final String EXT_ZIP = ".zip";
 
     /** Temporary directory name prefix: download */
-    public static String TEMP_DIR_PREFIX_DOWNLOAD = "belayer-download-";
+    public static final String TEMP_DIR_PREFIX_DOWNLOAD = "belayer-download-";
 
     /** Temporary directory name prefix: dump */
-    public static String TEMP_DIR_PREFIX_DUMP = "belayer-dump-";
+    public static final String TEMP_DIR_PREFIX_DUMP = "belayer-dump-";
 
     /** Temporary directory name prefix: load */
-    public static String TEMP_DIR_PREFIX_LAOD = "belayer-load-";
+    public static final String TEMP_DIR_PREFIX_LOAD = "belayer-load-";
 
     /** Temporary directory name prefix: load from zip file */
-    public static String TEMP_DIR_PREFIX_LAOD_ZIP = "belayer-load-zip-";
+    public static final String TEMP_DIR_PREFIX_LOAD_ZIP = "belayer-load-zip-";
 
     /** Temporary directory name prefix: backup */
-    public static String TEMP_DIR_PREFIX_BACKUP = "belayer-backup-";
+    public static final String TEMP_DIR_PREFIX_BACKUP = "belayer-backup-";
 
     /** Temporary directory name prefix: restore */
-    public static String TEMP_DIR_PREFIX_RESTORE = "belayer-restore-";
+    public static final String TEMP_DIR_PREFIX_RESTORE = "belayer-restore-";
 
     /** Temporary directory name prefix: monitoring files of external commands */
-    public static String TEMP_DIR_PREFIX_MONITOR = "belayer-climonitor-";
+    public static final String TEMP_DIR_PREFIX_MONITOR = "belayer-climonitor-";
 
     /** File name prefix: zip file to download multiple files */
-    public static String FILE_PREFIX_MULTIPLE_DOWNLOAD_ZIP = "belayer_download_";
+    public static final String FILE_PREFIX_MULTIPLE_DOWNLOAD_ZIP = "belayer_download_";
 
 }

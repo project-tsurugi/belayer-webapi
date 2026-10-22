@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.eclipse.jetty.io.RuntimeIOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +29,7 @@ import com.tsurugidb.belayer.webapi.dto.TransactionApiParameter;
 import com.tsurugidb.belayer.webapi.dto.TransactionFinishType;
 import com.tsurugidb.belayer.webapi.dto.TransactionMode;
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
+import com.tsurugidb.belayer.webapi.exception.IORuntimeException;
 import com.tsurugidb.belayer.webapi.exception.NotFoundException;
 import com.tsurugidb.belayer.webapi.model.JobManager;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
@@ -152,14 +152,17 @@ public class StatefulDumpLoadService {
      * Commit the transaction and mark the job as committed.
      *
      * @param job transaction job.
-     * @throws RuntimeIOException if the commit failed.
+     * @throws IORuntimeException if the commit failed.
      */
     public void commitTransaction(LongTransactionJob job) {
 
         try {
             job.getTsurugiTransaction().getTransaction().commit().await();
-        } catch (IOException | ServerException | InterruptedException ex) {
-            throw new RuntimeIOException("failed to commit transation", ex);
+        } catch (IOException | ServerException ex) {
+            throw new IORuntimeException("failed to commit transation", ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IORuntimeException("failed to commit transation", ex);
         }
 
         jobManager.updateJobStatus(job, JobStatus.COMMITED, null);
@@ -169,14 +172,17 @@ public class StatefulDumpLoadService {
      * Roll back the transaction and mark the job as rollback completed.
      *
      * @param job transaction job.
-     * @throws RuntimeIOException if the rollback failed.
+     * @throws IORuntimeException if the rollback failed.
      */
     public void rollbackTransaction(LongTransactionJob job) {
 
         try {
             job.getTsurugiTransaction().getTransaction().rollback().await();
-        } catch (IOException | ServerException | InterruptedException ex) {
-            throw new RuntimeIOException("failed to rollback transation", ex);
+        } catch (IOException | ServerException ex) {
+            throw new IORuntimeException("failed to rollback transation", ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IORuntimeException("failed to rollback transation", ex);
         }
 
         jobManager.updateJobStatus(job, JobStatus.ROLLBACK_COMPLETED, null);

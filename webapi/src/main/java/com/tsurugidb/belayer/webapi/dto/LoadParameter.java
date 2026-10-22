@@ -19,8 +19,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.codec.multipart.FilePart;
-
 import com.tsurugidb.belayer.webapi.api.helper.UploadHelper.UploadParameter;
 
 import lombok.Data;
@@ -41,14 +39,9 @@ public class LoadParameter extends UploadParameter {
     private String jobId;
     private String format = DumpLoadRequestParam.FORMAT_DETECT_BY_EXTENSION;
     private String table;
-    private List<FilePart> fileParts = new ArrayList<>();
     private List<ColumnMapping> colMap = new ArrayList<>();
     private LongTransactionJob transactionJob;
     private Path tempDir;
-
-    public void addFilePart(FilePart filePart) {
-        fileParts.add(filePart);
-    }
 
     /**
      * Add a column mapping.

@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,9 +43,14 @@ public abstract class DumpLoadRequestParam {
   /** Format value: zip archive of dump files. */
   public static final String FORMAT_ZIP = "zip";
 
+  // set by the server, not by the client: hidden from the API document.
+  @Schema(hidden = true)
   private String uid;
+  @Schema(hidden = true)
   private Object credentials;
+  @Schema(hidden = true)
   private String table;
+  @Schema(hidden = true)
   private String jobId;
   private String format = FORMAT_DETECT_BY_EXTENSION;
   private boolean waitUntilDone = false;

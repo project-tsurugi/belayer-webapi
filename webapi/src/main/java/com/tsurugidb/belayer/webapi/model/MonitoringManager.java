@@ -162,16 +162,4 @@ public class MonitoringManager {
             }
         }
     }
-
-    /**
-     * Listener of watch events. (Not used in the current implementation.)
-     */
-    public interface MonitoringListener {
-        /**
-         * Return a watch event.
-         *
-         * @return watch event.
-         */
-        WatchEvent<?> listenEvent();
-    }
 }
