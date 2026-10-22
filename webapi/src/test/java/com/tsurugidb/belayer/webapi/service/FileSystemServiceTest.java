@@ -1,5 +1,7 @@
 package com.tsurugidb.belayer.webapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
@@ -111,6 +113,64 @@ public class FileSystemServiceTest {
         } catch (BadRequestException ex) {
             // ok
         }
+    }
+
+    @Test
+    public void test_checkFileExists_traversal() throws Exception {
+        // the file exists, but outside the user's storage area
+        Path dir = Path.of(storageRootDir, "other_user");
+        Files.createDirectories(dir);
+        Files.write(Path.of(dir.toString(), "secret.txt"), "secret".getBytes(StandardCharsets.US_ASCII));
+
+        try {
+            fileSystemService.checkFileExists(TEST_USER, "../other_user/secret.txt");
+            fail("not thrown");
+        } catch (BadRequestException ex) {
+            // ok
+        }
+    }
+
+    @Test
+    public void test_convertToAbsolutePath() throws Exception {
+        Path userDir = Path.of(storageRootDir, TEST_USER).toAbsolutePath().normalize();
+
+        assertEquals(userDir.resolve("dir/a.parquet"),
+            fileSystemService.convertToAbsolutePath(TEST_USER, "dir/a.parquet"));
+        assertEquals(userDir.resolve("a.parquet"),
+            fileSystemService.convertToAbsolutePath(TEST_USER, "./dir/../a.parquet"));
+        // an absolute path is placed under the user's storage area
+        assertEquals(userDir.resolve("dir/a.parquet"),
+            fileSystemService.convertToAbsolutePath(TEST_USER, "/dir/a.parquet"));
+        assertEquals(userDir, fileSystemService.convertToAbsolutePath(TEST_USER, ""));
+    }
+
+    @Test
+    public void test_convertToAbsolutePath_traversal() throws Exception {
+        for (String path : new String[] { "..", "../other_user/a.parquet", "dir/../../a.parquet",
+            "/../../etc/passwd" }) {
+            try {
+                fileSystemService.convertToAbsolutePath(TEST_USER, path);
+                fail("not thrown. path:" + path);
+            } catch (BadRequestException ex) {
+                // ok
+            }
+        }
+    }
+
+    @Test
+    public void test_deleteFile_traversal() throws Exception {
+        Path dir = Path.of(storageRootDir, "other_user");
+        Files.createDirectories(dir);
+        Path file = Path.of(dir.toString(), "secret.txt");
+        Files.write(file, "secret".getBytes(StandardCharsets.US_ASCII));
+
+        try {
+            fileSystemService.deleteFile(TEST_USER, "../other_user/secret.txt");
+            fail("not thrown");
+        } catch (BadRequestException ex) {
+            // ok
+        }
+        assertTrue(Files.exists(file));
     }
 
     @Test
