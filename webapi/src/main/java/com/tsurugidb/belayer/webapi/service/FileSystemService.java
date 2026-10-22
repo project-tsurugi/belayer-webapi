@@ -63,8 +63,8 @@ public class FileSystemService {
 
     log.debug("start copy:" + realFilePath + "->" + distPath);
 
-    try {
-      Files.copy(realFilePath, new FileOutputStream(distPath.toString()));
+    try (var out = new FileOutputStream(distPath.toString())) {
+      Files.copy(realFilePath, out);
       log.debug("end copy:" + realFilePath + "->" + distPath);
     } catch (IOException ex) {
       throw new IORuntimeException("I/O error.", ex);
@@ -266,7 +266,8 @@ public class FileSystemService {
    */
   public List<String> getFileList(Path targetDir, boolean hideFile, boolean hideDir) throws IOException {
 
-    List<String> fileList = Files.walk(targetDir, MAX_DEPTH)
+    try (var paths = Files.walk(targetDir, MAX_DEPTH)) {
+      return paths
         .filter(path -> {
           if (hideFile) {
             // show dir only
@@ -284,8 +285,7 @@ public class FileSystemService {
         })
         .sorted(Comparator.naturalOrder())
         .collect(Collectors.toList());
-    return fileList;
-
+    }
   }
 
   /**
@@ -312,8 +312,8 @@ public class FileSystemService {
    * @param path ditrectory path to delete.
    */
   public void deleteDirectoryWithContent(Path path) {
-    try {
-      Files.walk(path)
+    try (var paths = Files.walk(path)) {
+      paths
           .sorted(Comparator.reverseOrder())
           .map(Path::toFile)
           .forEach(File::delete);

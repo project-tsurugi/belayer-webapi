@@ -59,7 +59,7 @@ public class DbStatusExecTest {
     public void test_script_debug_on_when_debug() {
         logger.setLevel(Level.DEBUG);
 
-        var status = exec.runProcess(tempDir.resolve("mon.log").toString(), "", "token");
+        var status = exec.runProcess(tempDir.resolve("mon.log").toString(), "token");
 
         assertEquals("true", status.getStatus());
     }
@@ -68,7 +68,7 @@ public class DbStatusExecTest {
     public void test_script_debug_off_otherwise() {
         logger.setLevel(Level.INFO);
 
-        var status = exec.runProcess(tempDir.resolve("mon.log").toString(), "", "token");
+        var status = exec.runProcess(tempDir.resolve("mon.log").toString(), "token");
 
         assertEquals("unset", status.getStatus());
     }

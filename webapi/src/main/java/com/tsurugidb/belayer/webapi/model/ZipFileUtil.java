@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.belayer.webapi.model;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -64,9 +65,14 @@ public class ZipFileUtil {
                 Files.createDirectories(parentDir);
                 log.debug("dir exists:{}" , Files.isDirectory(parentDir));
                 FileOutputStream fos = new FileOutputStream(zipFileName);
-                ZipOutputStream zos = new ZipOutputStream(fos);
-                zos.setLevel(compressLevel);
-                return zos;
+                try {
+                    ZipOutputStream zos = new ZipOutputStream(fos);
+                    zos.setLevel(compressLevel);
+                    return zos;
+                } catch (RuntimeException ex) {
+                    closeQuietly(fos);
+                    throw ex;
+                }
             } catch (FileNotFoundException ex) {
                 throw new IORuntimeException("Zip file path is invalid.", ex);
             } catch (IOException ex) {
@@ -83,7 +89,12 @@ public class ZipFileUtil {
                     zos.write(getFileContents(filePath));
                     zos.closeEntry();
                 } catch (IOException ex) {
+                    // the finisher is not called after an error, so close the file here.
+                    closeQuietly(zos);
                     throw new IORuntimeException("I/O Error occurred while writing a zip file.", ex);
+                } catch (RuntimeException ex) {
+                    closeQuietly(zos);
+                    throw ex;
                 }
             }
         };
@@ -103,6 +114,14 @@ public class ZipFileUtil {
         };
 
         return Collector.of(supplier, accumulator, combiner, finisher);
+    }
+
+    private static void closeQuietly(Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (IOException ex) {
+            log.warn("failed to close a zip file.", ex);
+        }
     }
 
     private static String toFilePath(Path basePath, String filePath) {
@@ -149,12 +168,12 @@ public class ZipFileUtil {
 
                     // write file content
                     log.debug("extract file:" + newFile);
-                    FileOutputStream fos = new FileOutputStream(newFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
+                    try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
                     }
-                    fos.close();
                 }
                 zis.closeEntry();
                 zipEntry = zis.getNextEntry();

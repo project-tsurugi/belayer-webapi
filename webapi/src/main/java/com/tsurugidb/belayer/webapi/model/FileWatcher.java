@@ -112,10 +112,9 @@ public class FileWatcher {
     }
 
     private void consumeLines(Path filePath) {
-        try {
-            // note: use absolute path instead of file path.
-            Files.lines(targetFilePath)
-                    .skip(lineCounter.get())
+        // note: use absolute path instead of file path.
+        try (var lines = Files.lines(targetFilePath)) {
+            lines.skip(lineCounter.get())
                     .forEach(line -> {
                         log.debug("monitor file line:" + line);
                         synchronized (this) {

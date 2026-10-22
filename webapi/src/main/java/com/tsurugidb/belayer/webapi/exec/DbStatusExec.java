@@ -65,34 +65,26 @@ public class DbStatusExec {
   public DbStatus getStatus(String jobId, String authToken) {
 
     Path filePath = null;
-    Path stdOutput = null;
-    boolean success = false;
     try {
       Path tmpDirPath = Path.of(System.getProperty("java.io.tmpdir") + "/belayer-db-status");
-      if (!Files.exists(tmpDirPath)) {
-        Files.createDirectory(tmpDirPath);
-      }
+      // createDirectories does not fail when another request has just created it.
+      Files.createDirectories(tmpDirPath);
 
       String id = RandomStringUtils.randomAlphanumeric(8);
       filePath = tmpDirPath.resolve(String.format("monitoring-%s.log", id));
-      stdOutput = tmpDirPath.resolve(String.format("stdout-%s.log", id));
 
-      var result = runProcess(filePath.toString(), stdOutput.toString(), authToken);
+      var result = runProcess(filePath.toString(), authToken);
 
       return result;
     } catch (IOException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {
-      if (success) {
+      // remove the monitoring file whether the command succeeded or not.
+      if (filePath != null) {
         try {
-          if (filePath != null) {
-            Files.delete(filePath);
-          }
-          if (stdOutput != null) {
-            Files.delete(stdOutput);
-          }
-        } catch (Exception ignore) {
-          log.warn("failed to delete file", ignore);
+          Files.deleteIfExists(filePath);
+        } catch (IOException ex) {
+          log.warn("failed to delete file", ex);
         }
       }
     }
@@ -102,12 +94,11 @@ public class DbStatusExec {
    * run the command and parse its output (stdout and stderr) as JSON.
    *
    * @param monitoringFile path of the monitoring file passed to the command
-   * @param outFile path of the output file (not used; the output is read from the process directly)
    * @param authToken authentication token
    * @return status
    * @throws ProcessExecException if failed to run the command or to parse its output
    */
-  public DbStatus runProcess(String monitoringFile, String outFile, String authToken) {
+  public DbStatus runProcess(String monitoringFile, String authToken) {
     String argsLine = String.format(cmdString, tgctl, tgha, monitoringFile, conf, authToken);
     String[] args = argsLine.split(" ");
 

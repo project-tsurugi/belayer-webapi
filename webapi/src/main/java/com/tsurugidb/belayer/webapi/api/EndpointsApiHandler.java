@@ -65,15 +65,17 @@ public class EndpointsApiHandler {
 
       long lastModified = file.lastModified();
       if (this.lastModified < lastModified) {
-        this.endpoints = Files.lines(Path.of(file.getAbsolutePath()))
-            .filter(line -> !line.startsWith("#"))
-            .filter(line -> line.trim().length() != 0)
-            .map(line -> Arrays.stream(line.split(","))
-                .map(String::trim)
-                .collect(Collectors.toList()))
-            .flatMap(list -> list.stream())
-            .collect(Collectors.toList())
-            .toArray(new String[0]);
+        try (var lines = Files.lines(Path.of(file.getAbsolutePath()))) {
+          this.endpoints = lines
+              .filter(line -> !line.startsWith("#"))
+              .filter(line -> line.trim().length() != 0)
+              .map(line -> Arrays.stream(line.split(","))
+                  .map(String::trim)
+                  .collect(Collectors.toList()))
+              .flatMap(list -> list.stream())
+              .collect(Collectors.toList())
+              .toArray(new String[0]);
+        }
 
         this.lastModified = lastModified;
       }

@@ -54,7 +54,7 @@ public class DbRestoreExec {
   @Value("${webapi.tsurugi.conf}")
   String conf;
 
-  @Value("${webapi.cli.cmd.restore:oltp restore backup %s --conf %s -f}")
+  @Value("${webapi.cli.cmd.restore}")
   String cmdString;
 
   @Autowired
@@ -82,6 +82,10 @@ public class DbRestoreExec {
       watcher.setCallback(status -> {
         BigDecimal progress = status.getProgress();
         synchronized (job) {
+          if (job.getStatus() != JobStatus.RUNNING) {
+            // the job has already finished or been canceled. ignore lines written after that.
+            return;
+          }
           job.setProgress(progress.multiply(BigDecimal.valueOf(100), new MathContext(0, RoundingMode.HALF_UP)).intValue());
           job.setOutput(status.toStatusString());
         }
@@ -112,7 +116,13 @@ public class DbRestoreExec {
     } catch (IOException | InterruptedException ex) {
       throw new ProcessExecException("Process execution failed.", ex);
     } finally {
-      stopWatch.stop();
+      // close the watcher first: stopWatch.stop() throws if the process has not been started.
+      if (watcher != null) {
+        watcher.close();
+      }
+      if (stopWatch.isRunning()) {
+        stopWatch.stop();
+      }
       log.debug("{}:{}ms", "exec restore", stopWatch.getTotalTimeMillis());
     }
   }
