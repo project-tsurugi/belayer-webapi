@@ -1,0 +1,32 @@
+// For format details, see https://aka.ms/devcontainer.json.
+{
+	"name": "belayer-webapi",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	// Keep the image's entrypoint, which starts TsurugiDB.
+	"overrideCommand": false,
+	"remoteUser": "tsurugi",
+	"forwardPorts": [8000, 18000, 12345],
+	"portsAttributes": {
+		"8000": { "label": "Belayer WebAPI" },
+		"18000": { "label": "Belayer management (actuator, Swagger UI)" },
+		"12345": { "label": "TsurugiDB (TCP)" }
+	},
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"DavidAnson.vscode-markdownlint",
+				"vscjava.vscode-java-pack",
+				"vmware.vscode-boot-dev-pack",
+				"vscjava.vscode-gradle",
+				"ms-python.python"
+			],
+			"settings": {
+				"java.import.gradle.wrapper.enabled": true,
+				"java.configuration.updateBuildConfiguration": "automatic"
+			}
+		}
+	}
+}

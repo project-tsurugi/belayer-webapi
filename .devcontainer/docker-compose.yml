@@ -1,0 +1,22 @@
+volumes:
+  gradle-cache:
+  tsurugi-data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        TSURUGI_VERSION: "1.12.0"
+    env_file:
+      - .env
+    volumes:
+      - ../..:/workspaces:cached
+      - gradle-cache:/home/tsurugi/.gradle
+      # TsurugiDB data (log_location of the official image), kept across rebuilds
+      - tsurugi-data:/opt/tsurugi/var/data
+    # IPC sessions use /dev/shm (about 20MB each); the Docker default of 64MB is too small.
+    shm_size: 2gb
+    # No command: the image's entrypoint starts TsurugiDB and keeps the container running.
+    stop_grace_period: 60s

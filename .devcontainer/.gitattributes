@@ -1,0 +1,4 @@
+# The scripts run inside the Linux container, whatever the host's autocrlf.
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+.env        text eol=lf
