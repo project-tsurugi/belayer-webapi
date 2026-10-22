@@ -149,7 +149,7 @@ public class DbRestoreExec {
     ScriptDebug.apply(pb, log);
     // stdout -> file
     pb.redirectOutput(new File(outFile.toString()));
-    log.debug("exec cmd: {}", argList);
+    log.debug("exec cmd: {}", CommandLineMask.mask(argList));
     try {
       var proc = pb.start();
       return proc;

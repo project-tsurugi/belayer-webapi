@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,7 +115,7 @@ public class DbQuiesceExec {
     ScriptDebug.apply(pb, log);
     // stdout -> file
     pb.redirectOutput(new File(outFile.toString()));
-    log.debug("exec cmd: {}", Arrays.asList(args));
+    log.debug("exec cmd: {}", CommandLineMask.mask(args));
     try {
       var proc = pb.start();
       return proc;
