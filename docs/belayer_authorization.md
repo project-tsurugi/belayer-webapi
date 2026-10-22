@@ -41,8 +41,11 @@ classDiagram
 |P_LOAD|ダンプファイルのロードが可能|
 |P_STREAM_API|Stream APIを利用した同一トランザクション内のダンプ・ロードが可能|
 |P_SESSION_CTL|セッションの参照やセッションの強制アボートが可能|
+|P_LIST_ENDPOINTS|Belayerサーバのエンドポイント一覧の取得が可能|
 |P_DB_START|DBの起動が可能|
 |P_DB_STOP|DBの停止が可能|
+|P_DB_CHANGE_MODE|DBの起動モードの変更が可能|
+|P_DB_SYNC|DBの同期が可能|
 |P_DB_STATUS|DBの起動状態の取得が可能|
 |P_TABLE_LIST|DBのテーブル一覧の取得が可能|
 |P_ROLE_EDIT|ロールとユーザのマッピング情報の参照・更新が可能|
@@ -71,11 +74,11 @@ classDiagram
 |P_DUMP, P_LOAD|ダンプ／ロード一覧取得API|いずれかを持てば実行可能|
 |P_DUMP, P_LOAD|ダンプ／ロード実行ステータス取得API|いずれかを持てば実行可能|
 |P_DUMP, P_LOAD|ダンプ／ロードキャンセルAPI|いずれかを持てば実行可能|
-|P_STREAM|トランザクション開始API| |
-|P_STREAM|トランザクションコミット/ロールバックAPI| |
-|P_STREAM|トランザクション確認API| |
-|P_STREAM|ストリームデータダンプAPI| |
-|P_STREAM|ストリームデータロードAPI| |
+|P_STREAM_API|トランザクション開始API| |
+|P_STREAM_API|トランザクションコミット/ロールバックAPI| |
+|P_STREAM_API|トランザクション確認API| |
+|P_STREAM_API|ストリームデータダンプAPI| |
+|P_STREAM_API|ストリームデータロードAPI| |
 |P_SESSION_CTL|セッションステータス確認API| |
 |P_SESSION_CTL|セッション変数設定API| |
 |P_SESSION_CTL|セッション停止API| |
@@ -142,8 +145,8 @@ classDiagram
 | P_SESSION_CTL     |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー         |        ○        |     ー    |
 | P_DB_START        |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |      ○     |     ー     |        ○          |       ー        |     ー    |
 | P_DB_STOP         |      ○     |      ー     |       ○      |     ー    |     ー    |        ー       |     ー     |     ○     |         ○         |        ー        |     ー    |
-| P_DB_STATUS       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ○         |        ー        |     ○     |
-| P_DB_CHANGE_MODE  |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ○         |        ー        |     ー    |
+| P_DB_STATUS       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー         |        ー        |     ○     |
+| P_DB_CHANGE_MODE  |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |      ○     |     ー     |        ○         |        ー        |     ー    |
 | P_DB_SYNC         |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ○         |        ー        |     ー    |
 | P_TABLE_LIST      |      ○     |      ー     |      ー      |     ○     |     ○     |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
 | P_ROLE_EDIT       |      ○     |      ー     |      ー      |     ー    |     ー    |        ー       |     ー     |     ー     |        ー        |        ー        |     ー    |
@@ -169,13 +172,14 @@ classDiagram
       "ROLE_DB_DOWN" : [ "P_DB_STOP" ],
       "ROLE_STREAM_API" : [ "P_STREAM_API" ],
       "ROLE_LOAD" : [ "P_TABLE_LIST", "P_UPLOAD", "P_LOAD", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ],
-      "ROLE_DB_UP" : [ "P_DB_START" ],
-      "ROLE_USER" : [ "P_DB_STATUS", "P_FILE_LIST" ],
+      "ROLE_DB_UP" : [ "P_DB_CHANGE_MODE", "P_DB_START" ],
+      "ROLE_USER" : [ "P_DB_STATUS", "P_LIST_ENDPOINTS", "P_FILE_LIST" ],
       "ROLE_DUMP" : [ "P_TABLE_LIST", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DUMP", "P_DOWNLOAD" ],
       "ROLE_SESSION_CTL" : [ "P_SESSION_CTL" ],
       "ROLE_RESTORE" : [ "P_UPLOAD", "P_RESTORE", "P_FILE_DIR_DELETE", "P_DB_START", "P_FILE_LIST", "P_DOWNLOAD", "P_DB_STOP" ],
-      "ROLE_ADMIN" : [ "P_DB_STATUS", "P_TABLE_LIST", "P_STREAM_API", "P_DB_START", "P_FILE_LIST", "P_SESSION_CTL", "P_DOWNLOAD", "P_DB_STOP", "P_BACKUP", "P_ROLE_EDIT", "P_UPLOAD", "P_RESTORE", "P_LOAD", "P_FILE_DIR_DELETE", "P_DUMP" ],
-      "ROLE_BACKUP" : [ "P_BACKUP", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ]
+      "ROLE_ADMIN" : [ "P_DB_STATUS", "P_TABLE_LIST", "P_STREAM_API", "P_LIST_ENDPOINTS", "P_DB_START", "P_FILE_LIST", "P_SESSION_CTL", "P_DOWNLOAD", "P_DB_STOP", "P_BACKUP", "P_ROLE_EDIT", "P_UPLOAD", "P_DB_CHANGE_MODE", "P_DB_SYNC", "P_RESTORE", "P_LOAD", "P_FILE_DIR_DELETE", "P_DUMP" ],
+      "ROLE_BACKUP" : [ "P_BACKUP", "P_FILE_DIR_DELETE", "P_FILE_LIST", "P_DOWNLOAD" ],
+      "ROLE_DB_ADMIN" : [ "P_DB_CHANGE_MODE", "P_DB_SYNC", "P_DB_START", "P_DB_STOP" ]
     }
     # 現状のロール・ユーザマッピング定義を確認する
     $ curl -s -H "Authorization:Bearer $TOKEN" localhost:8000/api/show/roleuser
