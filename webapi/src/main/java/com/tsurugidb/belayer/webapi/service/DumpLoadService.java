@@ -488,6 +488,7 @@ public class DumpLoadService {
         }
         job.setStatus(JobStatus.IN_USE);
         job.getUseCount().incrementAndGet();
+        jobManager.requestSave();
     }
 
     /**
@@ -514,6 +515,7 @@ public class DumpLoadService {
             }
             log.debug("finish dump or load:" + job.toString());
         }
+        jobManager.requestSave();
     }
 
     /**
@@ -566,6 +568,7 @@ public class DumpLoadService {
                 .map(j -> {
                     var job = (DumpJob) j;
                     job.setFiles(savedFile);
+                    jobManager.requestSave();
                     return job;
                 });
     }
@@ -581,6 +584,7 @@ public class DumpLoadService {
         log.debug("setLoadResult() jobId:{}", jobId);
         var targetJob = (LoadJob) jobOp.get();
         targetJob.setFiles(savedFile);
+        jobManager.requestSave();
         return Mono.just(targetJob);
     }
 
