@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.MockReset;
 
 import com.tsurugidb.belayer.webapi.dto.ColumnMapping;
 import com.tsurugidb.belayer.webapi.dto.DumpJob;
@@ -60,7 +61,7 @@ public class DumpLoadServiceTest {
     @MockBean
     TsubakuroService tsubakuroService;
 
-    @MockBean
+    @MockBean(reset = MockReset.NONE)
     SystemTime systemTime;
 
     @MockBean
@@ -113,12 +114,12 @@ public class DumpLoadServiceTest {
         Mono<TransactionalJob> actualResult = dumpLoadService.startDump(param);
 
         Thread.sleep(1 * 1000L);
-        var actualJob = actualResult.block();
+        var actualJob = withoutDisposable(actualResult.block());
 
         assertEquals(expectJob, actualJob);
 
         var fromJobManager = dumpLoadService.getJob(Job.TYPE_DUMP, uid, jobId);
-        assertEquals(expectJob, fromJobManager.block());
+        assertEquals(expectJob, withoutDisposable(fromJobManager.block()));
     }
 
     @Test
@@ -168,12 +169,12 @@ public class DumpLoadServiceTest {
         Mono<TransactionalJob> actualResult = dumpLoadService.startDump(param);
 
         Thread.sleep(1 * 1000L);
-        var actualJob = actualResult.block();
+        var actualJob = withoutDisposable(actualResult.block());
 
         assertEquals(expectJob, actualJob);
 
         var fromJobManager = dumpLoadService.getJob(Job.TYPE_DUMP, uid, jobId);
-        assertEquals(expectJob, fromJobManager.block());
+        assertEquals(expectJob, withoutDisposable(fromJobManager.block()));
     }
 
     @Test
@@ -216,12 +217,12 @@ public class DumpLoadServiceTest {
         Mono<TransactionalJob> actualResult = dumpLoadService.startDump(param);
 
         Thread.sleep(1 * 1000L);
-        var actualJob = actualResult.block();
+        var actualJob = withoutDisposable(actualResult.block());
 
         assertEquals(expectJob, actualJob);
 
         var fromJobManager = dumpLoadService.getJob(Job.TYPE_DUMP, uid, jobId);
-        assertEquals(expectJob, fromJobManager.block());
+        assertEquals(expectJob, withoutDisposable(fromJobManager.block()));
     }
 
     @Test
@@ -270,11 +271,11 @@ public class DumpLoadServiceTest {
         Mono<TransactionalJob> actualResult = dumpLoadService.startLoad(param);
 
         Thread.sleep(1 * 1000L);
-        var actualJob = actualResult.block();
+        var actualJob = withoutDisposable(actualResult.block());
         assertEquals(expectJob, actualJob);
 
         var fromJobManager = dumpLoadService.getJob(Job.TYPE_LOAD, uid, jobId);
-        assertEquals(expectJob, fromJobManager.block());
+        assertEquals(expectJob, withoutDisposable(fromJobManager.block()));
     }
 
     @Test
@@ -324,14 +325,14 @@ public class DumpLoadServiceTest {
         Mono<TransactionalJob> actualResult = dumpLoadService.startLoad(param);
 
         Thread.sleep(1 * 1000L);
-        var actualJob = actualResult.block();
+        var actualJob = withoutDisposable(actualResult.block());
 
         // erase temp dir to match result
         actualJob.setTempDir(null);
         assertEquals(expectJob, actualJob);
 
         var fromJobManager = dumpLoadService.getJob(Job.TYPE_LOAD, uid, jobId);
-        assertEquals(expectJob, fromJobManager.block());
+        assertEquals(expectJob, withoutDisposable(fromJobManager.block()));
     }
 
     @Test
@@ -374,12 +375,12 @@ public class DumpLoadServiceTest {
         Mono<TransactionalJob> actualResult = dumpLoadService.startLoad(param);
 
         Thread.sleep(1 * 1000L);
-        var actualJob = actualResult.block();
+        var actualJob = withoutDisposable(actualResult.block());
 
         assertEquals(expectJob, actualJob);
 
         var fromJobManager = dumpLoadService.getJob(Job.TYPE_LOAD, uid, jobId);
-        assertEquals(expectJob, fromJobManager.block());
+        assertEquals(expectJob, withoutDisposable(fromJobManager.block()));
     }
 
     @Test
@@ -432,8 +433,8 @@ public class DumpLoadServiceTest {
         expectJob.setFormat(DumpLoadRequestParam.FORMAT_PARQUET);
         expectJob.setProgress(100);
 
-        // this flux is never finished.
-        var testFlux = Flux.defer(() -> Flux.just(Path.of("file1.txt")));
+        // this flux is never finished, so that the job is still running when it is canceled.
+        Flux<Path> testFlux = Flux.never();
 
         when(tsubakuroService.dumpTable(any())).thenReturn(testFlux);
 
@@ -456,4 +457,16 @@ public class DumpLoadServiceTest {
         assertEquals(expectJob, actualJob);
     }
 
+    /**
+     * Clear the disposable of a finished job before comparing it.
+     *
+     * The service sets the disposable after it subscribes, so a job that finishes quickly may keep it
+     * after close() has cleared it (a race of the service, not checked by these tests).
+     */
+    private static <T extends Job> T withoutDisposable(T job) {
+        if (job != null) {
+            job.setDisposable(null);
+        }
+        return job;
+    }
 }

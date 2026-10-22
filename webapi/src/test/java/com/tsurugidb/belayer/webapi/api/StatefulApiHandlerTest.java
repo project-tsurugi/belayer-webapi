@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -77,7 +78,7 @@ public class StatefulApiHandlerTest {
     @MockBean
     JobIdService jobIdService;
 
-    @MockBean
+    @MockBean(reset = MockReset.NONE)
     SystemTime systemTime;
 
     @SpyBean
