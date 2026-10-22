@@ -139,10 +139,11 @@ public class OpenApiConfig {
                 + "(any directory part of it is removed)."))
         .addProperty("destDir", new StringSchema()
             .description("Destination directory, relative to the user's storage directory. "
-                + "Created if it does not exist."))
+                + "Created if it does not exist. If omitted or empty, the files are saved directly under "
+                + "the user's storage directory."))
         .addProperty("overwrite", new BooleanSchema()._default(false)
             .description("\"true\" to overwrite existing files. Otherwise an existing file is an error."))
-        .required(List.of("file", "destDir"));
+        .required(List.of("file"));
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })

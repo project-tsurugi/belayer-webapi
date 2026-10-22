@@ -22,6 +22,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.tsurugidb.belayer.webapi.dto.ErrorResult;
+import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 import com.tsurugidb.belayer.webapi.exception.InvalidSettingException;
 import com.tsurugidb.belayer.webapi.security.RoleConfig;
 
@@ -65,11 +66,15 @@ public class RoleUserMappingHandler {
    * Update Role-User mapping Definition.
    * 
    * @param req request
-   * @return response
+   * @return response (400 Bad Request if the request body is empty)
    */
   public Mono<ServerResponse> updateMapping(ServerRequest req) {
 
     return req.bodyToMono(String.class)
+        // a body of length 0 may be decoded as an empty string
+        .filter(json -> !json.isEmpty())
+        .switchIfEmpty(Mono.error(() -> new BadRequestException("Request body is required.",
+            "Request body is required.")))
         .flatMap(json -> {
           try {
             roleConfig.applyConfByJson(json);

@@ -27,6 +27,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -74,9 +75,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Component
 public class FileSystemApiHandler {
-
-  @Value("${webapi.storage.root}")
-  private String storageRootDir;
 
   @Value("${webapi.download.zipcompresslevel}")
   private int zipCompressLevel;
@@ -135,6 +133,8 @@ public class FileSystemApiHandler {
 
     param.setUid(auth.getName());
     param.setCredentials(auth.getCredentials());
+    // "destDir" is optional. Without it, files are saved directly under the user's storage area.
+    param.setDestDirPath("");
 
     return param;
   }
@@ -326,26 +326,30 @@ public class FileSystemApiHandler {
 
   private Resource getMultipleFileResource(String uid, String[] filePathList, boolean convertToCsv) {
 
-    if (filePathList.length < 1) {
+    if (filePathList == null || filePathList.length < 1) {
       throw new BadRequestException("One or more filePaths must be specified.", null);
     }
+    if (Arrays.stream(filePathList).anyMatch(Objects::isNull)) {
+      throw new BadRequestException("filePath must not be null.", null);
+    }
 
-    // get parent dir
-    String parentDir = Arrays.stream(filePathList)
+    // get parent dir. A file directly under the storage area has no parent, so it is treated as ".".
+    List<String> parentDirs = Arrays.stream(filePathList)
         .map(Paths::get)
-        .map(Path::getParent)
+        .map(path -> path.getParent() == null ? Paths.get(".") : path.getParent())
+        .map(Path::normalize)
         .map(Path::toString)
         .distinct()
-        .reduce((dir1, dir2) -> dir1.equals(dir2) ? dir1 : "")
-        .orElse("");
+        .collect(Collectors.toList());
 
-    if (parentDir == null || parentDir.toString().isEmpty()) {
+    if (parentDirs.size() != 1) {
       throw new BadRequestException("Only files with the same parent directory can be included.", null);
     }
+    String parentDir = parentDirs.get(0);
 
     String filenameSuffix = createTimeStamp();
 
-    Path dirPath = Path.of(storageRootDir, uid, parentDir).toAbsolutePath().normalize();
+    Path dirPath = fileSystemService.resolveInUserDir(uid, parentDir);
     String fileName = Constants.FILE_PREFIX_MULTIPLE_DOWNLOAD_ZIP + filenameSuffix + Constants.EXT_ZIP;
 
     Path tempDir = fileSystemService.createTempDirectory(Constants.TEMP_DIR_PREFIX_DOWNLOAD);
@@ -479,6 +483,7 @@ public class FileSystemApiHandler {
         .map(SecurityContext::getAuthentication)
         .flatMap(auth -> fillDeleteParams(auth, req, false))
         .map(param -> {
+          requirePath(param.getPath());
           param.setPathList(new String[] { param.getPath() });
           return param;
         })
@@ -500,7 +505,22 @@ public class FileSystemApiHandler {
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
         .flatMap(auth -> fillDeleteParams(auth, req, true))
-        .flatMap(target -> deleteFileOrDir(target.getUid(), target.getPathList(), true, false));
+        .flatMap(target -> {
+          String[] pathList = target.getPathList();
+          if (pathList == null) {
+            throw new BadRequestException("pathList is not specified.", null);
+          }
+          if (Arrays.stream(pathList).anyMatch(Objects::isNull)) {
+            throw new BadRequestException("pathList must not contain null.", null);
+          }
+          return deleteFileOrDir(target.getUid(), pathList, true, false);
+        });
+  }
+
+  private void requirePath(String path) {
+    if (path == null) {
+      throw new BadRequestException("path is not specified.", null);
+    }
   }
 
   private Mono<DeleteTarget> fillDeleteParams(Authentication auth, ServerRequest req, boolean deleteMultiFile) {
@@ -527,7 +547,10 @@ public class FileSystemApiHandler {
     return ReactiveSecurityContextHolder.getContext()
         .map(SecurityContext::getAuthentication)
         .flatMap(auth -> fillDeleteParams(auth, req, false))
-        .flatMap(param -> deleteFileOrDir(param.getUid(), new String[] { param.getPath() }, false, param.isForce()));
+        .flatMap(param -> {
+          requirePath(param.getPath());
+          return deleteFileOrDir(param.getUid(), new String[] { param.getPath() }, false, param.isForce());
+        });
   }
 
   private Mono<ServerResponse> deleteFileOrDir(String uid, String[] filePathList, boolean targetIsFile, boolean force) {

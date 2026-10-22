@@ -672,7 +672,7 @@ public class Router {
         .requestBody(jsonBody(DeleteTarget.class, true,
             "\"path\": file path relative to the user's storage directory."))
         .response(okJson("Deletion succeeded.", DeleteTarget.class))
-        .response(errorResponse("400", "The path is outside the user's storage directory, "
+        .response(errorResponse("400", "No path is given, the path is outside the user's storage directory, "
             + "or the body is not valid JSON."))
         .response(errorResponse("404", "The file does not exist, or the path is a directory.")));
   }
@@ -691,8 +691,8 @@ public class Router {
         .requestBody(jsonBody(DeleteTarget.class, true,
             "\"pathList\": file paths relative to the user's storage directory."))
         .response(okJson("Deletion succeeded. \"pathList\" holds the deleted paths.", DeleteTarget.class))
-        .response(errorResponse("400", "A path is outside the user's storage directory, "
-            + "or the body is not valid JSON."))
+        .response(errorResponse("400", "No \"pathList\" is given or it contains null, a path is outside "
+            + "the user's storage directory, or the body is not valid JSON."))
         .response(errorResponse("404", "A file does not exist, or a path is a directory.")));
   }
 
@@ -711,8 +711,8 @@ public class Router {
             "\"path\": directory path relative to the user's storage directory. "
                 + "\"force\": true to delete the directory with its content (default false)."))
         .response(okJson("Deletion succeeded. \"path\" holds the deleted directory.", DeleteTarget.class))
-        .response(errorResponse("400", "The path is outside the user's storage directory, the directory "
-            + "is not empty (without \"force\"), or the body is not valid JSON."))
+        .response(errorResponse("400", "No path is given, the path is outside the user's storage directory, "
+            + "the directory is not empty (without \"force\"), or the body is not valid JSON."))
         .response(errorResponse("404", "The directory does not exist, or the path is a file.")));
   }
 

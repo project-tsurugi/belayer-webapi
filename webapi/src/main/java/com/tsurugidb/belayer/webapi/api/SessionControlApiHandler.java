@@ -38,6 +38,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class SessionControlApiHandler {
 
+    private static final String NO_REQUEST_BODY = "Request body is required.";
+
     @Autowired
     SessionControlService sessionControlService;
 
@@ -64,7 +66,7 @@ public class SessionControlApiHandler {
      * Set variable to Tsurugi Session
      *
      * @param req Request
-     * @return Response
+     * @return Response (400 Bad Request if the request body is empty)
      */
     public Mono<ServerResponse> setVariable(ServerRequest req) {
 
@@ -72,6 +74,8 @@ public class SessionControlApiHandler {
                 .map(SecurityContext::getAuthentication)
                 .flatMap(auth -> {
                     return req.bodyToMono(SessionVariable.class)
+                            .switchIfEmpty(Mono.error(() -> new BadRequestException(NO_REQUEST_BODY,
+                                    NO_REQUEST_BODY)))
                             .map(param -> {
                                 param.setToken((String) auth.getCredentials());
                                 return param;
@@ -102,7 +106,7 @@ public class SessionControlApiHandler {
      * Kill Tsurugi Session
      *
      * @param req Request
-     * @return Response
+     * @return Response (400 Bad Request if the request body is empty)
      */
     public Mono<ServerResponse> killSession(ServerRequest req) {
 
@@ -110,6 +114,8 @@ public class SessionControlApiHandler {
                 .map(SecurityContext::getAuthentication)
                 .flatMap(auth -> {
                     return req.bodyToMono(SessionStatus.class)
+                            .switchIfEmpty(Mono.error(() -> new BadRequestException(NO_REQUEST_BODY,
+                                    NO_REQUEST_BODY)))
                             .map(param -> {
                                 param.setToken((String) auth.getCredentials());
                                 return param;
