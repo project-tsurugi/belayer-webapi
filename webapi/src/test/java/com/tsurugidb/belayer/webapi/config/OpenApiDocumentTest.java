@@ -12,7 +12,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
  * the server sets by itself as inputs (BW-3).
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        ManagementPortEnvironmentPostProcessor.ENABLED_PROPERTY + "=true",
+        ManagementPortEnvironmentPostProcessor.EXPOSURE_PROPERTY + "=health,openapi",
         "management.server.port=0" })
 public class OpenApiDocumentTest {
 

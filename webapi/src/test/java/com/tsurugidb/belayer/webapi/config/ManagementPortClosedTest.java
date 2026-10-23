@@ -9,18 +9,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 
 /**
- * Without BELAYER_MANAGEMENT_ENABLED the management port is not opened.
+ * With belayer.management.enabled=false the management port is not opened.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        ManagementPortEnvironmentPostProcessor.ENABLED_PROPERTY + "=false" })
 public class ManagementPortClosedTest {
 
     @Autowired
     Environment environment;
 
     @Test
-    public void test_management_port_closed_by_default() {
+    public void test_management_port_closed_when_disabled() {
         assertEquals("-1", environment.getProperty("management.server.port"));
         assertEquals("false", environment.getProperty("springdoc.api-docs.enabled"));
+        assertEquals("false", environment.getProperty("springdoc.swagger-ui.enabled"));
         // Spring Boot sets this only when it starts a management server.
         assertNull(environment.getProperty("local.management.port"));
     }
