@@ -8,7 +8,9 @@
     * **A setting given under the old name (e.g. `WEBAPI_REQUIRED_JAVA_MAJAR_VERSION`) is no longer read, and the default `11` applies without any warning.** Use `BELAYER_REQUIRED_JAVA_MAJOR_VERSION` instead.
 * `POST /api/transaction/status/{transaction_id}` now returns 400 (`Invalid parameter. Specify commit/rollback.`). It reached the Finish Transaction API (`POST /api/transaction/{type}/{transaction_id}`), which accepted `status` as `{type}` and returned the transaction status without finishing it. Use the Show Transaction Status API (`GET /api/transaction/status/{transaction_id}`), which is not changed.
     * WebAdmin and RemoteCLI do not call these APIs.
-* the management port (`BELAYER_MANAGEMENT_PORT`, default 18000) is now closed by default. Set `BELAYER_MANAGEMENT_ENABLED=true` to open it. It served the actuator endpoints (including `env` and `beans`), the OpenAPI document and Swagger UI without authentication. When it is closed, springdoc (OpenAPI document and Swagger UI) is disabled too. When it is open, the URLs are `/management/swagger-ui` and `/management/openapi/springdocDefault`.
+* the management port (`BELAYER_MANAGEMENT_PORT`, default 18000) now serves only `health` and `prometheus` by default. It served the actuator endpoints `health`, `info`, `beans`, `env` and `prometheus`, the OpenAPI document and Swagger UI, all without authentication.
+    * `BELAYER_MANAGEMENT_EXPOSURE` (comma-separated, default `health,prometheus`) lists what it serves. Add `info`, `env`, `beans`, `openapi` or `swagger-ui` for a while when needed; they are not for production use. With `openapi` or `swagger-ui`, the URLs are `/management/openapi/springdocDefault` and `/management/swagger-ui`.
+    * the port stays open by default, for the metrics. `BELAYER_MANAGEMENT_ENABLED=false` closes it.
 
 ### Bug fixes
 

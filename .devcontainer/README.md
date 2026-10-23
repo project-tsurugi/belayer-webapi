@@ -36,7 +36,7 @@ TsurugiDB の版は `docker-compose.yml` の `TSURUGI_VERSION` で変えられ�
 | `BELAYER_HOME` | `/opt/belayer` | `config/` と、起動時にスクリプトを展開する `proc/` を置く |
 | `BELAYER_STORAGE_ROOT` | `/opt/belayer/storage` | ダンプ・バックアップなどのファイルの置き場所 |
 | `BELAYER_LOG_LEVEL` | `INFO` | `DEBUG` にすると、スタブと状態取得スクリプトのログ（`/tmp/*_history.log` など）も出る |
-| `BELAYER_MANAGEMENT_ENABLED` | `true` | **開発用。** management ポート（18000。actuator、OpenAPI、Swagger UI）を開く。認証なしで読めるので、本番の設定には使わないこと |
+| `BELAYER_MANAGEMENT_EXPOSURE` | `health,prometheus,info,env,beans,openapi,swagger-ui` | **開発用。** management ポート（18000）で actuator の全項目と OpenAPI・Swagger UI を公開する（既定は `health,prometheus` だけ）。認証なしで読めるので、本番の設定には使わないこと |
 
 ## ビルドとテスト
 

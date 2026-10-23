@@ -53,13 +53,19 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
 - `tgctl_w` は本物の `tgctl` を呼ぶ**ラッパー**、`tgha_w` は外部コマンドを一切呼ばない**純粋なスタブ**。
   `mode.txt` はスタブ同士の内部状態で **Java 側は参照しない。**
 - `jq` を実際に使うのは JAR 同梱の `resources/scripts/show_db_status.sh` だけ（`/api/db/status` 用）。
-- **management ポートは既定では開かない**（2026-10-21〜）。`BELAYER_MANAGEMENT_ENABLED=true` のときだけ
-  `BELAYER_MANAGEMENT_PORT`（既定 18000）を開く。実装は `config/ManagementPortEnvironmentPostProcessor`
-  （`META-INF/spring.factories` で登録）で、OFF のとき `management.server.port=-1` にする。
-  swagger-ui / openapi もこちら側に出る（`springdoc.use-management-port=true`）ので、**OFF のときは
-  springdoc も止める。止めないと springdoc の Swagger UI 設定が起動時に落ちる。**
-  開いたときの URL は `/management/swagger-ui`（`/management/webjars/swagger-ui/index.html` へ転送）と
+- **management ポートは既定で開き、公開するのは `health` と `prometheus` だけ**（2026-10-23〜）。
+  メトリクスは収集に要るのでポートは開けておき、設定値や内部構成を返す `info` / `env` / `beans` /
+  OpenAPI / Swagger UI は既定で出さない、という方針。公開範囲は `BELAYER_MANAGEMENT_EXPOSURE`
+  （既定 `health,prometheus`。`management.endpoints.web.exposure.include` に入る）で、調査のときだけ足す。
+  ポート自体は `BELAYER_MANAGEMENT_ENABLED=false` で閉じられる。実装は `config/ManagementPortEnvironmentPostProcessor`
+  （`META-INF/spring.factories` で登録）で、閉じるときは `management.server.port=-1` にする。
+  swagger-ui / openapi もこちら側に出る（`springdoc.use-management-port=true`）ので、springdoc は公開範囲に
+  合わせて止める（`openapi` か `swagger-ui` があれば API ドキュメント、`swagger-ui` があれば Swagger UI）。
+  **ポートを閉じたまま springdoc を動かすと、Swagger UI の設定が起動時に落ちる。**
+  公開したときの URL は `/management/swagger-ui`（`/management/webjars/swagger-ui/index.html` へ転送）と
   `/management/openapi/springdocDefault`。`/management/openapi` そのものは 404。
+  単体テストで prometheus を確かめるときは `@AutoConfigureMetrics` が要る（テストでは既定で Prometheus の
+  レジストリが止まる）。
   management ポートにも Spring Security のフィルタは掛かるが、`/management/**` は `permitAll`。
 - **`docker/` と `docker-compose.yml` はメンテナンスを止めている。別タイミングで見直す
   予定なので、それまで手を付けないこと。** `docker/Dockerfile` が
