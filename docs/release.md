@@ -29,11 +29,11 @@
 * fix the job list file (`belayer_jobs.json`) handling.
     * it was rewritten on every read of a job, in place, so a crash while writing it lost the job history at the next start. It is now written in the background when jobs change (and every 5 seconds for progress), and replaced atomically. The format is unchanged.
     * fix a deadlock between canceling a job and a job finishing at the same time.
+    * a failure to write the file is now logged as a warning and no longer fails the API call.
 * release resources that were left behind.
     * restore and offline backup did not stop watching their monitoring file, which kept a file watch and the job in memory, and could overwrite the progress of a finished job.
     * the DB Status API (also called when a backup or a restore starts) left a file `monitoring-*.log` under `${java.io.tmpdir}/belayer-db-status` on every call.
     * close file streams that were left open until garbage collection.
-
 * fix `start_server.sh` so that the settings in `tsurugi-belayer.conf` take effect.
     * export `CONF_FOLDER`. Without it, the launch script in the JAR could not locate `tsurugi-belayer.conf`.
     * read `tsurugi-belayer.conf` and export all its variables before launching the JAR, as systemd does with `EnvironmentFile`. The launch script in the JAR sources the conf without exporting it, so only `JAVA_OPTS` and `RUN_ARGS` took effect, and settings such as `BELAYER_LOG_LEVEL` were ignored.
@@ -60,6 +60,8 @@
 * update `docs/belayer_authorization.md` to the permissions in the code: `P_STREAM_API` (not `P_STREAM`), `P_LIST_ENDPOINTS`, `P_DB_CHANGE_MODE` and `P_DB_SYNC`, the role x permission table and the `/api/list/roles` example.
 * write the Javadoc of the public API so that the javadoc of JDK 17 reports no warnings or errors, and remove `javadoc.failOnError = false`, so that a Javadoc error now stops the build.
 * clean up the code: remove unused classes and arguments, make constants final, fix names.
+* the release workflow publishes a tag ending with `-snapshot` or containing `-beta` (in any case) as a prerelease, not as the latest release.
+* add a VS Code dev container (`.devcontainer`) on the official TsurugiDB image.
 
 ### Full Changelog
 
