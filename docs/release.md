@@ -60,6 +60,7 @@
 * update `docs/belayer_authorization.md` to the permissions in the code: `P_STREAM_API` (not `P_STREAM`), `P_LIST_ENDPOINTS`, `P_DB_CHANGE_MODE` and `P_DB_SYNC`, the role x permission table and the `/api/list/roles` example.
 * write the Javadoc of the public API so that the javadoc of JDK 17 reports no warnings or errors, and remove `javadoc.failOnError = false`, so that a Javadoc error now stops the build.
 * clean up the code: remove unused classes and arguments, make constants final, fix names.
+* the tests pin the Spring profile `test-group`, so that `SPRING_PROFILES_ACTIVE` in the environment no longer breaks them.
 * the release workflow publishes a tag ending with `-snapshot` or containing `-beta` (in any case) as a prerelease, not as the latest release.
 * add a VS Code dev container (`.devcontainer`) on the official TsurugiDB image.
 
