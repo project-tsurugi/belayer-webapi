@@ -130,6 +130,9 @@ bootJar {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	// Pin the profile of src/test/resources/application.properties. A system
+	// property beats SPRING_PROFILES_ACTIVE set in the developer's environment.
+	systemProperty 'spring.profiles.active', 'test-group'
 }
 test {
 	finalizedBy jacocoTestReport // report is always generated after tests run
