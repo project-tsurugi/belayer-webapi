@@ -39,6 +39,7 @@
     * read `tsurugi-belayer.conf` and export all its variables before launching the JAR, as systemd does with `EnvironmentFile`. The launch script in the JAR sources the conf without exporting it, so only `JAVA_OPTS` and `RUN_ARGS` took effect, and settings such as `BELAYER_LOG_LEVEL` were ignored.
     * check `TSURUGI_HOME` after reading the conf, so that it no longer has to be set in the calling shell. The value in the conf takes precedence over the calling shell.
     * `start_server.sh` is a fallback script to launch manually. The systemd service does not use it and is not affected.
+* `install.sh` now puts `${TSURUGI_HOME}/bin/mode.txt` (containing `standalone`) next to the stubs `tgctl_w` and `tgha_w`. Without it, until a DB start through Belayer wrote it, the DB Status API returned the mode `stop`, e.g. right after TsurugiDB was started in another way. An existing file is kept.
 * fix the Backup/Restore Cancel API (`/api/br/cancel`) to accept `P_BACKUP` as well as `P_RESTORE`, as `docs/belayer_authorization.md` states. A user holding only `ROLE_BACKUP` could start a backup job but could not cancel it (403).
 * narrow the path match of the Finish Transaction API from `/api/transaction/**` to `/api/transaction/{type}/{transaction_id}`, so that it does not take over the permission settings of the other APIs under `/api/transaction/`. <u>This does not change the current behavior</u>, since all of them require `P_STREAM_API`.
 
