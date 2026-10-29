@@ -60,6 +60,11 @@ cp app/*.jar $INSTALL_DIR/jar/
 cp config/* $INSTALL_DIR/config/
 cp systemd/* $INSTALL_DIR/systemd/
 cp script/* $TSURUGI_HOME/bin/
+# The stubs keep the current mode in mode.txt and report "stop" without it,
+# until a start through Belayer writes it. Keep a file the stubs have written.
+if [ ! -e $TSURUGI_HOME/bin/mode.txt ]; then
+    echo "standalone" > $TSURUGI_HOME/bin/mode.txt
+fi
 
 sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/systemd/tsurugi-belayer.service
 sed -i "s|##BELAYER_INSTALL_DIR##|${INSTALL_DIR}|g" $INSTALL_DIR/config/tsurugi-belayer.conf
