@@ -23,6 +23,7 @@ TsurugiDB の版は `docker-compose.yml` の `TSURUGI_VERSION` で変えられ�
     * 手元に clone したフォルダを開き、「Dev Containers: Reopen in Container」
 4. コンテナの作成後に `.devcontainer/post-create.sh` が1回だけ動き、`install.sh` が行う配置を作業ツリーから行う
     * `distribution/stub/tgctl_w` / `tgha_w` → `${TSURUGI_HOME}/bin/`（実行権限を付ける）
+    * `${TSURUGI_HOME}/bin/mode.txt` に `standalone` を書く（スタブが使う現在のモード。既にあれば上書きしない）
     * `distribution/config/endpoints.csv` / `instance_info.json` → `${BELAYER_HOME}/config/`（既にあれば上書きしない）
     * スタブを書き換えたときは、このスクリプトを再実行する（`bash .devcontainer/post-create.sh`）
 
