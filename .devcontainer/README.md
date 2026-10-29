@@ -10,7 +10,7 @@ TsurugiDB の公式 Docker イメージ（`ghcr.io/project-tsurugi/tsurugidb`）
 | 追加するもの | jq、git、sudo など（`Dockerfile`） |
 | 実行ユーザ | `tsurugi`（パスワードなしで sudo できる） |
 | TsurugiDB | コンテナの起動と同時に起動する（イメージのエントリポイント）。`TSURUGI_HOME=/usr/lib/tsurugi` |
-| 認証 | WebAPI は `authmock` プロファイルで動かす。認証サーバ（harinoki）は起動しない |
+| 認証 | 認証サーバ（harinoki）は起動しない。認証をモックにするときは、WebAPI の起動時にプロファイル `authmock` を指定する（下記） |
 
 TsurugiDB の版は `docker-compose.yml` の `TSURUGI_VERSION` で変えられます。
 
@@ -32,7 +32,6 @@ TsurugiDB の版は `docker-compose.yml` の `TSURUGI_VERSION` で変えられ�
 
 | 変数 | 値 | 説明 |
 |:--|:--|:--|
-| `SPRING_PROFILES_ACTIVE` | `authmock` | 認証をモックにする。ユーザとパスワードは `webapi/src/main/resources/application-authmock.properties`（例: `tsurugi` / `password`） |
 | `BELAYER_HOME` | `/opt/belayer` | `config/` と、起動時にスクリプトを展開する `proc/` を置く |
 | `BELAYER_STORAGE_ROOT` | `/opt/belayer/storage` | ダンプ・バックアップなどのファイルの置き場所 |
 | `BELAYER_LOG_LEVEL` | `INFO` | `DEBUG` にすると、スタブと状態取得スクリプトのログ（`/tmp/*_history.log` など）も出る |
@@ -53,18 +52,24 @@ Gradle のキャッシュは名前付きボリューム（`gradle-cache`）に�
 ```sh
 cd /workspaces/belayer-webapi/webapi
 ./gradlew build -x test
-java -jar build/libs/tsurugi-belayer.jar
+# 認証をモックにする（認証サーバなしで動かす）
+java -Dspring.profiles.active=authmock -jar build/libs/tsurugi-belayer.jar
 ```
 
+プロファイルを指定しないと `default`（認証サーバ harinoki を使う）で起動します。このコンテナでは harinoki を
+起動していないので、ログインできません（harinoki を使う場合は下記）。
+`authmock` のユーザとパスワードは `webapi/src/main/resources/application-authmock.properties` にあります（例: `tsurugi` / `password`）。
+
 VSCode の Spring Boot Dashboard（拡張機能 `vmware.vscode-boot-dev-pack`）から起動・デバッグすることもできます。
-環境変数はコンテナに設定済みなので、追加の設定は要りません。
+`authmock` にするときは、起動構成（`launch.json`）の `vmArgs` に `-Dspring.profiles.active=authmock` を指定してください。
+そのほかの環境変数はコンテナに設定済みです。
 
 ### 動作確認
 
 ```sh
 curl http://localhost:8000/api/hello
 
-# authmock のユーザでログインしてトークンを取得
+# authmock のユーザでログインしてトークンを取得（authmock で起動したとき）
 TOKEN=$(curl -s -X POST -d 'uid=tsurugi&pw=password' http://localhost:8000/api/auth | jq -r .accessToken)
 
 # DB の状態（tgctl_w / tgha_w を使う）
@@ -96,6 +101,6 @@ WebAPI から TsurugiDB を停止・起動（`/api/db/shutdown`、`/api/db/start
 1. `/usr/lib/tsurugi/var/etc/tsurugi.ini` の `[authentication]` に `enabled=true` を書く
 2. ユーザは `/usr/lib/tsurugi/var/auth/etc/harinoki-users.props` に書く
 3. コンテナを再起動する（エントリポイントが harinoki と TsurugiDB を起動する）
-4. `SPRING_PROFILES_ACTIVE` を外して（または `default` にして）WebAPI を起動する
+4. プロファイルを指定せずに（`default` で）WebAPI を起動する
 
 この変更はコンテナの中だけに残り、コンテナを作り直すと元に戻ります。
