@@ -76,6 +76,12 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
   **OSS 単体配布（`tsurugi-webapp-<ver>.tar.gz`）に入るのはこちら側。**
 - CI（`ci-build.yml`）は `./gradlew check` を実行する（ユニットテストを含む）。
 
+## リリース
+
+手順はスキル `/belayer-webapi-release`（`.claude/skills/belayer-webapi-release/SKILL.md`）にある。
+リリースノートは `docs/release.md`。タグを付けるところまでを行い、push はユーザーが行う
+（タグの push で `ci-release.yml` が GitHub Release を作る）。
+
 ## Java のバージョン
 
 tsubakuro と同じ型に統一済み。`toolchain 17` でビルドし、`options.release = 11` で

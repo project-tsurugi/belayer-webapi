@@ -26,6 +26,9 @@
 .#*
 \#*#
 
+# Release check written by the release skill (.claude/skills/belayer-webapi-release)
+/.release_check.md
+
 /distribution/dist
 /distribution/dist_temp
 /distribution/tsurugi-webapp-*
