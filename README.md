@@ -82,6 +82,7 @@ See the env var table below.
 |TSURUGI_TGHA_COMMAND|Command used for the HA operations (mode switch, database apply). *3|`${TSURUGI_HOME}/bin/tgha_w`|
 |TSURUGI_AUTH_URL|URL for authentication server "harinoki".|`http://localhost:8080/harinoki`|
 |TSURUGI_AUTH_AT_EXPIRATION_MIN|The expiration minutes for Access Token.|`10`|
+|TSURUGI_AUTH_VERIFY_CACHE_MAX_MIN|Maximum minutes to reuse the result of verifying an Access Token with "harinoki" (never beyond the token's expiration). `0` verifies on every request.|`30`|
 |BELAYER_DEFAULT_ROLE_USER_MAPPING|Initial role-user mapping(JSON String) *1 *2|`{"ROLE_ADMIN": [".*"]}`|
 |BELAYER_MAX_FILE_LIST_SIZE|Max size to list the files.|`500`|
 |BELAYER_JOB_EXPIRATION_DAYS|Epiration days for the job history data.|`3`|

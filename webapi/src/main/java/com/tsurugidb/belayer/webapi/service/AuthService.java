@@ -16,13 +16,16 @@
 package com.tsurugidb.belayer.webapi.service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -38,17 +41,20 @@ import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.exception.UnauthenticatedException;
+import com.tsurugidb.belayer.webapi.model.SystemTime;
 import com.tsurugidb.belayer.webapi.security.PermissionConfig;
 import com.tsurugidb.belayer.webapi.security.RoleConfig;
 import com.tsurugidb.belayer.webapi.security.UserTokenAuthentication;
 import com.tsurugidb.tsubakuro.auth.Ticket;
 import com.tsurugidb.tsubakuro.auth.TicketProvider;
 import com.tsurugidb.tsubakuro.auth.TokenKind;
+import com.tsurugidb.tsubakuro.auth.http.JwtTicketProvider;
 import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 import com.tsurugidb.tsubakuro.exception.CoreServiceException;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Service to authenticate user.
@@ -72,8 +78,17 @@ public class AuthService {
   @Autowired
   RoleConfig roleConfig;
 
+  @Autowired
+  SystemTime systemTime;
+
   @Value("${webapi.auth.at.expiration.min}")
   private int accessKeyExpirationMin;
+
+  @Value("${webapi.auth.verify.cache.max.min}")
+  int verifyCacheMaxMin;
+
+  /** access tokens verified by the authentication server, and the time until which they are trusted */
+  private final Map<String, Instant> verifiedTokens = new ConcurrentHashMap<>();
 
   /**
    * verify user password credential and return access token.
@@ -163,7 +178,8 @@ public class AuthService {
     return Mono.just(authorizationHeader)
         .filter(MATCH_BEARER_LENGTH_PREDICATE)
         .flatMap(ISOLATE_BEARER_VALUE_FUNC)
-        .map(this::verifyToken)
+        // verifying may call the authentication server, so keep it off the event loop
+        .flatMap(token -> Mono.fromCallable(() -> verifyToken(token)).subscribeOn(Schedulers.boundedElastic()))
         .switchIfEmpty(Mono.just(new UserTokenAuthentication()));
   }
 
@@ -177,7 +193,16 @@ public class AuthService {
     } catch (RuntimeException ex) {
       throw new UnauthenticatedException("Invalid token.");
     }
+    // restore() only decodes the token, so check the kind and the expiration here
+    if (ticket.getToken(TokenKind.ACCESS).isEmpty()) {
+      throw new UnauthenticatedException("Invalid token.");
+    }
     var accessExpirationTime = ticket.getAccessExpirationTime();
+    Instant now = systemTime.now();
+    if (accessExpirationTime.isEmpty() || !now.isBefore(accessExpirationTime.get())) {
+      throw new UnauthenticatedException("Token is expired.");
+    }
+    verifyByAuthServer(token, ticket, accessExpirationTime.get(), now);
 
     List<String> roles = roleConfig.getRolesByUserId(ticket.getUserId());
     List<SimpleGrantedAuthority> authorities;
@@ -194,6 +219,40 @@ public class AuthService {
     }
 
     return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true, authorities);
+  }
+
+  /**
+   * Ask the authentication server whether the token was issued by it (signature, issuer and audience).
+   * A verified token is cached until the earlier of the cache limit and its expiration time.
+   * Nothing is done for providers without an authentication server (authmock).
+   */
+  private void verifyByAuthServer(String token, Ticket ticket, Instant expirationTime, Instant now) {
+    if (!(ticketProvider instanceof JwtTicketProvider)) {
+      return;
+    }
+    Instant cachedUntil = verifiedTokens.get(token);
+    if (cachedUntil != null && now.isBefore(cachedUntil)) {
+      return;
+    }
+
+    try {
+      ((JwtTicketProvider) ticketProvider).verify(ticket, TokenKind.ACCESS);
+    } catch (CoreServiceException ex) {
+      log.debug("token was rejected by the authentication server: {}", ex.getMessage());
+      throw new UnauthenticatedException("Invalid token.");
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+      throw new UnauthenticatedException("Authentication server is not available.");
+    } catch (IOException | RuntimeException ex) {
+      log.warn("failed to verify token by the authentication server: {}", ex.toString());
+      throw new UnauthenticatedException("Authentication server is not available.");
+    }
+
+    if (verifyCacheMaxMin > 0) {
+      Instant limit = now.plus(Duration.ofMinutes(verifyCacheMaxMin));
+      verifiedTokens.values().removeIf(until -> !now.isBefore(until));
+      verifiedTokens.put(token, expirationTime.isBefore(limit) ? expirationTime : limit);
+    }
   }
 
 }
