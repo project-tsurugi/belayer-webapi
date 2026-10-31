@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Request/response body of the session control APIs, serialized with snake_case keys; null fields are omitted.
@@ -51,5 +52,6 @@ public class SessionStatus {
     private String varName;
 
     @JsonIgnore
+    @ToString.Exclude
     private String token;
 }

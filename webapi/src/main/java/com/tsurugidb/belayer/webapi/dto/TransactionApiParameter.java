@@ -16,6 +16,7 @@
 package com.tsurugidb.belayer.webapi.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * Parameters of the transaction APIs (begin, commit/rollback, status).
@@ -28,6 +29,7 @@ import lombok.Data;
 public class TransactionApiParameter {
 
     private String uid;
+    @ToString.Exclude
     private String credentials;
     private int timeoutMin;
     private String transactionId;

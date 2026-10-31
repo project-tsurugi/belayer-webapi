@@ -18,6 +18,7 @@ package com.tsurugidb.belayer.webapi.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
 /**
@@ -33,6 +34,7 @@ import lombok.NoArgsConstructor;
 public class BackupRestoreRequestParam {
 
   private String uid;
+  @ToString.Exclude
   private Object credentials;
   private String dirPath;
   private String zipFilePath;
