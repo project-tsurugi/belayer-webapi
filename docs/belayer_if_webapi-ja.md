@@ -1871,6 +1871,7 @@
 * Note
     * 環境変数「BELAYER_CONFIG_ROOT」直下の[endopoints.csv](#エンドポイント一覧csvフォーマット)からエンドポイント一覧を取得し、JSONで返却する。
     * endpoint.csvが存在しない場合、デフォルトとして自エンドポイントの情報(リクエストされたホスト・ポート)のみを返却する。
+        * リバースプロキシ経由の場合、リクエストされたホスト・ポートとして、プロキシがBelayerに送る`Host`ヘッダの値が使われる。クライアントがアクセスしたURLを返すには、環境変数`BELAYER_FORWARD_HEADERS_STRATEGY`を`framework`に設定し、プロキシに`X-Forwarded-Host`などのヘッダを付けさせる（[リバースプロキシ](#リバースプロキシ)を参照）。
     * endpoint.csvを変更・削除した場合、再起動なしに最新状態が返却される。
 * リクエスト
     * メソッド: GET
@@ -2288,6 +2289,20 @@
         RUN_ARGS="--server.jetty.accesslog.filename=/var/log/belayer_access_yyyy_MM_dd.log --server.jetty.accesslog.file-date-format=yyyy_MM_dd --server.jetty.accesslog.format=EXTENDED_NCSA"
         ```
 * 認証・認可のエラーをログに出力する場合は、環境変数`BELAYER_AUTH_ERROR_LOG_LEVEL`を`WARN`に設定する。
+
+## リバースプロキシ
+
+* Belayer Web API Serverは、既定ではリクエストの`Host`ヘッダをクライアントがアクセスしたホスト・ポートとみなす。
+* `Host`を自身の転送先アドレスに書き換えるリバースプロキシ（nginxの既定の`proxy_set_header Host $proxy_host`など）の後ろに置くと、以下が起きる。
+    * ブラウザ（WebAdmin）からのリクエストのうち`Origin`ヘッダが付くもの（POSTなど）が、別オリジンからのリクエストとみなされ、CORSの設定によっては403で拒否される。
+    * endpoints.csvが存在しない場合、[エンドポイント一覧取得API](#エンドポイント一覧取得api)がプロキシの転送先アドレスを返す。
+* これを避けるには、環境変数`BELAYER_FORWARD_HEADERS_STRATEGY`を`framework`に設定し、プロキシに`X-Forwarded-Host`・`X-Forwarded-Proto`（または`Forwarded`）ヘッダを付けさせる。Belayer Web API ServerはこれらのヘッダからクライアントがアクセスしたURLを求める。
+    * nginxの設定例
+    ```
+    proxy_set_header X-Forwarded-Host  $http_host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    ```
+* `BELAYER_FORWARD_HEADERS_STRATEGY`の既定値は`none`（これらのヘッダを無視する）。クライアントがプロキシを通さずBelayer Web API Serverに直接アクセスできる構成では、クライアント自身がこれらのヘッダを送れるため、`none`のままにする。
 
 ## ジョブ情報の永続化
 

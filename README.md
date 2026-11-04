@@ -70,6 +70,7 @@ See the env var table below.
 |BELAYER_ALLOWED_METHODS|The CORS setting for allowed methods. comma sparated strings.|``(means not specify Methods)|
 |BELAYER_ALLOWED_HEADERS|The CORS setting for allowed headers. comma sparated strings.|``(means not specify Headers)|
 |BELAYER_ALLOW_CREDENTIALS|The CORS setting for allow credentials. (true or false) |`false`|
+|BELAYER_FORWARD_HEADERS_STRATEGY|Set `framework` when the server is behind a reverse proxy, to take the URL the client requested from the `X-Forwarded-Host` / `X-Forwarded-Proto` / `X-Forwarded-Port` (or `Forwarded`) headers the proxy adds. *4|`none`(ignore these headers)|
 |BELAYER_STORAGE_ROOT|The directory path to use as Belayer storage.|`/opt/belayer/storage`|
 |TSURUGI_URL|URL to connect Tsurugi database.|`ipc:tsurugi`|
 |TSURUGI_CONNECT_TIMEOUT_SEC|connect timeout seconds for Tsurugi database.|`5`|
@@ -94,6 +95,13 @@ See the env var table below.
 * *2: The user IDs are specified as regular expressions. The default value `{"ROLE_ADMIN": [".*"]}` therefore grants `ROLE_ADMIN` to **every authenticated user**. Be sure to set this variable explicitly for production use.
 * *3: `tgctl_w` and `tgha_w` are the wrapper/stub scripts shipped in `distribution/stub/` and installed into `$TSURUGI_HOME/bin/` by `install.sh`. Point these variables at the official commands once they are available.
     * This value is used only when the role-user mapping file (`${BELAYER_STORAGE_ROOT}/belayer_role_users.json`) does not exist. Once the mapping has been updated via the `/api/update/roleuser` API, the file takes precedence and changing this variable has no effect.
+* *4: Behind a reverse proxy that sends its own address as `Host` (e.g. nginx with its default `proxy_set_header Host $proxy_host`), the server otherwise sees that address: requests from WebAdmin are rejected as cross-origin (403), and the Endpoints API (`/api/instance/list`) returns that address when `endpoints.csv` lists no endpoint. Configure the proxy to add the headers, for example with nginx:
+    ```
+    proxy_set_header X-Forwarded-Host  $http_host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    ```
+    (`$http_host` is the `Host` the client sent, with the port if any.)
+    Keep `none` when clients can reach the server directly, since they could then send these headers themselves. Without this setting, listing the public URL in `endpoints.csv` works around the Endpoints API part only.
 
 ### How to use mock Authentication for development
 
