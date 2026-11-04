@@ -44,7 +44,7 @@ public class DbStatusExecTest {
         script.toFile().setExecutable(true);
 
         exec = new DbStatusExec();
-        exec.cmdString = script + " %s %s %s %s %s";
+        exec.cmdString = script + " %s %s %s %s";
         exec.tgctl = "tgctl";
         exec.tgha = "tgha";
         exec.conf = "tsurugi.ini";
@@ -83,7 +83,7 @@ public class DbStatusExecTest {
         Path script = tempDir.resolve("status2.sh");
         Files.writeString(script, "#!/bin/bash\n" + body);
         script.toFile().setExecutable(true);
-        exec.cmdString = script + " %s %s %s %s %s";
+        exec.cmdString = script + " %s %s %s %s";
     }
 
     @Test
@@ -107,6 +107,14 @@ public class DbStatusExecTest {
 
         Path monitoringFile = Path.of(Files.readString(reported));
         assertFalse(Files.exists(monitoringFile));
+    }
+
+    @Test
+    public void test_token_in_environment_not_in_arguments() throws Exception {
+        // report the token the script sees and the number of its arguments
+        useScript("echo \"{\\\"status\\\": \\\"${TSURUGI_AUTH_TOKEN:-unset} $#\\\"}\"\n");
+
+        assertEquals("token 4", exec.runProcess(tempDir.resolve("mon.log").toString(), "token").getStatus());
     }
 
     @Test

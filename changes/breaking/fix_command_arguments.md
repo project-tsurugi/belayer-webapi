@@ -1,0 +1,2 @@
+* the external commands get the authentication token in the environment variable `TSURUGI_AUTH_TOKEN`, no longer with `--auth-token`. A command set in `TSURUGI_TGCTL_COMMAND` or `TSURUGI_TGHA_COMMAND` has to take the token from that variable (`tgctl` does). Install the `tgctl_w` and `tgha_w` of this version together with the server: the server no longer quotes the arguments it passes, which the older `tgctl_w` expected.
+    * the command templates (`webapi.cli.cmd.*`) no longer quote their placeholders and no longer have `--auth-token`. Overridden templates have to follow.

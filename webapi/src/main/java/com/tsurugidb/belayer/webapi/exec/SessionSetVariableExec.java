@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,13 +131,13 @@ public class SessionSetVariableExec {
    */
   protected Process runProcess(String sessionId, String variableName, String variableValue, String monitoringFile,
       String outFile, String token) {
-    String argsLine = String.format(cmdString, sessionId, variableName, variableValue, monitoringFile, conf, token);
-    String[] args = argsLine.split(" ");
+    List<String> args = CommandArguments.build(cmdString, sessionId, variableName, variableValue, monitoringFile, conf);
 
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
     ScriptDebug.apply(pb, log);
+    CommandArguments.setAuthToken(pb, token);
     // stdout -> file
     pb.redirectOutput(new File(outFile));
     log.debug("exec cmd: {}", CommandLineMask.mask(args));

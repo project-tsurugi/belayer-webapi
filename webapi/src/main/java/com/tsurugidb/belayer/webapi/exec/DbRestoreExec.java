@@ -22,7 +22,6 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,15 +137,13 @@ public class DbRestoreExec {
    * @throws ProcessExecException if failed to start the process
    */
   protected Process runProcess(String dirPath, Path monitoringFilePath, Path outFile, String token) {
-    String argsLine = String.format(cmdString, dirPath, monitoringFilePath.toString(), conf, token);
-    String[] args = argsLine.split(" ");
-
-    List<String> argList = Arrays.asList(args);
+    List<String> argList = CommandArguments.build(cmdString, dirPath, monitoringFilePath.toString(), conf);
 
     var pb = new ProcessBuilder(argList);
     // stderr -> stdout
     pb.redirectErrorStream(true);
     ScriptDebug.apply(pb, log);
+    CommandArguments.setAuthToken(pb, token);
     // stdout -> file
     pb.redirectOutput(new File(outFile.toString()));
     log.debug("exec cmd: {}", CommandLineMask.mask(argList));
