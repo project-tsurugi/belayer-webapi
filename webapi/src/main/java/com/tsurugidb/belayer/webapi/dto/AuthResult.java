@@ -21,6 +21,7 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Result of authentication or token refresh.
@@ -35,10 +36,12 @@ public class AuthResult {
 
     private String userId;
 
+    @ToString.Exclude
     private String refreshToken;
 
     private Instant refreshExpirationTime;
 
+    @ToString.Exclude
     private String accessToken;
 
     private Instant accessExpirationTime;

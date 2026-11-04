@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Request body of the session variable API, with snake_case keys: sets {@code var_name} to
@@ -49,5 +50,6 @@ public class SessionVariable {
     private String varValue;
 
     @JsonIgnore
+    @ToString.Exclude
     private String token;
 }

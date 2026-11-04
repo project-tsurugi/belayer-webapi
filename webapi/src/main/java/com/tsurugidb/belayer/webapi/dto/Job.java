@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import lombok.Data;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 
@@ -72,6 +73,7 @@ public abstract class Job implements Closeable {
 
   @JsonIgnore
   @NotNull
+  @ToString.Exclude
   private Object credentials;
 
   private String type;

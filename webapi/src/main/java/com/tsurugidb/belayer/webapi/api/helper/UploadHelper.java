@@ -27,6 +27,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import com.tsurugidb.belayer.webapi.exception.BadRequestException;
 
 import lombok.Data;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -44,6 +45,7 @@ public class UploadHelper {
     public static class UploadParameter {
         private String destDirPath;
         private String uid;
+        @ToString.Exclude
         private Object credentials;
         private boolean overwrite;
         private List<FilePart> fileParts = new ArrayList<FilePart>();

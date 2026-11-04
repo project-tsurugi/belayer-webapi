@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
 /**
@@ -47,6 +48,7 @@ public abstract class DumpLoadRequestParam {
   @Schema(hidden = true)
   private String uid;
   @Schema(hidden = true)
+  @ToString.Exclude
   private Object credentials;
   @Schema(hidden = true)
   private String table;
