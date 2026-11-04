@@ -1,6 +1,6 @@
 ---
 name: belayer-webapi-release
-description: belayer-webapi をリリースする。リリース番号の確認（docs/release.md から類推、既存タグの扱い）、tsubakuro の更新要否の確認、リリースノートとコミットログの突き合わせ（結果を .release_check.md に出す）、リリースノートの確定とコミット、リリースタグの作成までを行う。「belayer-webapi をリリースして」「リリースの準備をして」「リリースタグを付けて」と頼まれたときに使う。
+description: belayer-webapi をリリースする。リリース番号の確認（直前のタグと changes/ から類推、既存タグの扱い）、tsubakuro の更新要否の確認、changes/ の記載とコミットログの突き合わせ（結果を .release_check.md に出す）、changes/ からのリリースノート（docs/release.md）の節の作成とコミット、リリースタグの作成までを行う。「belayer-webapi をリリースして」「リリースの準備をして」「リリースタグを付けて」と頼まれたときに使う。
 disable-model-invocation: true
 ---
 
@@ -14,9 +14,15 @@ belayer-webapi のリリースを、ローカルのリポジトリで**タグを
 - **push はしない。** コミットの push もタグの push もユーザーが行う。リモートのタグ・GitHub Release の削除もユーザーが行う。
   このスキルの最後に、ユーザーが実行するコマンドを示す。
 - リリースノートは **`docs/release.md`**（英語）。各版の節は `## ver X.Y.Z (Since ver A.B.C)` で始まり、
-  `### Breaking changes` / `### Bug fixes` / `### Misc changes` / `### Full Changelog` の小見出しを持つ（無い小見出しは省く）。
-- **まだリリースしていない版の節は、見出しの末尾に ` - unreleased` を付ける**（例: `## ver 1.5.4 (Since ver 1.5.3) - unreleased`）。
-  開発中にエントリを足すときはこの形で節を作り、リリースのときにこのスキルが外す。1.5.3 以前の節には付いていない。
+  `### Breaking changes` / `### Feature improvements` / `### Bug fixes` / `### Misc changes` / `### Full Changelog` の小見出しを持つ（無い小見出しは省く）。
+- **開発中は `docs/release.md` を書き換えない。** 変更ごとの記載は、リポジトリ直下の **`changes/<kind>/<ブランチ名の / を _ に置き換えたもの>.md`**
+  に1件1ファイルで、英語で置く（書き方は `changes/README.md`）。ディレクトリと見出しの対応は
+  `breaking/` → Breaking changes、`feature/` → Feature improvements、`bugfix/` → Bug fixes、`misc/` → Misc changes。
+  リリースのときに、このスキルがそれらを集めて版の節を作り、使ったファイルを消す（手順5）。
+  PR ごとに別のファイルになるので、リリースノートがマージのときに競合しない。
+  `changes/README.md` と各ディレクトリの `.gitkeep` は消さない。
+- 古いやり方の名残で、`docs/release.md` に未リリースの節（`(unreleased, since ver A.B.C)` や ` - unreleased`）やエントリが
+  直接書かれていたら、それも今回の版の記載として扱い、確認点に挙げる。
 - 版数は2か所にある。**`VERSION`**（`build.gradle` が読み、JAR と OpenAPI の版になる）と、タグ名。
   CI はタグ名で `VERSION` を上書きしてビルドするが、タグを付けるコミットの `VERSION` もリリース番号に揃えておく。
 - tsubakuro の版は `webapi/build.gradle` の `tsubarkuro_version`（変数名は原文のまま）。
@@ -24,6 +30,9 @@ belayer-webapi のリリースを、ローカルのリポジトリで**タグを
 - 変更は理由ごとに別のコミットにする（tsubakuro の更新、`VERSION`、リリースノート）。
   コミットメッセージは英語で、既存の形（`build: ...`、`chore: ...`、`docs: ...`）に合わせる。
 - 途中でユーザーの確認が要る箇所（下の「**確認**」）では、必ず止まって回答を待つ。勝手に進めない。
+- **「画面に出す」ものは、その応答の最後のメッセージにまとめて書く。** ツール呼び出しの合間に書いたテキストは、
+  Claude Code の設定（focus mode など）によってはユーザーに表示されない。確認で止まるときも、手順の最後の報告も、
+  必要な内容をすべて最後のメッセージに入れ、「ファイルに書いた」「上に示した」だけで済ませない。
 
 ## 手順
 
@@ -35,14 +44,13 @@ belayer-webapi のリリースを、ローカルのリポジトリで**タグを
 
 ### 2. リリース番号の確認
 
-1. `docs/release.md` の先頭の節の見出しから、版（X.Y.Z）と前の版（Since の A.B.C）を読む。
-2. `VERSION` の値と、リリースのタグ（snapshot を除く）の一覧 `git tag --sort=-v:refname` を見る。
+1. 直前のリリースのタグ（snapshot を除く。`git tag --sort=-v:refname`）と、`docs/release.md` の先頭の版の節を見る。
+   先頭の節が直前のタグの版であれば、リリースノートはそこまで確定している。
+2. `changes/` の記載ファイル（`README.md` と `.gitkeep` を除く）を区分ごとに数える。1件も無ければ、そのことを報告に含める。
 3. 次のように類推して、**リリース番号の案を1つ**示す。
-    - 先頭の節の版にまだタグが無い、またはローカルにだけある（まだ push していない） → その版。
-    - 先頭の節の版のタグがリモートにある（リリース済み） → リリースノートに新しい節がまだ無い。前の版の次のパッチ版を案にし、
-      手順4で節を作る必要があることも伝える。
+    - 既定は、直前のリリースの版の次のパッチ版。
+    - `changes/breaking/` や `changes/feature/` に記載があれば、マイナー版を上げる案も並べて示す（決めるのはユーザー）。
     - `VERSION` と食い違うときは、食い違いを示す（`VERSION` は手順5で揃える）。
-    - Since の版が直前のリリースタグと違うときも示す。
 4. **既存タグの確認。** 案の版のタグがあるか、ローカル（`git tag -l <版>`）とリモート（`git ls-remote --tags origin <版>`）の両方で調べる。
     - ローカルにだけある → 削除してよいか**確認**する。了承されたら `git tag -d <版>` で消す。
       このあと手順5でコミットが無ければ、タグを付け直す必要は無いので、残す案も示してよい。
@@ -64,29 +72,33 @@ belayer-webapi のリリースを、ローカルのリポジトリで**タグを
 5. 更新する場合:
     - `tsubarkuro_version` を書き換え、`webapi` で `./gradlew build` を通す（WSL では `--console=plain`、`-q` とリダイレクトを組み合わせない）。
     - コミットする（例: `build: update tsubakuro to 1.17.0`）。
-    - リリースノートの `### Misc changes` に `* update tsubakuro dependencies to version X.` を足す（手順4のコミットに含める）。
+    - `changes/misc/update_tsubakuro.md` に `* update tsubakuro dependencies to version X.` を書き、更新のコミットに含める。
 
-### 4. リリースノートとコミットログの突き合わせ
+### 4. 記載（`changes/`）とコミットログの突き合わせ
 
 1. 対象のコミットを集める: `git log --no-merges --format='%h %s' <前のリリースタグ>..HEAD`。
    本文も要るときは `git show --stat <hash>` で見る。
-2. コミットごとに、リリースノートのどのエントリに当たるかを対応付ける。
+   記載は `changes/` の各ファイル（エントリ）である。どのコミットで足されたかは
+   `git log --diff-filter=A --format='%h %s' <前のリリースタグ>..HEAD -- changes/` で分かる。
+2. コミットごとに、どの記載（`changes/` のファイルのエントリ）に当たるかを対応付ける。区分（ディレクトリ）が合っているかも見る。
     - 利用者に見える変更（API の応答・パス・権限、設定項目・環境変数、配布物・スクリプト、必要な環境、セキュリティ）は
-      エントリが要る。挙動を変える修正は `Breaking changes` に入れるべきかも見る。
+      エントリが要る。挙動を変える修正は `breaking/`（Breaking changes）に入れるべきかも見る。
     - **CI 周りの変更（`.github/workflows/`、ビルド・テストの設定。`build.gradle` のツールチェーンや test タスクなど）は
-      `### Misc changes` に載せる。** devcontainer など開発環境の追加・大きな変更も Misc に載せる。
+      `misc/`（Misc changes）に載せる。** devcontainer など開発環境の追加・大きな変更も `misc/` に載せる。
     - それ以外の内部だけの変更（テストコード、`.claude/`、コメント）はエントリが無くてよい。
       ただし、まとめて1行にしている既存の書き方（`clean up the code: ...`）があれば、それに含まれるかを見る。
     - revert で打ち消し合うコミットの組は、差し引きで判断する。
 3. 逆向きに、エントリごとに裏付けのコミットがあるか（書いてあるのに実装が無い・違う、が無いか）を見る。
-4. 表記も見る: 版と Since、`Full Changelog` のリンク（`compare/<前の版>...<リリース番号>`）、小見出しの並び、
-   見出しの ` - unreleased`（無ければ付け忘れとして報告するだけでよい）、残っている `TBD` / `TODO` / `(WIP)` など。
+4. 表記も見る: 各ファイルが見出しを持たず `* ` の行だけか、英語で既存のエントリの書き方に合っているか、
+   同じ内容が別の区分にも重複していないか、残っている `TBD` / `TODO` / `(WIP)` など。
+   `docs/release.md` に未リリースの節や、直前のリリースの節より後のエントリが直接書かれていないかも見る。
 5. 結果を **`.release_check.md`**（リポジトリの直下。`.gitignore` 済みでコミットしない）に書く。
    **同じ版の `.release_check.md` が既にあるとき（再実行）は、前の「確認したい点」とその回答・反映結果を消さず、
    「これまでの確認と回答」の節に移して残す。** 書く内容:
     - リリース番号、前のリリースタグ、対象コミット数、未 push のコミット数
     - tsubakuro: 今の版、最新の版、判断（更新あり・なし。ありなら版）
-    - コミット → エントリの対応表（`hash | 件名 | 対応するエントリ / 不要の理由`）。
+    - `changes/` の記載の一覧（区分ごと。ファイル名と、それを足したコミット）
+    - コミット → エントリの対応表（`hash | 件名 | 対応する記載（changes/ のファイル） / 不要の理由`）。
       **表の直前に、ずれの有無を1行で書く**: `ずれ: なし` または `ずれ: あり（N件）`。
       ずれとは、エントリが要るのに無いコミットと、裏付けのコミットが無い・食い違うエントリの合計。
       ずれのある行は表の中でも分かるようにする（**太字**と、対応する確認の番号）。
@@ -100,17 +112,24 @@ belayer-webapi のリリースを、ローカルのリポジトリで**タグを
     5. 再実行のときは、「これまでの確認と回答」も一覧で（各点の回答と反映先）
 7. 疑問点は**まとめて**示し、回答を**確認**する。1件ずつ小出しにしない。確認したい点が無ければ、そう書いて確認を取る。
 
-### 5. リリースノートの確定とコミット
+### 5. リリースノートの節の作成とコミット
 
 回答を受けてから行う。
 
-1. `docs/release.md` のリリースする版の節を直す: 足りないエントリを足し、誤りを直し、
-   見出しの ` - unreleased` を外し、見出しの版と Since、`Full Changelog` のリンクを確定する。
-   既存のエントリの書き方（英語、現在形の動詞で始める、利用者から見た影響を書く）に合わせる。
-2. `VERSION` がリリース番号と違えば直す。
-3. コミットは理由ごとに分ける。
+1. 回答に沿って、`changes/` のファイルを直す（足りない記載を足す、誤りを直す、区分を移す）。
+   書き方は既存のエントリ（英語、現在形の動詞で始める、利用者から見た影響を書く）に合わせる。
+2. `docs/release.md` の `# Change Log` の直後（いちばん新しい版の節の前）に、リリースする版の節を作る。
+    - 見出しは `## ver X.Y.Z (Since ver A.B.C)`（A.B.C は直前のリリースの版）。
+    - 小見出しは Breaking changes → Feature improvements → Bug fixes → Misc changes の順で、記載のある区分だけ作る。
+    - 各小見出しの下に、その区分のファイルの中身を、ファイルを足したコミットの古い順に並べる
+      （`git log --diff-filter=A --reverse --format=%H -- changes/<kind>/` の順）。
+    - 最後に `### Full Changelog` と `https://github.com/project-tsurugi/belayer-webapi/compare/<前の版>...<リリース番号>`。
+    - 古いやり方で `docs/release.md` に直接書かれた記載があれば、この節にまとめ、未リリースの節は消す。
+3. 使った `changes/` のファイルを消す（`git rm`）。`changes/README.md` と各ディレクトリの `.gitkeep` は残す。
+4. `VERSION` がリリース番号と違えば直す。
+5. コミットは理由ごとに分ける。
     - `VERSION`: `chore: bump the version to X.Y.Z`
-    - リリースノート: `docs: finalize the X.Y.Z release note`
+    - リリースノート（節の作成と `changes/` のファイルの削除を同じコミットに）: `docs: finalize the X.Y.Z release note`
    変更が無いものはコミットしない。
 
 ### 6. ビルドの確認
