@@ -1,0 +1,3 @@
+* add `BELAYER_FORWARD_HEADERS_STRATEGY` to run behind a reverse proxy that sends its own address as `Host` (e.g. nginx with its default `proxy_set_header Host $proxy_host`). Set it to `framework` and have the proxy add `X-Forwarded-Host` and `X-Forwarded-Proto`, and the server takes the URL the client requested from these headers.
+    * without it, requests from WebAdmin with an `Origin` header (e.g. login) were rejected as cross-origin (403), and the Endpoints API (`/api/instance/list`) returned the proxy's address when `endpoints.csv` lists no endpoint.
+    * the default `none` ignores these headers, as before. Keep it when clients can reach the server directly.
