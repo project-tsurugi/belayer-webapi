@@ -1,11 +1,5 @@
 # Change Log
 
-## ver 1.5.4 (unreleased, since ver 1.5.3)
-
-### Breaking changes
-
-### Bug fixes
-
 ## ver 1.5.3 (Since ver 1.5.2)
 
 ### Breaking changes
