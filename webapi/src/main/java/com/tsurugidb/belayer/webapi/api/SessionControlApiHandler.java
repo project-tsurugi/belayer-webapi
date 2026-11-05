@@ -15,6 +15,8 @@
  */
 package com.tsurugidb.belayer.webapi.api;
 
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -40,8 +42,36 @@ public class SessionControlApiHandler {
 
     private static final String NO_REQUEST_BODY = "Request body is required.";
 
+    /**
+     * Session ID: the numeric ID that tgctl takes after ":" (the session
+     * commands of webapi.cli.cmd put the ":" in front).
+     */
+    static final Pattern SESSION_ID = Pattern.compile("[0-9]{1,20}");
+
+    /**
+     * Session variable name: Tsurugi builds the names from 0-9, a-z, "_" and
+     * "." and compares them case insensitively.
+     */
+    static final Pattern VARIABLE_NAME = Pattern.compile("[0-9A-Za-z_.]{1,100}");
+
+    /** Session variable value: printable ASCII, no control characters. */
+    static final Pattern VARIABLE_VALUE = Pattern.compile("[\\x20-\\x7E]{1,100}");
+
     @Autowired
     SessionControlService sessionControlService;
+
+    /**
+     * reject a session ID that is not a numeric session ID.
+     *
+     * @param sessionId session ID from the request
+     * @throws BadRequestException if the session ID is not valid
+     */
+    private static void checkSessionId(String sessionId) {
+        if (sessionId == null || !SESSION_ID.matcher(sessionId).matches()) {
+            var msg = "invalid session ID.";
+            throw new BadRequestException(msg, msg);
+        }
+    }
 
     /**
      * Show Status of Tsurugi Session
@@ -54,6 +84,7 @@ public class SessionControlApiHandler {
                 .map(SecurityContext::getAuthentication)
                 .flatMap(auth -> {
                     String sessionId = req.pathVariable("session_id");
+                    checkSessionId(sessionId);
                     boolean available = sessionControlService.isAvailable(sessionId, (String)auth.getCredentials());
 
                     String status = available ? "available" : "unavailable";
@@ -85,6 +116,15 @@ public class SessionControlApiHandler {
                     if (!StringUtils.hasLength(param.getSessionId()) || !StringUtils.hasLength(param.getVarName())
                             || !StringUtils.hasLength(param.getVarValue())) {
                         var msg = "invalid parameters.";
+                        throw new BadRequestException(msg, msg);
+                    }
+                    checkSessionId(param.getSessionId());
+                    if (!VARIABLE_NAME.matcher(param.getVarName()).matches()) {
+                        var msg = "invalid variable name.";
+                        throw new BadRequestException(msg, msg);
+                    }
+                    if (!VARIABLE_VALUE.matcher(param.getVarValue()).matches()) {
+                        var msg = "invalid variable value.";
                         throw new BadRequestException(msg, msg);
                     }
                     var result = sessionControlService.setVariable(param);
@@ -126,6 +166,7 @@ public class SessionControlApiHandler {
                         var msg = "sessionId is not specified.";
                         throw new BadRequestException(msg, msg);
                     }
+                    checkSessionId(param.getSessionId());
 
                     boolean success = sessionControlService.killSession(param.getSessionId(), param.getToken());
                     if (success) {

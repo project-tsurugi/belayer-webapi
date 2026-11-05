@@ -182,7 +182,8 @@ public class DbControlApiHandler {
                                 if (fromHost == null) {
                                     throw new BadRequestException("from is not specified.", "from is not specified.");
                                 }
-                                if (fromHost.contains("\"") || fromHost.matches(".*\\s.*$")) {
+                                // an endpoint such as host:port or dns:///host:port
+                                if (!fromHost.matches("[0-9A-Za-z._:/\\[\\]-]{1,255}")) {
                                     return ServerResponse.badRequest()
                                             .body(BodyInserters.fromValue(new ErrorResult("invalid from")));
                                 }

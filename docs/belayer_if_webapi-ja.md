@@ -1804,6 +1804,9 @@
             ```
             {"session_id": "<session_id>", "status": "available"}
             ```
+    * 異常(パラメータ不正：セッションIDが数字（1〜20桁）でない)
+        * ステータスコード: 400
+        * ボディ: ```{"errorMessage": "invalid session ID."}```
 
 ## セッション変数設定API
 
@@ -1834,6 +1837,12 @@
     * 異常(パラメータ不正：セッションIDなし)
         * ステータスコード: 400
         * ボディ: ```{"errorMessage": "invalid parameters."}```
+    * 異常(パラメータ不正：値の形式)
+        * 条件
+            * session_id が数字（1〜20桁）でない: ```{"errorMessage": "invalid session ID."}```
+            * var_name が英数字・`_`・`.` の1〜100文字でない: ```{"errorMessage": "invalid variable name."}```
+            * var_value が制御文字を含まない ASCII（空白から `~` まで）の1〜100文字でない: ```{"errorMessage": "invalid variable value."}```
+        * ステータスコード: 400
     * 異常（セッション変数設定失敗）
         * 条件
             * 何らかの理由によりセッションに変数が設定できなかった場合。（セッションが利用不能の場合を含む）
@@ -1864,6 +1873,9 @@
     * 異常(パラメータ不正：セッションIDなし)
         * ステータスコード: 400
         * ボディ: ```{"errorMessage": "sessionId is not specified."}```
+    * 異常(パラメータ不正：セッションIDが数字（1〜20桁）でない)
+        * ステータスコード: 400
+        * ボディ: ```{"errorMessage": "invalid session ID."}```
 
 ## エンドポイント一覧取得API
 
@@ -2047,7 +2059,7 @@
     * パス: /api/db/sync
     * パラメータ: なし
     * ボディ: 任意
-        * from: 連携元の接続先
+        * from: 連携元の接続先（英数字と `.` `_` `-` `:` `/` `[` `]` の1〜255文字。例: `host:port`、`dns:///host:port`）
         ```
         {
           "from": "tsurugi_master:12345"
@@ -2058,6 +2070,7 @@
         * ステータスコード: 200
         * ボディ: なし
     * 異常
+        * 条件: from が無い、from の形式が上記でない（`invalid from`）、同期に失敗した
         * ステータスコード: 400
         * ボディ: 
             ```

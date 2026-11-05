@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -107,17 +109,21 @@ public class DbChangeModeExec {
    * @throws ProcessExecException if failed to start the process
    */
   protected Process runProcess(String monitoringFile, String outFile, String token, String mode, String replicateFrom, boolean autoFetchWal) {
-    String modeAndOptions = !"replica".equals(mode) ? mode : mode + " --replicate-from " + replicateFrom;
-    if ("replica".equals(mode) && autoFetchWal) {
-      modeAndOptions += " --auto-fetch-wal";
+    List<String> modeAndOptions = new ArrayList<>(List.of(mode));
+    if ("replica".equals(mode)) {
+      modeAndOptions.add("--replicate-from");
+      modeAndOptions.add(replicateFrom);
+      if (autoFetchWal) {
+        modeAndOptions.add("--auto-fetch-wal");
+      }
     }
-    String argsLine = String.format(cmdString, modeAndOptions, monitoringFile, conf, token);
-    String[] args = argsLine.split(" ");
+    List<String> args = CommandArguments.build(cmdString, modeAndOptions, monitoringFile, conf);
 
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
     ScriptDebug.apply(pb, log);
+    CommandArguments.setAuthToken(pb, token);
     // stdout -> file
     pb.redirectOutput(new File(outFile));
     log.debug("exec cmd: {}", CommandLineMask.mask(args));
