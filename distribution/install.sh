@@ -28,26 +28,32 @@ if [ -z $_JAVA_PATH ] && [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ];  t
     _JAVA_PATH="$JAVA_HOME/bin/java"
 fi
 
-if [ !$_JAVA_PATH ]; then
-    _JAVA_MAJOR_VERSION=$($_JAVA_PATH -version 2>&1 | grep -oP 'version "?(1\.)?\K\d+' || true)
-    _JAVA_FULL_VERSION=$($_JAVA_PATH -version 2>&1)
+if [ -z "$_JAVA_PATH" ]; then
+    echo ""
+    echo "java is not found. requires Java ${REQUIRE_JAVA_MAJOR_VERSION} or newer."
+    exit 1
 fi
+
+_JAVA_MAJOR_VERSION=$($_JAVA_PATH -version 2>&1 | grep -oP 'version "?(1\.)?\K\d+' || true)
+_JAVA_FULL_VERSION=$($_JAVA_PATH -version 2>&1)
 
 echo Java Version: $_JAVA_FULL_VERSION
 echo Java MajorVersion: $_JAVA_MAJOR_VERSION
 echo Java Path: $_JAVA_PATH
 
-if [ $_JAVA_MAJOR_VERSION -lt "${REQUIRE_JAVA_MAJOR_VERSION}" ]; then
+# An empty version (java -version printed something unexpected) fails the
+# check as well, instead of letting the comparison error out and go on.
+if [ -z "$_JAVA_MAJOR_VERSION" ] || [ "$_JAVA_MAJOR_VERSION" -lt "${REQUIRE_JAVA_MAJOR_VERSION}" ]; then
     echo ""
     echo "requires Java ${REQUIRE_JAVA_MAJOR_VERSION} or newer."
-    exit -1
+    exit 1
 fi
 
 # check TSURUGI_HOME
 if [ -z $TSURUGI_HOME ]; then
     echo ""
     echo "TSURUGI_HOME is not set"
-    exit -1
+    exit 1
 fi
 
 mkdir -p ${INSTALL_DIR}/bin
