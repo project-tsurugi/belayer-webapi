@@ -83,6 +83,7 @@ See the env var table below.
 |TSURUGI_AUTH_URL|URL for authentication server "harinoki".|`http://localhost:8080/harinoki`|
 |TSURUGI_AUTH_AT_EXPIRATION_MIN|The expiration minutes for Access Token.|`10`|
 |TSURUGI_AUTH_VERIFY_CACHE_MAX_MIN|Maximum minutes to reuse the result of verifying an Access Token with "harinoki" (never beyond the token's expiration). `0` verifies on every request.|`30`|
+|TSURUGI_AUTH_VERIFY_TIMEOUT_MS|Maximum milliseconds to wait for "harinoki" to answer the verification of an Access Token. When it does not answer in time, the request is rejected with 401. `0` waits without limit.|`1000`|
 |BELAYER_DEFAULT_ROLE_USER_MAPPING|Initial role-user mapping(JSON String) *1 *2|`{"ROLE_ADMIN": [".*"]}`|
 |BELAYER_MAX_FILE_LIST_SIZE|Max size to list the files.|`500`|
 |BELAYER_JOB_EXPIRATION_DAYS|Epiration days for the job history data.|`3`|

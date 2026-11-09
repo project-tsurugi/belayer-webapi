@@ -26,7 +26,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -87,8 +92,18 @@ public class AuthService {
   @Value("${webapi.auth.verify.cache.max.min}")
   int verifyCacheMaxMin;
 
+  @Value("${webapi.auth.verify.timeout.ms}")
+  long verifyTimeoutMs;
+
   /** access tokens verified by the authentication server, and the time until which they are trusted */
   private final Map<String, Instant> verifiedTokens = new ConcurrentHashMap<>();
+
+  /** threads to ask the authentication server, so that a request can stop waiting at the timeout */
+  private final ExecutorService verifyExecutor = Executors.newCachedThreadPool(runnable -> {
+    Thread thread = new Thread(runnable, "auth-verify");
+    thread.setDaemon(true);
+    return thread;
+  });
 
   /**
    * verify user password credential and return access token.
@@ -236,7 +251,7 @@ public class AuthService {
     }
 
     try {
-      ((JwtTicketProvider) ticketProvider).verify(ticket, TokenKind.ACCESS);
+      verifyWithTimeout((JwtTicketProvider) ticketProvider, ticket);
     } catch (CoreServiceException ex) {
       log.debug("token was rejected by the authentication server: {}", ex.getMessage());
       throw new UnauthenticatedException("Invalid token.");
@@ -252,6 +267,44 @@ public class AuthService {
       Instant limit = now.plus(Duration.ofMinutes(verifyCacheMaxMin));
       verifiedTokens.values().removeIf(until -> !now.isBefore(until));
       verifiedTokens.put(token, expirationTime.isBefore(limit) ? expirationTime : limit);
+    }
+  }
+
+  /**
+   * Ask the authentication server, waiting for its response at most the configured time.
+   * The HTTP request built by tsubakuro has no response timeout, so the call runs on another thread,
+   * which is interrupted when the time is up. A value of 0 or less waits without limit.
+   */
+  private void verifyWithTimeout(JwtTicketProvider provider, Ticket ticket)
+      throws InterruptedException, IOException, CoreServiceException {
+    if (verifyTimeoutMs <= 0) {
+      provider.verify(ticket, TokenKind.ACCESS);
+      return;
+    }
+    Future<Void> future = verifyExecutor.submit(() -> {
+      provider.verify(ticket, TokenKind.ACCESS);
+      return null;
+    });
+    try {
+      future.get(verifyTimeoutMs, TimeUnit.MILLISECONDS);
+    } catch (TimeoutException ex) {
+      future.cancel(true);
+      throw new IOException("authentication server did not respond within " + verifyTimeoutMs + " ms", ex);
+    } catch (InterruptedException ex) {
+      future.cancel(true);
+      throw ex;
+    } catch (ExecutionException ex) {
+      Throwable cause = ex.getCause();
+      if (cause instanceof CoreServiceException) {
+        throw (CoreServiceException) cause;
+      }
+      if (cause instanceof IOException) {
+        throw (IOException) cause;
+      }
+      if (cause instanceof RuntimeException) {
+        throw (RuntimeException) cause;
+      }
+      throw new IOException(cause);
     }
   }
 

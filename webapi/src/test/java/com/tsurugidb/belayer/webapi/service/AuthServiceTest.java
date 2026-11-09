@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -32,6 +34,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,6 +75,7 @@ public class AuthServiceTest {
     authService.permissionConfig = permissionConfig;
     authService.systemTime = systemTime;
     authService.verifyCacheMaxMin = 30;
+    authService.verifyTimeoutMs = 1000;
   }
 
   private static String token(String subject, Instant expiresAt) {
@@ -190,5 +195,58 @@ public class AuthServiceTest {
 
     when(systemTime.now()).thenReturn(NOW.plus(Duration.ofMinutes(30)));
     assertThrows(UnauthenticatedException.class, () -> authenticate(token));
+  }
+
+  @Test
+  public void test_auth_server_does_not_respond() throws Exception {
+    authService.verifyTimeoutMs = 200;
+    String token = token("access", NOW.plus(Duration.ofMinutes(10)));
+    CountDownLatch interrupted = new CountDownLatch(1);
+    doAnswer(invocation -> {
+      try {
+        Thread.sleep(10_000);
+      } catch (InterruptedException ex) {
+        interrupted.countDown();
+        throw ex;
+      }
+      return null;
+    }).when(tokenProvider).verify(token);
+
+    long start = System.nanoTime();
+    assertThrows(UnauthenticatedException.class, () -> authenticate(token));
+    long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+
+    assertTrue(elapsedMs < 5_000, "waited " + elapsedMs + " ms");
+    // the thread waiting for the response is released
+    assertTrue(interrupted.await(5, TimeUnit.SECONDS));
+    // a token not verified in time is not cached
+    doNothing().when(tokenProvider).verify(token);
+    authenticate(token);
+    verify(tokenProvider, times(2)).verify(token);
+  }
+
+  @Test
+  public void test_auth_server_responds_within_timeout() throws Exception {
+    authService.verifyTimeoutMs = 2_000;
+    String token = token("access", NOW.plus(Duration.ofMinutes(10)));
+    doAnswer(invocation -> {
+      Thread.sleep(100);
+      return null;
+    }).when(tokenProvider).verify(token);
+
+    assertTrue(authenticate(token).isAuthenticated());
+  }
+
+  @Test
+  public void test_timeout_disabled() throws Exception {
+    authService.verifyTimeoutMs = 0;
+    String token = token("access", NOW.plus(Duration.ofMinutes(10)));
+
+    assertTrue(authenticate(token).isAuthenticated());
+
+    String rejected = token("access", NOW.plus(Duration.ofMinutes(20)));
+    doThrow(new CoreServiceException(CoreServiceCode.BROKEN_CREDENTIAL, "invalid token"))
+        .when(tokenProvider).verify(rejected);
+    assertThrows(UnauthenticatedException.class, () -> authenticate(rejected));
   }
 }
