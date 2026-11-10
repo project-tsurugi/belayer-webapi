@@ -16,9 +16,13 @@
 package com.tsurugidb.belayer.webapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -34,6 +38,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +46,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 
+import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.exception.UnauthenticatedException;
 import com.tsurugidb.belayer.webapi.model.SystemTime;
 import com.tsurugidb.belayer.webapi.security.PermissionConfig;
@@ -235,6 +241,38 @@ public class AuthServiceTest {
     }).when(tokenProvider).verify(token);
 
     assertTrue(authenticate(token).isAuthenticated());
+  }
+
+  @Test
+  public void test_login_does_not_verify_issued_token() throws Exception {
+    String refreshToken = token("refresh", NOW.plus(Duration.ofHours(24)));
+    String accessToken = token("access", NOW.plus(Duration.ofMinutes(10)));
+    when(tokenProvider.issue("user1", "password")).thenReturn(refreshToken);
+    when(tokenProvider.refresh(eq(refreshToken), anyLong(), any())).thenReturn(accessToken);
+    // a token issued by the authentication server is not asked again, even when it does not respond
+    doThrow(new IOException("connection refused")).when(tokenProvider).verify(anyString());
+
+    AuthResult result = authService.verifyCredential("user1", "password");
+
+    assertNull(result.getErrorMessage());
+    assertEquals(accessToken, result.getAccessToken());
+    assertEquals(Set.of("ROLE_ADMIN", "ROLE_USER"), result.getRoles());
+    verify(tokenProvider, never()).verify(anyString());
+  }
+
+  @Test
+  public void test_refresh_does_not_verify_issued_token() throws Exception {
+    String refreshToken = token("refresh", NOW.plus(Duration.ofHours(24)));
+    String accessToken = token("access", NOW.plus(Duration.ofMinutes(10)));
+    when(tokenProvider.refresh(eq(refreshToken), anyLong(), any())).thenReturn(accessToken);
+    doThrow(new IOException("connection refused")).when(tokenProvider).verify(anyString());
+
+    AuthResult result = authService.refreshToken(refreshToken);
+
+    assertNull(result.getErrorMessage());
+    assertEquals(accessToken, result.getAccessToken());
+    assertEquals(Set.of("ROLE_ADMIN", "ROLE_USER"), result.getRoles());
+    verify(tokenProvider, never()).verify(anyString());
   }
 
   @Test

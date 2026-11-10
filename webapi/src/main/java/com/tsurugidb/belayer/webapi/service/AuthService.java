@@ -154,8 +154,9 @@ public class AuthService {
       Optional<String> at = ticket.getToken(TokenKind.ACCESS);
       var atExpirationTime = ticket.getAccessExpirationTime();
 
-      Authentication auth = this.verifyToken(at.orElse(null));
-      var roleSet = auth.getAuthorities().stream().map(item -> item.toString()).collect(Collectors.toSet());
+      // the access token has just been issued by the authentication server, so it is not verified again here
+      var roleSet = resolveRoles(ticket.getUserId()).stream().map(item -> item.toString())
+          .collect(Collectors.toSet());
       Set<String> authzSet = new HashSet<>();
       for (String role : roleSet) {
         var authz = permissionConfig.getAuthoritiesByRole(role);
@@ -219,7 +220,15 @@ public class AuthService {
     }
     verifyByAuthServer(token, ticket, accessExpirationTime.get(), now);
 
-    List<String> roles = roleConfig.getRolesByUserId(ticket.getUserId());
+    return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true,
+        resolveRoles(ticket.getUserId()));
+  }
+
+  /**
+   * Resolve the roles of the user: the roles assigned to the user and the default role.
+   */
+  private List<SimpleGrantedAuthority> resolveRoles(String userId) {
+    List<String> roles = roleConfig.getRolesByUserId(userId);
     List<SimpleGrantedAuthority> authorities;
     if (roles == null) {
       authorities = new ArrayList<>();
@@ -232,8 +241,7 @@ public class AuthService {
       log.debug("role:{}, authz:{}", authority.getAuthority(),
           permissionConfig.getAuthoritiesByRole(authority.getAuthority()));
     }
-
-    return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true, authorities);
+    return authorities;
   }
 
   /**
