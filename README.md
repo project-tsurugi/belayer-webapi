@@ -94,6 +94,7 @@ See the env var table below.
 * *1: See [Belayer Authorizaion](./docs/belayer_authorization.md#ロールを持つユーザの指定例) document.
 * *2: The user IDs are specified as regular expressions. The default value `{"ROLE_ADMIN": [".*"]}` therefore grants `ROLE_ADMIN` to **every authenticated user**. Be sure to set this variable explicitly for production use.
 * *3: `tgctl_w` and `tgha_w` are the wrapper/stub scripts shipped in `distribution/stub/` and installed into `$TSURUGI_HOME/bin/` by `install.sh`. Point these variables at the official commands once they are available.
+    * The server runs these commands with one argument per value and passes the authentication token in the environment variable `TSURUGI_AUTH_TOKEN` rather than with `--auth-token`. A command used here has to take the token from that variable, as `tgctl` does.
     * This value is used only when the role-user mapping file (`${BELAYER_STORAGE_ROOT}/belayer_role_users.json`) does not exist. Once the mapping has been updated via the `/api/update/roleuser` API, the file takes precedence and changing this variable has no effect.
 * *4: Behind a reverse proxy that sends its own address as `Host` (e.g. nginx with its default `proxy_set_header Host $proxy_host`), the server otherwise sees that address: requests from WebAdmin are rejected as cross-origin (403), and the Endpoints API (`/api/instance/list`) returns that address when `endpoints.csv` lists no endpoint. Configure the proxy to add the headers, for example with nginx:
     ```

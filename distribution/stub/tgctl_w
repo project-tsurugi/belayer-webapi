@@ -5,9 +5,16 @@ import argparse
 import os
 import json
 import re
+import shlex
+import subprocess
 
 TSURUGI_HOME = os.environ['TSURUGI_HOME']
 TGCTL = f"{TSURUGI_HOME}/bin/tgctl"
+
+# tgctl is run with its arguments as a list, never through a shell, so that
+# nothing in an argument (a session variable value, for example) is
+# interpreted. The authentication token comes in the environment variable
+# TSURUGI_AUTH_TOKEN, which tgctl reads itself and inherits from here.
 
 def main():
     parser = argparse.ArgumentParser(description='tgctl warrper stub')
@@ -16,9 +23,8 @@ def main():
         out_log(" ".join(sys.argv))
         exit()
 
-    cmd = " ".join(sys.argv[1:])
-    cmd = TGCTL + " " + cmd
-    out_log(f"command: {cmd}")
+    cmd = [TGCTL] + sys.argv[1:]
+    out_log(f"command: {shlex.join(cmd)}")
 
     match sys.argv[1]:
         case "start":
@@ -26,8 +32,10 @@ def main():
 #        case "config":
 #            print()
         case _:
-            out_log(f"other command: {cmd}")
-            rt = os.system(cmd) >> 8
+            out_log(f"other command: {shlex.join(cmd)}")
+            # The exit status stays 0 as before: the caller reads the result
+            # from the monitor file.
+            subprocess.call(cmd)
             exit()
 
     subparsers = parser.add_subparsers(dest='subcommand')
@@ -74,14 +82,23 @@ def main():
             result_dict_list = [result_dict, result_dict2]
             out_monitor(monitor_file, result_dict_list)
         case _:
-            out_log(f"other command: {cmd}")
-            rt = os.system(cmd) >> 8
+            out_log(f"other command: {shlex.join(cmd)}")
+            # The exit status stays 0 as before: the caller reads the result
+            # from the monitor file.
+            subprocess.call(cmd)
+            exit()
 
 
 def start_command(monitor_file:str, conf_file:str, timeout:int, auth_token:str, mode:str, replicateFrom:str, autoFetchWal:bool):
-    cmd = f"{TGCTL} start --monitor {monitor_file} --conf {conf_file} --timeout {timeout} --auth-token {auth_token}"
-    out_log(f"stub for cmd: '{cmd}'")
-    rt = os.system(cmd) >> 8
+    cmd = [TGCTL, "start", "--timeout", str(timeout)]
+    if conf_file:
+        cmd += ["--conf", conf_file]
+    if monitor_file:
+        cmd += ["--monitor", monitor_file]
+    if auth_token:
+        cmd += ["--auth-token", auth_token]
+    out_log(f"stub for cmd: '{shlex.join(cmd)}'")
+    rt = subprocess.call(cmd)
     if rt == 0:
         out_mode(mode, replicateFrom, autoFetchWal)
 

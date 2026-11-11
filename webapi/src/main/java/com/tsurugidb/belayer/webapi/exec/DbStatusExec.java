@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,13 +100,13 @@ public class DbStatusExec {
    * @throws ProcessExecException if failed to run the command or to parse its output
    */
   public DbStatus runProcess(String monitoringFile, String authToken) {
-    String argsLine = String.format(cmdString, tgctl, tgha, monitoringFile, conf, authToken);
-    String[] args = argsLine.split(" ");
+    List<String> args = CommandArguments.build(cmdString, tgctl, tgha, monitoringFile, conf);
 
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
     ScriptDebug.apply(pb, log);
+    CommandArguments.setAuthToken(pb, authToken);
     String result = null;
     try {
       var proc = pb.start();

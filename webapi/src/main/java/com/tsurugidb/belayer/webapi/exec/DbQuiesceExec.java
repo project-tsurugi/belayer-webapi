@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,13 +107,13 @@ public class DbQuiesceExec {
    * @throws ProcessExecException if failed to start the process
    */
   protected Process runProcess(Path monitoringFilePath, String label, Path outFile, String token) {
-    String argsLine = String.format(cmdString, monitoringFilePath.toString(), conf, label, token);
-    String[] args = argsLine.split(" ");
+    List<String> args = CommandArguments.build(cmdString, monitoringFilePath.toString(), conf, label);
 
     var pb = new ProcessBuilder(args);
     // stderr -> stdout
     pb.redirectErrorStream(true);
     ScriptDebug.apply(pb, log);
+    CommandArguments.setAuthToken(pb, token);
     // stdout -> file
     pb.redirectOutput(new File(outFile.toString()));
     log.debug("exec cmd: {}", CommandLineMask.mask(args));
