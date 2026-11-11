@@ -34,8 +34,14 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
 ## 認証・認可の効き方
 
 - **Harinoki へ出るのは `/api/auth`（発行）と `/api/refresh`（更新）だけ。**
-- **Bearer の検証は `ticketProvider.restore()` でローカル完結する**（毎リクエストの問い合わせは無い）。
-  したがって **Harinoki が落ちても既存トークンは有効期限（既定10分）まで操作が通る。**
+- **Bearer の検証は Harinoki の `/verify` に問い合わせる**（`AuthService#verifyToken`）。
+  `restore()` はデコードするだけなので、`sub=access` と `exp` はアプリ側で確かめ、署名・`iss`・`aud` は
+  `/verify` に任せる。検証済みのトークンは最大 `TSURUGI_AUTH_VERIFY_CACHE_MAX_MIN`（既定30分）、
+  ただしトークンの `exp` までキャッシュする。**Harinoki が落ちると、キャッシュに無いトークンは 401 になる。**
+  `/verify` の応答待ちは `TSURUGI_AUTH_VERIFY_TIMEOUT_MS`（既定 1000 ミリ秒、0 で無制限）で打ち切り、401 にする。
+  tsubakuro の `HttpTokenProvider` が作る要求には応答のタイムアウトが無いので、別スレッドで呼んで
+  `Future.get` の時間切れで割り込む（`AuthService#verifyWithTimeout`）。
+  `authmock` には問い合わせ先が無いので `/verify` は呼ばない（`sub` と `exp` の確認だけ）。
 - `permission.defaultRole`（既定 `ROLE_USER`）は fallback ではなく、
   **認証を通った全ユーザに無条件で付与される**。そこに割り当てた権限は事実上全開放。
 - 権限を追加するときは `FunctionPermission` → `permission.properties` → `RouterPath` →

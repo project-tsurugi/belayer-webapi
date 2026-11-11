@@ -16,14 +16,22 @@
 package com.tsurugidb.belayer.webapi.service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -38,17 +46,20 @@ import org.springframework.stereotype.Component;
 
 import com.tsurugidb.belayer.webapi.dto.AuthResult;
 import com.tsurugidb.belayer.webapi.exception.UnauthenticatedException;
+import com.tsurugidb.belayer.webapi.model.SystemTime;
 import com.tsurugidb.belayer.webapi.security.PermissionConfig;
 import com.tsurugidb.belayer.webapi.security.RoleConfig;
 import com.tsurugidb.belayer.webapi.security.UserTokenAuthentication;
 import com.tsurugidb.tsubakuro.auth.Ticket;
 import com.tsurugidb.tsubakuro.auth.TicketProvider;
 import com.tsurugidb.tsubakuro.auth.TokenKind;
+import com.tsurugidb.tsubakuro.auth.http.JwtTicketProvider;
 import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 import com.tsurugidb.tsubakuro.exception.CoreServiceException;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Service to authenticate user.
@@ -72,8 +83,27 @@ public class AuthService {
   @Autowired
   RoleConfig roleConfig;
 
+  @Autowired
+  SystemTime systemTime;
+
   @Value("${webapi.auth.at.expiration.min}")
   private int accessKeyExpirationMin;
+
+  @Value("${webapi.auth.verify.cache.max.min}")
+  int verifyCacheMaxMin;
+
+  @Value("${webapi.auth.verify.timeout.ms}")
+  long verifyTimeoutMs;
+
+  /** access tokens verified by the authentication server, and the time until which they are trusted */
+  private final Map<String, Instant> verifiedTokens = new ConcurrentHashMap<>();
+
+  /** threads to ask the authentication server, so that a request can stop waiting at the timeout */
+  private final ExecutorService verifyExecutor = Executors.newCachedThreadPool(runnable -> {
+    Thread thread = new Thread(runnable, "auth-verify");
+    thread.setDaemon(true);
+    return thread;
+  });
 
   /**
    * verify user password credential and return access token.
@@ -124,8 +154,9 @@ public class AuthService {
       Optional<String> at = ticket.getToken(TokenKind.ACCESS);
       var atExpirationTime = ticket.getAccessExpirationTime();
 
-      Authentication auth = this.verifyToken(at.orElse(null));
-      var roleSet = auth.getAuthorities().stream().map(item -> item.toString()).collect(Collectors.toSet());
+      // the access token has just been issued by the authentication server, so it is not verified again here
+      var roleSet = resolveRoles(ticket.getUserId()).stream().map(item -> item.toString())
+          .collect(Collectors.toSet());
       Set<String> authzSet = new HashSet<>();
       for (String role : roleSet) {
         var authz = permissionConfig.getAuthoritiesByRole(role);
@@ -163,7 +194,8 @@ public class AuthService {
     return Mono.just(authorizationHeader)
         .filter(MATCH_BEARER_LENGTH_PREDICATE)
         .flatMap(ISOLATE_BEARER_VALUE_FUNC)
-        .map(this::verifyToken)
+        // verifying may call the authentication server, so keep it off the event loop
+        .flatMap(token -> Mono.fromCallable(() -> verifyToken(token)).subscribeOn(Schedulers.boundedElastic()))
         .switchIfEmpty(Mono.just(new UserTokenAuthentication()));
   }
 
@@ -177,9 +209,26 @@ public class AuthService {
     } catch (RuntimeException ex) {
       throw new UnauthenticatedException("Invalid token.");
     }
+    // restore() only decodes the token, so check the kind and the expiration here
+    if (ticket.getToken(TokenKind.ACCESS).isEmpty()) {
+      throw new UnauthenticatedException("Invalid token.");
+    }
     var accessExpirationTime = ticket.getAccessExpirationTime();
+    Instant now = systemTime.now();
+    if (accessExpirationTime.isEmpty() || !now.isBefore(accessExpirationTime.get())) {
+      throw new UnauthenticatedException("Token is expired.");
+    }
+    verifyByAuthServer(token, ticket, accessExpirationTime.get(), now);
 
-    List<String> roles = roleConfig.getRolesByUserId(ticket.getUserId());
+    return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true,
+        resolveRoles(ticket.getUserId()));
+  }
+
+  /**
+   * Resolve the roles of the user: the roles assigned to the user and the default role.
+   */
+  private List<SimpleGrantedAuthority> resolveRoles(String userId) {
+    List<String> roles = roleConfig.getRolesByUserId(userId);
     List<SimpleGrantedAuthority> authorities;
     if (roles == null) {
       authorities = new ArrayList<>();
@@ -192,8 +241,79 @@ public class AuthService {
       log.debug("role:{}, authz:{}", authority.getAuthority(),
           permissionConfig.getAuthoritiesByRole(authority.getAuthority()));
     }
+    return authorities;
+  }
 
-    return new UserTokenAuthentication(ticket.getUserId(), token, accessExpirationTime, true, authorities);
+  /**
+   * Ask the authentication server whether the token was issued by it (signature, issuer and audience).
+   * A verified token is cached until the earlier of the cache limit and its expiration time.
+   * Nothing is done for providers without an authentication server (authmock).
+   */
+  private void verifyByAuthServer(String token, Ticket ticket, Instant expirationTime, Instant now) {
+    if (!(ticketProvider instanceof JwtTicketProvider)) {
+      return;
+    }
+    Instant cachedUntil = verifiedTokens.get(token);
+    if (cachedUntil != null && now.isBefore(cachedUntil)) {
+      return;
+    }
+
+    try {
+      verifyWithTimeout((JwtTicketProvider) ticketProvider, ticket);
+    } catch (CoreServiceException ex) {
+      log.debug("token was rejected by the authentication server: {}", ex.getMessage());
+      throw new UnauthenticatedException("Invalid token.");
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+      throw new UnauthenticatedException("Authentication server is not available.");
+    } catch (IOException | RuntimeException ex) {
+      log.warn("failed to verify token by the authentication server: {}", ex.toString());
+      throw new UnauthenticatedException("Authentication server is not available.");
+    }
+
+    if (verifyCacheMaxMin > 0) {
+      Instant limit = now.plus(Duration.ofMinutes(verifyCacheMaxMin));
+      verifiedTokens.values().removeIf(until -> !now.isBefore(until));
+      verifiedTokens.put(token, expirationTime.isBefore(limit) ? expirationTime : limit);
+    }
+  }
+
+  /**
+   * Ask the authentication server, waiting for its response at most the configured time.
+   * The HTTP request built by tsubakuro has no response timeout, so the call runs on another thread,
+   * which is interrupted when the time is up. A value of 0 or less waits without limit.
+   */
+  private void verifyWithTimeout(JwtTicketProvider provider, Ticket ticket)
+      throws InterruptedException, IOException, CoreServiceException {
+    if (verifyTimeoutMs <= 0) {
+      provider.verify(ticket, TokenKind.ACCESS);
+      return;
+    }
+    Future<Void> future = verifyExecutor.submit(() -> {
+      provider.verify(ticket, TokenKind.ACCESS);
+      return null;
+    });
+    try {
+      future.get(verifyTimeoutMs, TimeUnit.MILLISECONDS);
+    } catch (TimeoutException ex) {
+      future.cancel(true);
+      throw new IOException("authentication server did not respond within " + verifyTimeoutMs + " ms", ex);
+    } catch (InterruptedException ex) {
+      future.cancel(true);
+      throw ex;
+    } catch (ExecutionException ex) {
+      Throwable cause = ex.getCause();
+      if (cause instanceof CoreServiceException) {
+        throw (CoreServiceException) cause;
+      }
+      if (cause instanceof IOException) {
+        throw (IOException) cause;
+      }
+      if (cause instanceof RuntimeException) {
+        throw (RuntimeException) cause;
+      }
+      throw new IOException(cause);
+    }
   }
 
 }
