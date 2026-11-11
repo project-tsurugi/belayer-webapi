@@ -1,5 +1,37 @@
 # Change Log
 
+## ver 1.5.4 (Since ver 1.5.3)
+
+### Breaking changes
+
+* the external commands get the authentication token in the environment variable `TSURUGI_AUTH_TOKEN`, no longer with `--auth-token`. A command set in `TSURUGI_TGCTL_COMMAND` or `TSURUGI_TGHA_COMMAND` has to take the token from that variable (`tgctl` does). Install the `tgctl_w` and `tgha_w` of this version together with the server: the server no longer quotes the arguments it passes, which the older `tgctl_w` expected.
+    * the command templates (`webapi.cli.cmd.*`) no longer quote their placeholders and no longer have `--auth-token`. Overridden templates have to follow.
+
+### Bug fixes
+
+* add `BELAYER_FORWARD_HEADERS_STRATEGY` to run behind a reverse proxy that sends its own address as `Host` (e.g. nginx with its default `proxy_set_header Host $proxy_host`). Set it to `framework` and have the proxy add `X-Forwarded-Host` and `X-Forwarded-Proto`, and the server takes the URL the client requested from these headers.
+    * without it, requests from WebAdmin with an `Origin` header (e.g. login) were rejected as cross-origin (403), and the Endpoints API (`/api/instance/list`) returned the proxy's address when `endpoints.csv` lists no endpoint.
+    * the default `none` ignores these headers, as before. Keep it when clients can reach the server directly.
+* stop writing the authentication token to the DEBUG log. Jobs and request parameters (e.g. of the dump, load, backup, restore and session APIs) were logged with `toString()`, which included the token, and so was the login result with the issued access and refresh tokens.
+    * Note: `com.tsurugidb` logs at DEBUG unless `BELAYER_LOG_LEVEL` is set.
+* run the external commands (`tgctl_w`, `tgha_w` and the DB status script) with one argument per value. `tgctl_w` joined its arguments into one command line and ran it with the shell, so the shell interpreted the values given to the session APIs (e.g. a session variable value).
+    * pass the authentication token in the environment variable `TSURUGI_AUTH_TOKEN` instead of on the command line, where other users of the host could read it.
+* check the values of the session APIs and the DB sync API, and return 400 for a session ID that is not a number, a variable name other than 1 to 100 letters, digits, `_` and `.`, a variable value other than 1 to 100 printable ASCII characters, and a `from` other than an endpoint (letters, digits, `.` `_` `-` `:` `/` `[` `]`).
+* fix `install.sh`, which went on installing when java was not found or its version could not be read. It now also exits with 1 when it stops on an error (`exit -1` gave 2 under `sh`).
+* verify the access token of each request with the authentication server (harinoki). The token was only decoded, without checking its signature or its expiration, so a token that harinoki did not issue, or one that had expired, was accepted.
+    * a verified token is reused until the earlier of its expiration and `TSURUGI_AUTH_VERIFY_CACHE_MAX_MIN` (default `30` minutes, `0` verifies on every request).
+    * while harinoki is not available, a token not verified before is rejected with 401.
+    * the wait for harinoki to answer the verification is limited by `TSURUGI_AUTH_VERIFY_TIMEOUT_MS` (default `1000` milliseconds, `0` waits without limit). When harinoki does not answer in time, the request is rejected with 401.
+    * with the `authmock` profile, which has no authentication server, only the kind (access token) and the expiration are checked.
+
+### Misc changes
+
+* fix a typo in the path of the TLS setting document.
+
+### Full Changelog
+
+https://github.com/project-tsurugi/belayer-webapi/compare/1.5.3...1.5.4
+
 ## ver 1.5.3 (Since ver 1.5.2)
 
 ### Breaking changes

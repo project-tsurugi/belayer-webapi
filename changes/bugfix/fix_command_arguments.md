@@ -1,3 +1,0 @@
-* run the external commands (`tgctl_w`, `tgha_w` and the DB status script) with one argument per value. `tgctl_w` joined its arguments into one command line and ran it with the shell, so the shell interpreted the values given to the session APIs (e.g. a session variable value).
-    * pass the authentication token in the environment variable `TSURUGI_AUTH_TOKEN` instead of on the command line, where other users of the host could read it.
-* check the values of the session APIs and the DB sync API, and return 400 for a session ID that is not a number, a variable name other than 1 to 100 letters, digits, `_` and `.`, a variable value other than 1 to 100 printable ASCII characters, and a `from` other than an endpoint (letters, digits, `.` `_` `-` `:` `/` `[` `]`).
