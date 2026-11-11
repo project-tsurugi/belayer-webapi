@@ -97,7 +97,7 @@ belayerをインストールしたディレクトリのbinに存在する起動�
 Javaの起動パラメータでSpringFrameworkの関連プロパティの値を指定する。
 ここで、TLSのプロトコルやサーバ証明書用のPKCS12形式のファイルのパスを指定する。
 
-* /usr/libb/tsurugi-webapp-<version>/bin/start_server.sh
+* /usr/lib/tsurugi-webapp-<version>/bin/start_server.sh
 
 ```sh
 #BELAYER_APP_OPTS=
