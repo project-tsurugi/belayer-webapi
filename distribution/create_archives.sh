@@ -38,14 +38,14 @@ mkdir -p $DIST_TEMP_DIR/config
 mkdir -p $DIST_TEMP_DIR/systemd
 mkdir -p $DIST_TEMP_DIR/script
 
-cp -p install.sh $DIST_TEMP_DIR/
+cp -p install.sh install_packages.sh $DIST_TEMP_DIR/
 cp -p server_script/*.sh $DIST_TEMP_DIR/bin/
 cp -p systemd/* $DIST_TEMP_DIR/systemd/
 cp -p config/* $DIST_TEMP_DIR/config/
 cp -p stub/* $DIST_TEMP_DIR/script/
 sed -i "s/#VERSION#/$VERSION/g" $DIST_TEMP_DIR/install.sh
-chmod u+x $DIST_TEMP_DIR/install.sh
-chmod u+x $DIST_TEMP_DIR/bin/*.sh
+chmod u+x $DIST_TEMP_DIR/install.sh $DIST_TEMP_DIR/install_packages.sh
+chmod u+x $DIST_TEMP_DIR/bin/*.sh $DIST_TEMP_DIR/systemd/*.sh
 
 # to tar.gz
 tar zcf $DIST_DIR/$DIST_ARCV_NAME $DIST_TEMP_DIR

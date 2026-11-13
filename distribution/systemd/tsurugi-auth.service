@@ -1,0 +1,17 @@
+[Unit]
+Description=Tsurugi Authentication Server (##TSURUGI_HOME##)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# authentication-server start runs the server in the background and returns.
+Type=forking
+User=##SERVICE_USER##
+Group=##SERVICE_GROUP##
+Environment=TSURUGI_HOME=##TSURUGI_HOME##
+ExecStart=##TSURUGI_HOME##/bin/authentication-server start
+ExecStop=##TSURUGI_HOME##/bin/authentication-server stop
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
