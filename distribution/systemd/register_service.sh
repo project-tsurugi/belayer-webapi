@@ -48,7 +48,24 @@ fill() {
       -e "s|##SERVICE_GROUP##|${SERVICE_GROUP}|g" \
       -e "s|##TSURUGIDB_UNIT##|${DB_UNIT}|g" \
       -e "s|##AUTH_UNIT##|${AUTH_UNIT_REF}|g" \
+      -e "s|##AUTH_URL##|${AUTH_URL}|g" \
       "$1" > "$2"
+}
+
+# ini_value <file> <section> <key> : prints the value of the key in the
+# section of an ini file (the last one when repeated), or nothing.
+ini_value() {
+  awk -v sec="[$2]" -v key="$3" '
+    { line = $0; sub(/^[ \t]+/, "", line); sub(/[ \t\r]+$/, "", line) }
+    line ~ /^\[/ { insec = (line == sec); next }
+    insec && line !~ /^[#;]/ {
+      n = index(line, "=")
+      if (n > 0) {
+        k = substr(line, 1, n - 1); sub(/[ \t]+$/, "", k)
+        if (k == key) { v = substr(line, n + 1); sub(/^[ \t]+/, "", v); val = v }
+      }
+    }
+    END { print val }' "$1"
 }
 
 # set_conf <name> <value> : sets NAME=value in tsurugi-belayer.conf, keeping
@@ -133,7 +150,22 @@ if ${WITH_AUTH}; then
     echo "[ERROR] ${TSURUGI_HOME}/bin/authentication-server is not found." 1>&2
     exit 1
   fi
+  if ! command -v curl > /dev/null 2>&1; then
+    echo "[ERROR] curl is not found. run install_packages.sh first." 1>&2
+    exit 1
+  fi
 fi
+# The unit of the authentication server waits until it answers here.
+AUTH_URL=$(ini_value "${TSURUGI_CONF}" authentication url)
+AUTH_URL=${AUTH_URL:-http://localhost:8080/harinoki}
+case "${AUTH_URL}" in
+  *[!A-Za-z0-9:/._~-]*)
+    if ${WITH_AUTH}; then
+      echo "[ERROR] [authentication] url of ${TSURUGI_CONF} has a character not supported here: ${AUTH_URL}" 1>&2
+      exit 1
+    fi
+    ;;
+esac
 SUDOERS_FILE=${SUDOERS_DIR}/tsurugi-belayer${SUFFIX}
 
 # Units of the same name for another TsurugiDB: two TsurugiDBs need two names.

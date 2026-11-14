@@ -169,7 +169,7 @@ The installation has three steps. The third one is only for running Belayer as a
 
 | Step | Script | Run as | What it does |
 |:--|:--|:--|:--|
-| 1 | `install_packages.sh` | root | installs Java 11 or newer, `jq` and Python 3 when missing (apt) |
+| 1 | `install_packages.sh` | root | installs Java 11 or newer, `jq`, Python 3 and `curl` when missing (apt) |
 | 2 | `install.sh` | the user that runs the TsurugiDB | lays out Belayer; registers no service |
 | 3 | `<install dir>/systemd/register_service.sh` | root | registers Belayer and the TsurugiDB as systemd services (optional) |
 
@@ -211,6 +211,7 @@ $ sudo $HOME/opt/tsurugi-belayer-x.x.x/systemd/register_service.sh
 
 * Both run as the owner of the install directory, which has to own the TsurugiDB as well.
 * The units are `tsurugi-belayer-<name>.service` and `tsurugidb-<name>.service` (`tsurugi-auth-<name>.service` with `--with-auth-server`). `<name>` is given by `--name` and defaults to the owner (no name for root: `tsurugi-belayer.service`, ...).
+* The unit of the authentication server counts as started once `[authentication] url` of `tsurugi.ini` (default `http://localhost:8080/harinoki`) answers, so that a TsurugiDB with authentication enabled can start right after it.
 * An owner other than root may run `/usr/bin/systemctl start tsurugidb-<name>.service` without a password (`/etc/sudoers.d/tsurugi-belayer-<name>`), and nothing else.
 * The service of Belayer is only ordered after the one of the TsurugiDB: starting or stopping one does not start or stop the other.
 * `--tsurugidb-only` registers the TsurugiDB alone, for a Belayer started by hand. Registering Belayer alone is not supported.

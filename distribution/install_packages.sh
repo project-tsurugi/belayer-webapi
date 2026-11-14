@@ -6,6 +6,8 @@
 #   Java 11 or newer   runs Belayer (openjdk-17-jre-headless when missing)
 #   jq                 used to report the status of the TsurugiDB
 #   python3 (3.10 -)   runs the wrappers tgctl_w and tgha_w
+#   curl               the unit of the authentication server waits with it
+#                      until the server answers (register_service.sh)
 
 REQUIRE_JAVA_MAJOR_VERSION=11
 
@@ -24,6 +26,7 @@ if [ -z "$_JAVA_MAJOR_VERSION" ] || [ "$_JAVA_MAJOR_VERSION" -lt "$REQUIRE_JAVA_
 fi
 command -v jq > /dev/null 2>&1 || _PACKAGES="$_PACKAGES jq"
 [ -x /usr/bin/python3 ] || _PACKAGES="$_PACKAGES python3"
+command -v curl > /dev/null 2>&1 || _PACKAGES="$_PACKAGES curl"
 
 if [ -z "$_PACKAGES" ]; then
     echo "all packages are installed."

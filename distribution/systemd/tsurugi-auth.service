@@ -10,8 +10,14 @@ User=##SERVICE_USER##
 Group=##SERVICE_GROUP##
 Environment=TSURUGI_HOME=##TSURUGI_HOME##
 ExecStart=##TSURUGI_HOME##/bin/authentication-server start
+# The script returns before the server answers, and a TsurugiDB with
+# authentication enabled fails to start without it: wait until it answers at
+# the URL of the TsurugiDB ([authentication] url of tsurugi.ini). Jetty opens
+# its port after deploying harinoki, so any HTTP response will do.
+ExecStartPost=/bin/sh -c 'for i in $$(seq 1 120); do [ "$$(curl -s -o /dev/null -w %%{http_code} ##AUTH_URL##/encryption-key)" != 000 ] && exit 0; sleep 0.5; done; echo "##AUTH_URL## does not answer" 1>&2; exit 1'
 ExecStop=##TSURUGI_HOME##/bin/authentication-server stop
 Restart=no
+TimeoutStartSec=90
 
 [Install]
 WantedBy=multi-user.target
