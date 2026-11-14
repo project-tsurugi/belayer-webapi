@@ -5,7 +5,7 @@
 # other's files, and Belayer puts its wrappers in $TSURUGI_HOME/bin.
 #
 # The installation has three steps; this script is the second one.
-#   1. install_packages.sh (root): Java, jq and Python 3.
+#   1. apt-install.sh (root): Java, jq and Python 3.
 #   2. install.sh (the user of the TsurugiDB): lays out the files. It does not
 #      register any service; bin/start_server.sh starts Belayer at once.
 #   3. <install dir>/systemd/register_service.sh (root, optional): registers
@@ -116,7 +116,7 @@ fi
 if [ -z "$_JAVA_PATH" ]; then
     echo ""
     echo "java is not found. requires Java ${REQUIRE_JAVA_MAJOR_VERSION} or newer."
-    echo "run install_packages.sh as root first."
+    echo "run apt-install.sh as root first."
     exit 1
 fi
 

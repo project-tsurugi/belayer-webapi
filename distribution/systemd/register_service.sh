@@ -151,7 +151,7 @@ if ${WITH_AUTH}; then
     exit 1
   fi
   if ! command -v curl > /dev/null 2>&1; then
-    echo "[ERROR] curl is not found. run install_packages.sh first." 1>&2
+    echo "[ERROR] curl is not found. run apt-install.sh first." 1>&2
     exit 1
   fi
 fi

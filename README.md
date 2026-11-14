@@ -169,7 +169,7 @@ The installation has three steps. The third one is only for running Belayer as a
 
 | Step | Script | Run as | What it does |
 |:--|:--|:--|:--|
-| 1 | `install_packages.sh` | root | installs Java 11 or newer, `jq`, Python 3 and `curl` when missing (apt) |
+| 1 | `apt-install.sh` | root | installs Java 11 or newer, `jq`, Python 3 and `curl` when missing (apt) |
 | 2 | `install.sh` | the user that runs the TsurugiDB | lays out Belayer; registers no service |
 | 3 | `<install dir>/systemd/register_service.sh` | root | registers Belayer and the TsurugiDB as systemd services (optional) |
 
@@ -178,7 +178,7 @@ The installation has three steps. The third one is only for running Belayer as a
 ```console
 $ tar -zxvf tsurugi-webapp-x.x.x.tar.gz
 $ cd tsurugi-webapp-x.x.x
-$ sudo sh install_packages.sh
+$ sudo sh apt-install.sh
 ```
 
 #### 2. Lay out Belayer
