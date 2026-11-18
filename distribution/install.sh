@@ -26,7 +26,9 @@ Usage: $(basename $0) [OPTION]...
   --prefix=<dir>          directory to create tsurugi-belayer-${VERSION} in.
                           [default: the directory that holds the TsurugiDB]
   --storage=<dir>         storage root of Belayer (the files of the users, the
-                          job history, the role assignments).
+                          job history, the role assignments). Keep it outside
+                          the install dir and give the same one to a newer
+                          version, or the upgrade starts with an empty one.
                           [default: <install dir>/storage]
   --port=<port>           port of the Web API. [default: ${DEFAULT_SERVER_PORT}]
   --management-port=<port>

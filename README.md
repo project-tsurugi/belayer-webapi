@@ -222,4 +222,10 @@ sudo systemctl start tsurugi-belayer-<name>.service
 ```
 
 `sudo <install dir>/systemd/unregister_service.sh` removes the services again (it stops with an error while the TsurugiDB runs, unless `--stop-tsurugidb` is given). It leaves the services alone when the service of Belayer runs another install, e.g. after an upgrade.
+
+#### Upgrade
+
+A new version goes to a directory of its own (`tsurugi-belayer-<version>`), and the default storage root `<install dir>/storage` does not move with it: the new version starts with an empty storage. **Keep the storage root outside the install directory with `--storage=<dir>`, and give the new version the same `--storage`** (and the same other options). If the old storage root is inside the old install directory, stop Belayer and move it out first. Then run `register_service.sh` of the new version (the service of Belayer moves to it), and `unregister_service.sh` of the old version, which leaves the services to the new one.
+
+Versions before the three-step installer keep the storage in `/opt/belayer/storage` (owned by root) unless `BELAYER_STORAGE_ROOT` is set in their conf; give it to the user that runs the TsurugiDB (`chown -R`) and pass it with `--storage`, or move it.
 ```
