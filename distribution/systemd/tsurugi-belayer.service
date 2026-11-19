@@ -1,8 +1,13 @@
 [Unit]
-Description=Tsurugi Belayer
+Description=Tsurugi Belayer (##BELAYER_INSTALL_DIR##)
+# Ordering only: starting Belayer does not start the TsurugiDB, and stopping
+# one of them does not stop the other.
+After=network-online.target ##TSURUGIDB_UNIT##
 
 [Service]
 Type=simple
+User=##SERVICE_USER##
+Group=##SERVICE_GROUP##
 EnvironmentFile=##BELAYER_INSTALL_DIR##/config/tsurugi-belayer.conf
 ExecStart=##BELAYER_INSTALL_DIR##/jar/tsurugi-belayer.jar
 Restart=no

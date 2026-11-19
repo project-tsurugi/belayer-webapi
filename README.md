@@ -79,6 +79,8 @@ See the env var table below.
 |BELAYER_REQUIRED_JAVA_MAJOR_VERSION|Minimum Java major version the server checks for at startup.|`11`|
 |TSURUGI_CONF|Tsurugi configuration file path.|`${TSURUGI_HOME}/var/etc/tsurugi.ini`|
 |TSURUGI_TGCTL_COMMAND|Command used to start, stop and inspect Tsurugi database. *3|`${TSURUGI_HOME}/bin/tgctl_w`|
+|BELAYER_TGCTL_DELEGATE|Read by `bin/tgctl_dispatch.sh`, not by the server: the command it passes the arguments on to. *3|`${TSURUGI_HOME}/bin/tgctl_w`|
+|BELAYER_TSURUGIDB_UNIT|Read by `bin/tgctl_dispatch.sh`, not by the server: the systemd unit of the TsurugiDB. When set, the TsurugiDB is started with `sudo -n systemctl start` of this unit; `systemd/register_service.sh` sets it. *3|``(Belayer runs tgctl itself)|
 |TSURUGI_TGHA_COMMAND|Command used for the HA operations (mode switch, database apply). *3|`${TSURUGI_HOME}/bin/tgha_w`|
 |TSURUGI_AUTH_URL|URL for authentication server "harinoki".|`http://localhost:8080/harinoki`|
 |TSURUGI_AUTH_AT_EXPIRATION_MIN|The expiration minutes for Access Token.|`10`|
@@ -96,6 +98,7 @@ See the env var table below.
 * *1: See [Belayer Authorizaion](./docs/belayer_authorization.md#ロールを持つユーザの指定例) document.
 * *2: The user IDs are specified as regular expressions. The default value `{"ROLE_ADMIN": [".*"]}` therefore grants `ROLE_ADMIN` to **every authenticated user**. Be sure to set this variable explicitly for production use.
 * *3: `tgctl_w` and `tgha_w` are the wrapper/stub scripts shipped in `distribution/stub/` and installed into `$TSURUGI_HOME/bin/` by `install.sh`. Point these variables at the official commands once they are available.
+    * `install.sh` sets `TSURUGI_TGCTL_COMMAND` to `<install dir>/bin/tgctl_dispatch.sh` in `config/tsurugi-belayer.conf`. It decides how the TsurugiDB is started (by itself in a session of its own, or through the systemd unit in `BELAYER_TSURUGIDB_UNIT`) and passes everything else on to `BELAYER_TGCTL_DELEGATE`. Replace `tgctl_w` with `tgctl` there, not in `TSURUGI_TGCTL_COMMAND`.
     * The server runs these commands with one argument per value and passes the authentication token in the environment variable `TSURUGI_AUTH_TOKEN` rather than with `--auth-token`. A command used here has to take the token from that variable, as `tgctl` does.
     * This value is used only when the role-user mapping file (`${BELAYER_STORAGE_ROOT}/belayer_role_users.json`) does not exist. Once the mapping has been updated via the `/api/update/roleuser` API, the file takes precedence and changing this variable has no effect.
 * *4: Behind a reverse proxy that sends its own address as `Host` (e.g. nginx with its default `proxy_set_header Host $proxy_host`), the server otherwise sees that address: requests from WebAdmin are rejected as cross-origin (403), and the Endpoints API (`/api/instance/list`) returns that address when `endpoints.csv` lists no endpoint. Configure the proxy to add the headers, for example with nginx:
@@ -162,55 +165,67 @@ tsurugi-webapp-x.x.x.tar.gz
 
 ### WebAPI
 
-#### Install to the default directory.
+The installation has three steps. The third one is only for running Belayer as a systemd service.
+
+| Step | Script | Run as | What it does |
+|:--|:--|:--|:--|
+| 1 | `apt-install.sh` | root | installs Java 11 or newer, `jq`, Python 3 and `curl` when missing (apt) |
+| 2 | `install.sh` | the user that runs the TsurugiDB | lays out Belayer; registers no service |
+| 3 | `<install dir>/systemd/register_service.sh` | root | registers Belayer and the TsurugiDB as systemd services (optional) |
+
+#### 1. Packages
 
 ```console
 $ tar -zxvf tsurugi-webapp-x.x.x.tar.gz
 $ cd tsurugi-webapp-x.x.x
-$ sudo sh install.sh
+$ sudo sh apt-install.sh
 ```
 
-Belayer Web API Server is installed under `/usr/lib`.
+#### 2. Lay out Belayer
+
+Run `install.sh` as the OS user that runs the TsurugiDB; it does not need root. Give the TsurugiDB with `TSURUGI_HOME` or `--tsurugi-home`.
 
 ```console
-$ ls /usr/lib/tsurugi-webapp-*
-tsurugi-webapp-x-x-x
+$ sh install.sh --tsurugi-home=$HOME/opt/tsurugi
+$ ls $HOME/opt/tsurugi-belayer-x.x.x
+bin  config  jar  proc  storage  systemd
 ```
-Execute `/usr/lib/tsurugi-webapp-x-x-x/bin/start_server.sh` to start belayer server.
-It reads `config/tsurugi-belayer.conf` and passes all the variables in it to the server, including `TSURUGI_HOME`, which `install.sh` writes there.
+
+By default `tsurugi-belayer-x.x.x` is created beside the TsurugiDB (`/usr/lib/tsurugi-belayer-x.x.x` for `/usr/lib/tsurugi`).
+Options: `--tsurugi-home=<dir>`, `--tsurugi-conf=<file>`, `--prefix=<dir>`, `--storage=<dir>` (default `<install dir>/storage`), `--port=<port>` (default `8000`) and `--management-port=<port>` (default `18000`); see `install.sh --help`.
+They are written to `config/tsurugi-belayer.conf`, together with `TSURUGI_URL` taken from `[ipc_endpoint] database_name` of the configuration of the TsurugiDB.
+A re-install of the same version keeps the files already in `config/`.
+
+Execute `<install dir>/bin/start_server.sh` to start belayer server.
+It reads `config/tsurugi-belayer.conf` and passes all the variables in it to the server.
 The values in the conf take precedence over the environment variables of the calling shell.
+A TsurugiDB started through Belayer runs in a session and process group of its own, so stopping Belayer (Ctrl-C, closing the terminal) leaves it running.
 
-#### Install to another directory.
-
-You can specify install directory using `--prefix` option.
+#### 3. Run Belayer as a systemd service
 
 ```console
-$ tar -zxvf tsurugi-webapp-x.x.x.tar.gz
-$ cd tsurugi-webapp-x.x.x
-$ sh install.sh --prefix=$HOME/tsurugi-webapp
-$ ls $HOME/tsurugi-webapp/*
-tsurugi-webapp-x-x-x
+$ sudo $HOME/opt/tsurugi-belayer-x.x.x/systemd/register_service.sh
 ```
 
-Execute `<your_prefix>/bin/start_server.sh` to start belayer server, which reads `config/tsurugi-belayer.conf` in the same way.
+**When Belayer runs as a systemd service, the TsurugiDB runs as one as well.** A TsurugiDB that Belayer started inside the service of Belayer would stop together with it (stop, restart, crash). `register_service.sh` registers both, and makes Belayer start the TsurugiDB with `sudo systemctl start` of its unit (`BELAYER_TSURUGIDB_UNIT`).
 
-#### Execute belayer server as Systemd service
-
-Copy service definition file to `/etc/systemd/system`.
+* Both run as the owner of the install directory, which has to own the TsurugiDB as well.
+* The units are `tsurugi-belayer-<name>.service` and `tsurugidb-<name>.service` (`tsurugi-auth-<name>.service` with `--with-auth-server`). `<name>` is given by `--name` and defaults to the owner (no name for root: `tsurugi-belayer.service`, ...).
+* The unit of the authentication server counts as started once `[authentication] url` of `tsurugi.ini` (default `http://localhost:8080/harinoki`) answers, so that a TsurugiDB with authentication enabled can start right after it.
+* An owner other than root may run `/usr/bin/systemctl start tsurugidb-<name>.service` without a password (`/etc/sudoers.d/tsurugi-belayer-<name>`), and nothing else.
+* The service of Belayer is only ordered after the one of the TsurugiDB: starting or stopping one does not start or stop the other.
+* `--tsurugidb-only` registers the TsurugiDB alone, for a Belayer started by hand. Registering Belayer alone is not supported.
 
 ```sh
-sudo cp tsurugi-webapp.service /etc/systemd/system
-sudo systemctl enable tsurugi-webapp.service
+sudo systemctl start tsurugidb-<name>.service
+sudo systemctl start tsurugi-belayer-<name>.service
 ```
 
-**Note: If you have changed the directory to be installed belayer, you have to apply your setting to the `TSURUGI_HOME` path and the `ExecStart` path in `tsurugi-webapp.service`.**
+`sudo <install dir>/systemd/unregister_service.sh` removes the services again (it stops with an error while the TsurugiDB runs, unless `--stop-tsurugidb` is given). It leaves the services alone when the service of Belayer runs another install, e.g. after an upgrade.
 
-tsurugi-webapp.service
+#### Upgrade
 
-```text
-[Service]
-Type=simple
-Environment=TSURUGI_HOME=/usr/lib/tsurugi
-ExecStart=/usr/lib/tsurugi-webapp-#VERSION#/bin/start_server.sh
-Restart=no
+A new version goes to a directory of its own (`tsurugi-belayer-<version>`), and the default storage root `<install dir>/storage` does not move with it: the new version starts with an empty storage. **Keep the storage root outside the install directory with `--storage=<dir>`, and give the new version the same `--storage`** (and the same other options). If the old storage root is inside the old install directory, stop Belayer and move it out first. Then run `register_service.sh` of the new version (the service of Belayer moves to it), and `unregister_service.sh` of the old version, which leaves the services to the new one.
+
+Versions before the three-step installer keep the storage in `/opt/belayer/storage` (owned by root) unless `BELAYER_STORAGE_ROOT` is set in their conf; give it to the user that runs the TsurugiDB (`chown -R`) and pass it with `--storage`, or move it.
 ```

@@ -1,0 +1,23 @@
+[Unit]
+Description=Tsurugi Database (##TSURUGI_CONF##)
+After=network-online.target ##AUTH_UNIT##
+Wants=network-online.target ##AUTH_UNIT##
+
+[Service]
+# tgctl start returns when the database is up and leaves tsurugidb running,
+# which systemd takes as the main process.
+Type=forking
+User=##SERVICE_USER##
+Group=##SERVICE_GROUP##
+Environment=TSURUGI_HOME=##TSURUGI_HOME##
+ExecStart=##TSURUGI_HOME##/bin/tgctl start --conf ##TSURUGI_CONF## --timeout 0
+ExecStop=##TSURUGI_HOME##/bin/tgctl shutdown --conf ##TSURUGI_CONF## --timeout 0
+Restart=no
+# Starting may take long to recover the database, and stopping waits for the
+# shutdown rather than killing the database.
+TimeoutStartSec=infinity
+TimeoutStopSec=infinity
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

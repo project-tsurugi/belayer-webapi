@@ -58,7 +58,8 @@ API の実装・認証認可・ジョブ管理はすべてここにある。WebA
       `TSURUGI_TGCTL_COMMAND` / `TSURUGI_TGHA_COMMAND` で正式なコマンドに
       差し替えた環境で不要な起動失敗を招く。`python3` の検査を足さないのも同じ理由。
 - **スタブは Python 3 製**（`distribution/stub/{tgctl_w,tgha_w}`、shebang は `/usr/bin/python3`）。
-  python3 の存在は `install.sh` でも起動時検査でも確認していない。README には要件として書いてある。
+  python3 の存在は `install.sh` でも起動時検査でも確認していない。README には要件として書いてあり、
+  `apt-install.sh` が無ければ入れる。
 - `tgctl_w` は本物の `tgctl` を呼ぶ**ラッパー**、`tgha_w` は外部コマンドを一切呼ばない**純粋なスタブ**。
   `mode.txt` はスタブ同士の内部状態で **Java 側は参照しない。**
 - `jq` を実際に使うのは JAR 同梱の `resources/scripts/show_db_status.sh` だけ（`/api/db/status` 用）。
